@@ -7,12 +7,6 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        terminal: {
-          green: '#00ff00',
-          black: '#000000',
-        },
-      },
       fontFamily: {
         mono: ['Courier New', 'monospace'],
       },

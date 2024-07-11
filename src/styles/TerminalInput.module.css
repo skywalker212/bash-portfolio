@@ -1,0 +1,11 @@
+.inputWrapper {
+    @apply flex items-center;
+}
+
+.prompt {
+    @apply text-yellow-500 mr-2;
+}
+
+.input {
+    @apply bg-transparent outline-none text-green-500 flex-grow;
+}

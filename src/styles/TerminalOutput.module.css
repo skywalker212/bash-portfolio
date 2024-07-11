@@ -1,0 +1,11 @@
+.output {
+    @apply text-green-500 whitespace-pre-wrap mb-2;
+}
+
+.error {
+    @apply text-red-500;
+}
+
+.success {
+    @apply text-blue-500;
+}
