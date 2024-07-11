@@ -1,5 +1,3 @@
-// src/utils/commandHandler.ts
-
 import { commands } from '../commands';
 import { loadWasmModule } from './wasmLoader';
 import { CommandResult } from '@/types';
@@ -16,7 +14,7 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
       console.error(`Error executing command ${commandName}:`, error);
       return {
         content: `Error executing command ${commandName}: ${error.message}`,
-        type: 'text'
+        type: 'error'
       };
     }
   } else {
@@ -28,7 +26,7 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
         // This is a placeholder and would need to be implemented based on your WASM module structure
         return {
           content: `Executed WASM module: ${commandName}`,
-          type: 'text'
+          type: 'output'
         };
       }
     } catch (error) {
@@ -38,6 +36,6 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
 
   return {
     content: `Command not found: ${commandName}. Type 'help' for a list of available commands.`,
-    type: 'text'
+    type: 'error'
   };
 };

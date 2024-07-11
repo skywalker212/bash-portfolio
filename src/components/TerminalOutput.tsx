@@ -1,19 +1,30 @@
 import React from 'react';
 import { CommandResult } from '@/types';
+import styles from '@/styles/TerminalOutput.module.css';
 
 const TerminalOutput: React.FC<CommandResult> = ({ content, type }) => {
-    if (type === 'input') {
-        return <div className="mb-1">$ {content}</div>;
-    }
+    let outputClass = styles.output;
 
-    if (type === 'text') {
-        return <div className="mb-1 whitespace-pre-wrap">{content}</div>;
+    switch (type) {
+        case 'error':
+            outputClass += ` ${styles.error}`;
+            break;
+        case 'success':
+            outputClass += ` ${styles.success}`;
+            break;
+        case 'info':
+            outputClass += ` ${styles.info}`;
+            break;
+        case 'input':
+            outputClass += ` ${styles.input}`;
+            break;
+        // Add more cases if needed
     }
 
     if (type === 'table') {
         return (
-            <div className="mb-1">
-                <table className="w-full">
+            <div className={outputClass}>
+                <table>
                     <tbody>
                         {(content as string[][]).map((row, i) => (
                             <tr key={i}>
@@ -28,11 +39,7 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }) => {
         );
     }
 
-    if (type === 'custom') {
-        return <div className="mb-1">{content}</div>;
-    }
-
-    return null;
+    return <div className={outputClass}>{content}</div>;
 };
 
 export default TerminalOutput;

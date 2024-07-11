@@ -1,5 +1,14 @@
 .output {
-    @apply text-green-500 whitespace-pre-wrap mb-2;
+    @apply mb-2 whitespace-pre-wrap;
+}
+
+.input {
+    @apply text-[var(--terminal-text)];
+}
+
+.input::before {
+    content: attr(data-prompt);
+    @apply text-[var(--terminal-prompt)] mr-2;
 }
 
 .error {
@@ -7,5 +16,9 @@
 }
 
 .success {
+    @apply text-green-500;
+}
+
+.info {
     @apply text-blue-500;
 }

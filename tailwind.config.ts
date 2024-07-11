@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -7,8 +6,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        terminal: {
+          bg: 'var(--terminal-bg)',
+          text: 'var(--terminal-text)',
+          prompt: 'var(--terminal-prompt)',
+        },
+      },
       fontFamily: {
-        mono: ['Courier New', 'monospace'],
+        mono: ['Inconsolata', 'monospace'],
       },
     },
   },

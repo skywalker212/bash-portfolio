@@ -3,9 +3,9 @@
 }
 
 .prompt {
-    @apply text-yellow-500 mr-2;
+    @apply text-[var(--terminal-prompt)] mr-2 whitespace-nowrap;
 }
 
 .input {
-    @apply bg-transparent outline-none text-green-500 flex-grow;
+    @apply bg-transparent outline-none w-full text-[var(--terminal-text)];
 }

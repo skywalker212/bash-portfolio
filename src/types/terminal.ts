@@ -10,9 +10,11 @@ export interface TerminalState {
 
 export type CommandHandler = (command: string) => string;
 
+export type CommandResultType = 'input' | 'output' | 'error' | 'success' | 'info' | 'table' | 'custom';
+
 export interface CommandResult {
     content: any;
-    type: 'input' | 'text' | 'table' | 'custom';
+    type: CommandResultType;
 }
 
 export interface Command {

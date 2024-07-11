@@ -1,12 +1,11 @@
-import type { Metadata } from 'next'
+import '@/styles/globals.css'
 import { Inter } from 'next/font/google'
-import '../styles/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'Akash Gajjar | Terminal Portfolio',
-  description: 'Interactive terminal-style portfolio of Akash Gajjar, software engineer',
+export const metadata = {
+  title: 'Akash Gajjar Portfolio',
+  description: 'A bash-style portfolio',
 }
 
 export default function RootLayout({

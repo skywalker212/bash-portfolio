@@ -1,27 +1,15 @@
 .terminal {
-    @apply bg-black text-green-500 p-4 font-mono h-screen overflow-y-auto;
-}
-
-.terminalContent {
-    @apply mb-4;
-}
-
-.promptLine {
-    @apply flex;
-}
-
-.prompt {
-    @apply mr-2;
-}
-
-.input {
-    @apply bg-transparent outline-none flex-grow;
+    @apply w-full h-screen overflow-y-auto p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text)] font-mono;
 }
 
 .output {
-    @apply whitespace-pre-wrap;
+    @apply mb-2 whitespace-pre-wrap;
 }
 
-.cursor {
-    @apply inline-block w-2 h-4 bg-green-500 ml-1 animate-blink;
+.prompt {
+    @apply text-[var(--terminal-prompt)] mr-2;
+}
+
+.input {
+    @apply bg-transparent outline-none w-full;
 }

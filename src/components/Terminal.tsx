@@ -1,23 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TerminalInput from './TerminalInput';
 import TerminalOutput from './TerminalOutput';
-import { useCommandHistory, useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
+import TerminalInitialRender from './TerminalInitialRender';
+import { useCommandHistory, useKeyboardNavigation, useTerminal, useAutoFocus, useInitialRender } from '@/hooks';
+import styles from '@/styles/Terminal.module.css';
+import { terminalConfig } from '@/config/terminalConfig';
 
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
+    const [currentDirectory, setCurrentDirectory] = useState(terminalConfig.initialDirectory);
     const { addToHistory, getPreviousCommand, getNextCommand } = useCommandHistory();
-    const { output, setOutput, executeCommand, clearTerminal } = useTerminal([{ content: 'Welcome to Akash Gajjar\'s terminal portfolio. Type "help" for available commands.', type: 'text' }]);
+    const initialRender = useInitialRender();
+    const { output, setOutput, executeCommand, clearTerminal } = useTerminal();
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
 
     useKeyboardNavigation(inputRef, getPreviousCommand, getNextCommand, setInput);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         if (!input.trim()) return;
 
         addToHistory(input);
-        const inputResult = { content: input, type: 'input' as const };
+        const prompt = `${terminalConfig.user}@${terminalConfig.host}:${currentDirectory}$`;
+        const inputResult = { content: `${prompt} ${input}`, type: 'input' as const };
         const result = await executeCommand(input);
         if (result.content === 'CLEAR_TERMINAL') {
             clearTerminal();
@@ -31,10 +36,11 @@ const Terminal: React.FC = () => {
         if (terminalRef.current) {
             terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
         }
-    }, [output]);
+    }, [output, initialRender]);
 
     return (
-        <div ref={terminalRef} className="terminal w-full h-screen overflow-y-auto bg-black text-green-500 font-mono p-2 sm:p-4">
+        <div ref={terminalRef} className={styles.terminal}>
+            <TerminalInitialRender initialRender={initialRender} />
             {output.map((item, index) => (
                 <TerminalOutput key={index} content={item.content} type={item.type} />
             ))}
@@ -43,7 +49,7 @@ const Terminal: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onSubmit={handleSubmit}
-                className="terminal-input"
+                prompt={`${terminalConfig.user}@${terminalConfig.host}:${currentDirectory}$`}
             />
         </div>
     );
