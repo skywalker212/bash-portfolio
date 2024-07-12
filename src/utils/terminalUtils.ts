@@ -1,7 +1,8 @@
 import { ParsedCommand } from '@/types';
+import { terminalConfig } from '@/config';
 
 export const getPrompt = (currentDirectory: string): string => {
-  return `guest@akash-portfolio:${currentDirectory}$ `;
+  return `${terminalConfig.user}@${terminalConfig.host}:${currentDirectory}$ `;
 };
 
 export const parseCommand = (input: string): ParsedCommand => {
@@ -10,8 +11,4 @@ export const parseCommand = (input: string): ParsedCommand => {
     command: parts[0],
     args: parts.slice(1),
   };
-};
-
-export const formatOutput = (output: string): string => {
-  return output.trim().replace(/\n/g, '<br>');
 };

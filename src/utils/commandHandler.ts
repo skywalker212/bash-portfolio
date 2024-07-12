@@ -1,9 +1,10 @@
 import { commands } from '../commands';
+import { parseCommand } from './terminalUtils';
 import { loadWasmModule } from './wasmLoader';
 import { CommandResult, CommandResultType } from '@/types';
 
 export const handleCommand = async (input: string): Promise<CommandResult> => {
-  const [commandName, ...args] = input.trim().split(' ');
+  const { command: commandName, args } = parseCommand(input);
 
   const command = commands.find(cmd => cmd.name === commandName);
 

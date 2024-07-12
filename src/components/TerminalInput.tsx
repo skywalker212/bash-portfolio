@@ -1,12 +1,6 @@
-import React, { forwardRef, ChangeEvent, KeyboardEvent } from 'react';
+import React, { forwardRef, KeyboardEvent } from 'react';
 import styles from '@/styles/TerminalInput.module.css';
-
-interface TerminalInputProps {
-  value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  onSubmit: () => void;
-  prompt: string;
-}
+import { TerminalInputProps } from '@/types';
 
 const TerminalInput = forwardRef<HTMLInputElement, TerminalInputProps>(
   ({ value, onChange, onSubmit, prompt }, ref) => {

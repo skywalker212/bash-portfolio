@@ -13,7 +13,7 @@ body {
   font-family: 'Inconsolata', monospace;
   background-color: var(--terminal-bg);
   color: var(--terminal-text);
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .terminal {

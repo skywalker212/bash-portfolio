@@ -1,16 +1,14 @@
-import { ReactNode } from 'react';
+import { ChangeEvent, ReactNode } from 'react';
 
 export interface TerminalProps {
     initialMessage?: string;
 }
 
 export interface TerminalInputProps {
-    onSubmit: (command: string) => void;
+    value: string;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    onSubmit: () => void;
     prompt: string;
-}
-
-export interface TerminalOutputProps {
-    output: string;
 }
 
 export interface LayoutProps {

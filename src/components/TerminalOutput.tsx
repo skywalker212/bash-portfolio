@@ -3,7 +3,7 @@ import { CommandResult } from '@/types';
 import styles from '@/styles/TerminalOutput.module.css';
 import { table, getBorderCharacters } from 'table';
 
-const TerminalOutput: React.FC<CommandResult> = ({ content, type }) => {
+const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResult) => {
     let outputClass = styles.output;
 
     switch (type) {

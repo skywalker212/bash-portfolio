@@ -1,4 +1,5 @@
 import '@/styles/globals.css';
+import { LayoutProps } from '@/types';
 import { Viewport } from 'next';
 
 export const metadata = {
@@ -15,9 +16,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode
-}) {
+}: LayoutProps) {
   return (
     <html lang="en">
       <body>{children}</body>

@@ -7,7 +7,6 @@ export const getLastLogin = (): string => {
     return lastLogin || 'No previous login recorded';
 };
 
-export const getPrompt = (currentDirectory: string) : string => (`${terminalConfig.user}@${terminalConfig.host}:${currentDirectory}$ `)
 
 export const terminalTheme = {
     backgroundColor: 'var(--terminal-bg)',

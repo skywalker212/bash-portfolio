@@ -7,12 +7,12 @@ export const skillsCommand: Command = {
         return {
             content: [
                 ['Category', 'Skills'],
-                ['Languages', 'TypeScript, Python, Java, C++'],
-                ['Frontend', 'React, Next.js, HTML, CSS'],
+                ['Languages', 'Python, TypeScript, Java'],
+                ['Frontend', 'Next.js, Angular, React'],
                 ['Backend', 'Node.js, Express, Django'],
                 ['Databases', 'PostgreSQL, MongoDB, Redis'],
-                ['DevOps', 'Docker, Kubernetes, CI/CD'],
-                ['Other', 'Machine Learning, RESTful APIs, GraphQL']
+                ['DevOps', 'Docker, Kubernetes, Jenkins'],
+                ['Other', 'pyTorch, Kafka']
             ],
             type: CommandResultType.TABLE
         };

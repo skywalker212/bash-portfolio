@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { TerminalState } from '@/types'
+import { terminalConfig } from '@/config'
 
 interface TerminalStore extends TerminalState {
   addCommand: (command: string, output: string) => void
@@ -8,7 +9,9 @@ interface TerminalStore extends TerminalState {
 
 export const useTerminalStore = create<TerminalStore>((set) => ({
   commandHistory: [],
-  currentDirectory: '~',
+  user: terminalConfig.user,
+  host: terminalConfig.host,
+  currentDirectory: terminalConfig.initialDirectory,
   addCommand: (command, output) => set((state) => ({
     commandHistory: [...state.commandHistory, { command, output }],
   })),

@@ -4,8 +4,10 @@ export interface CommandHistory {
 }
 
 export interface TerminalState {
-    commandHistory: CommandHistory[];
+    user: string;
+    host: string; 
     currentDirectory: string;
+    commandHistory: CommandHistory[];
 }
 
 export type CommandHandler = (command: string) => string;

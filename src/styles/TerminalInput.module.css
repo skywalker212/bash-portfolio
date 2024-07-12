@@ -1,5 +1,5 @@
 .inputWrapper {
-    @apply flex items-center flex-wrap;
+    @apply flex items-center;
 }
 
 .prompt {
