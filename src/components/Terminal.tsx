@@ -15,7 +15,7 @@ const Terminal: React.FC = () => {
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
 
-    useKeyboardNavigation(inputRef, getPreviousCommand, getNextCommand, setInput);
+    useKeyboardNavigation(inputRef, getPreviousCommand, getNextCommand, setInput, clearTerminal);
 
     const handleSubmit = async () => {
         if (!input.trim()) return;
