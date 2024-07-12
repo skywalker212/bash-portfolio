@@ -18,7 +18,6 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }) => {
         case 'input':
             outputClass += ` ${styles.input}`;
             break;
-        // Add more cases if needed
     }
 
     if (type === 'table') {
@@ -35,6 +34,17 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }) => {
                         ))}
                     </tbody>
                 </table>
+            </div>
+        );
+    }
+
+    if (type === 'input') {
+        const [prompt, ...commandParts] = content.split(' ');
+        const command = commandParts.join(' ');
+        return (
+            <div className={outputClass}>
+                <span className={styles.prompt}>{prompt}</span>
+                <span>{command}</span>
             </div>
         );
     }

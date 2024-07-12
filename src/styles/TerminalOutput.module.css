@@ -6,8 +6,7 @@
     @apply text-[var(--terminal-text)];
 }
 
-.input::before {
-    content: attr(data-prompt);
+.prompt {
     @apply text-[var(--terminal-prompt)] mr-2;
 }
 

@@ -21,8 +21,8 @@ const Terminal: React.FC = () => {
         if (!input.trim()) return;
 
         addToHistory(input);
-        const prompt = `${terminalConfig.user}@${terminalConfig.host}:${currentDirectory}$`;
-        const inputResult = { content: `${prompt} ${input}`, type: 'input' as const };
+        const prompt = `${terminalConfig.user}@${terminalConfig.host}:${currentDirectory}$ `;
+        const inputResult = { content: `${prompt}${input}`, type: 'input' as const };
         const result = await executeCommand(input);
         if (result.content === 'CLEAR_TERMINAL') {
             clearTerminal();
