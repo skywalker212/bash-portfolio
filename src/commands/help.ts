@@ -1,4 +1,4 @@
-import { Command } from '@/types';
+import { Command, CommandResultType } from '@/types';
 import { commands } from './index';
 
 export const helpCommand: Command = {
@@ -11,7 +11,7 @@ export const helpCommand: Command = {
                 ['Command', 'Description'],
                 ...commandList
             ],
-            type: 'table'
+            type: CommandResultType.TABLE
         };
     }
 };

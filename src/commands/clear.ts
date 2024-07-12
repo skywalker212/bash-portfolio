@@ -1,4 +1,4 @@
-import { Command } from '@/types';
+import { Command, CommandResultType } from '@/types';
 
 export const clearCommand: Command = {
     name: 'clear',
@@ -6,7 +6,7 @@ export const clearCommand: Command = {
     execute: () => {
         return {
             content: 'CLEAR_TERMINAL',
-            type: 'custom'
+            type: CommandResultType.CUSTOM
         };
     }
 };

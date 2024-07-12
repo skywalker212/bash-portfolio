@@ -1,4 +1,4 @@
-import { Command } from '@/types';
+import { Command, CommandResultType } from '@/types';
 
 export const skillsCommand: Command = {
     name: 'skills',
@@ -14,7 +14,7 @@ export const skillsCommand: Command = {
                 ['DevOps', 'Docker, Kubernetes, CI/CD'],
                 ['Other', 'Machine Learning, RESTful APIs, GraphQL']
             ],
-            type: 'table'
+            type: CommandResultType.TABLE
         };
     }
 };

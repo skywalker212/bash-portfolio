@@ -1,5 +1,5 @@
 .output {
-    @apply mb-2 whitespace-pre-wrap;
+    @apply mb-2 whitespace-pre-wrap break-words;
 }
 
 .input {
@@ -20,4 +20,16 @@
 
 .info {
     @apply text-blue-500;
+}
+
+@media (max-width: 640px) {
+
+    .output,
+    .input,
+    .prompt,
+    .error,
+    .success,
+    .info {
+        @apply text-xs;
+    }
 }

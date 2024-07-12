@@ -4,7 +4,8 @@ import TerminalOutput from './TerminalOutput';
 import TerminalInitialRender from './TerminalInitialRender';
 import { useCommandHistory, useKeyboardNavigation, useTerminal, useAutoFocus, useInitialRender } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
-import { terminalConfig } from '@/config/terminalConfig';
+import { getPrompt, terminalConfig } from '@/config/terminalConfig';
+import { CommandResultType } from '@/types';
 
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
@@ -21,8 +22,7 @@ const Terminal: React.FC = () => {
         if (!input.trim()) return;
 
         addToHistory(input);
-        const prompt = `${terminalConfig.user}@${terminalConfig.host}:${currentDirectory}$ `;
-        const inputResult = { content: `${prompt}${input}`, type: 'input' as const };
+        const inputResult = { content: `${getPrompt(currentDirectory)}${input}`, type: CommandResultType.INPUT };
         const result = await executeCommand(input);
         if (result.content === 'CLEAR_TERMINAL') {
             clearTerminal();
@@ -49,7 +49,7 @@ const Terminal: React.FC = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onSubmit={handleSubmit}
-                prompt={`${terminalConfig.user}@${terminalConfig.host}:${currentDirectory}$`}
+                prompt={getPrompt(currentDirectory)}
             />
         </div>
     );

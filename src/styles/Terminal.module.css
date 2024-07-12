@@ -3,7 +3,7 @@
 }
 
 .output {
-    @apply mb-2 whitespace-pre-wrap;
+    @apply mb-2 whitespace-pre-wrap break-words;
 }
 
 .prompt {
@@ -12,4 +12,10 @@
 
 .input {
     @apply bg-transparent outline-none w-full;
+}
+
+@media (max-width: 640px) {
+    .terminal {
+        @apply p-2;
+    }
 }

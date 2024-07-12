@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MOTD, getLastLogin } from '@/config/terminalConfig';
-import { CommandResult } from '@/types';
+import { CommandResult, CommandResultType } from '@/types';
 
 export const useInitialRender = () => {
     const [initialRender, setInitialRender] = useState<CommandResult[]>([]);
@@ -9,11 +9,9 @@ export const useInitialRender = () => {
         const lastLogin = getLastLogin();
 
         setInitialRender([
-            { content: `Last login: ${lastLogin}`, type: 'output' },
-            { content: '', type: 'output' }, // Empty line for spacing
-            { content: MOTD, type: 'output' },
-            { content: '', type: 'output' }, // Empty line for spacing
-            { content: "Type 'help' for available commands.", type: 'output' },
+            { content: `Last login: ${lastLogin}`, type: CommandResultType.OUTPUT },
+            { content: MOTD, type: CommandResultType.OUTPUT },
+            { content: "Type 'help' for available commands.", type: CommandResultType.OUTPUT },
         ]);
     }, []);
 

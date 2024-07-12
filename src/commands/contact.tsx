@@ -1,4 +1,4 @@
-import { Command } from '../types';
+import { Command, CommandResultType } from '../types';
 
 export const contactCommand: Command = {
     name: 'contact',
@@ -12,7 +12,7 @@ export const contactCommand: Command = {
                     <p>GitHub: <a href="https://github.com/skywalker212" target = "_blank" rel = "noopener noreferrer" className = "terminal-link" >github.com/skywalker212</a></p>
                 </div>
             ),
-            type: 'custom'
+            type: CommandResultType.CUSTOM
         };
     }
 };

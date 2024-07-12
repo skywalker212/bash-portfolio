@@ -10,7 +10,15 @@ export interface TerminalState {
 
 export type CommandHandler = (command: string) => string;
 
-export type CommandResultType = 'input' | 'output' | 'error' | 'success' | 'info' | 'table' | 'custom';
+export enum CommandResultType {
+    INPUT = 'input',
+    OUTPUT = 'output',
+    ERROR = 'error',
+    SUCCESS = 'success',
+    INFO = 'info',
+    TABLE = 'table',
+    CUSTOM = 'custom'
+}
 
 export interface CommandResult {
     content: any;

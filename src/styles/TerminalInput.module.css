@@ -1,5 +1,5 @@
 .inputWrapper {
-    @apply flex items-center;
+    @apply flex items-center flex-wrap;
 }
 
 .prompt {
@@ -7,5 +7,15 @@
 }
 
 .input {
-    @apply bg-transparent outline-none w-full text-[var(--terminal-text)];
+    @apply bg-transparent outline-none w-full text-[var(--terminal-text)] min-w-0;
+}
+
+@media (max-width: 640px) {
+    .prompt {
+        @apply text-xs;
+    }
+
+    .input {
+        @apply text-xs;
+    }
 }

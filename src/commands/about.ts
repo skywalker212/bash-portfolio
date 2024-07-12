@@ -1,4 +1,4 @@
-import { Command } from '@/types';
+import { Command, CommandResultType } from '@/types';
 
 export const aboutCommand: Command = {
     name: 'about',
@@ -12,7 +12,7 @@ export const aboutCommand: Command = {
                 ['Experience', '3+ years in software development'],
                 ['Interests', 'Machine Learning, Web Development, Cyber Security']
             ],
-            type: 'table'
+            type: CommandResultType.TABLE
         };
     }
 };

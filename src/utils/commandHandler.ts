@@ -1,6 +1,6 @@
 import { commands } from '../commands';
 import { loadWasmModule } from './wasmLoader';
-import { CommandResult } from '@/types';
+import { CommandResult, CommandResultType } from '@/types';
 
 export const handleCommand = async (input: string): Promise<CommandResult> => {
   const [commandName, ...args] = input.trim().split(' ');
@@ -14,7 +14,7 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
       console.error(`Error executing command ${commandName}:`, error);
       return {
         content: `Error executing command ${commandName}: ${error.message}`,
-        type: 'error'
+        type: CommandResultType.ERROR
       };
     }
   } else {
@@ -26,7 +26,7 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
         // This is a placeholder and would need to be implemented based on your WASM module structure
         return {
           content: `Executed WASM module: ${commandName}`,
-          type: 'output'
+          type: CommandResultType.OUTPUT
         };
       }
     } catch (error) {
@@ -36,6 +36,6 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
 
   return {
     content: `Command not found: ${commandName}. Type 'help' for a list of available commands.`,
-    type: 'error'
+    type: CommandResultType.ERROR
   };
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CommandResult } from '@/types';
 import styles from '@/styles/TerminalOutput.module.css';
+import { table, getBorderCharacters } from 'table';
 
 const TerminalOutput: React.FC<CommandResult> = ({ content, type }) => {
     let outputClass = styles.output;
@@ -23,17 +24,9 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }) => {
     if (type === 'table') {
         return (
             <div className={outputClass}>
-                <table>
-                    <tbody>
-                        {(content as string[][]).map((row, i) => (
-                            <tr key={i}>
-                                {row.map((cell, j) => (
-                                    <td key={j} className="pr-4">{cell}</td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                {table(content, {
+                    border: getBorderCharacters('ramac')
+                })}
             </div>
         );
     }

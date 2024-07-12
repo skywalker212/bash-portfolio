@@ -1,4 +1,4 @@
-import { Command } from '@/types';
+import { Command, CommandResultType } from '@/types';
 
 export const projectsCommand: Command = {
     name: 'projects',
@@ -13,7 +13,7 @@ export const projectsCommand: Command = {
                 ['Shadowfax', 'Distributed system project', 'Java'],
                 ['HPA Classification', 'Machine learning project', 'Python, TensorFlow']
             ],
-            type: 'table'
+            type: CommandResultType.TABLE
         };
     }
 };

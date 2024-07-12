@@ -1,11 +1,16 @@
-import '@/styles/globals.css'
-import { Inter } from 'next/font/google'
-
-const inter = Inter({ subsets: ['latin'] })
+import '@/styles/globals.css';
+import { Viewport } from 'next';
 
 export const metadata = {
   title: 'Akash Gajjar Portfolio',
-  description: 'A bash-style portfolio',
+  description: 'A bash-style portfolio'
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false 
 }
 
 export default function RootLayout({
@@ -15,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   )
 }
