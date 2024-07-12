@@ -1,19 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TerminalInput from './TerminalInput';
 import TerminalOutput from './TerminalOutput';
-import { useCommandHistory, useKeyboardNavigation, useTerminal, useAutoFocus, useInitialRender } from '@/hooks';
+import { useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
-import { terminalConfig } from '@/config';
 import { CommandResultType } from '@/types';
 import { getPrompt } from '@/utils';
-import { useTerminalStore } from '@/store';
+import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
+import { initialRender } from '@/config';
 
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
-    const { currentDirectory, changeDirectory } = useTerminalStore();
-    const { addToHistory, getPreviousCommand, getNextCommand } = useCommandHistory();
-    const initialRender = useInitialRender();
-    const { output, setOutput, executeCommand, clearTerminal } = useTerminal();
+    const { currentDirectory, addCommandToHistory, changeDirectory } = useTerminalStore();
+    const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender);
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
 
@@ -22,7 +20,7 @@ const Terminal: React.FC = () => {
     const handleSubmit = async () => {
         if (!input.trim()) return;
 
-        addToHistory(input);
+        addCommandToHistory(input);
         const inputResult = { content: `${getPrompt(currentDirectory)}${input}`, type: CommandResultType.INPUT };
         const result = await executeCommand(input);
         if (result.content === 'CLEAR_TERMINAL') {
@@ -34,7 +32,6 @@ const Terminal: React.FC = () => {
     };
 
     useEffect(() => {
-        inputRef.current?.focus();
         if (terminalRef.current) {
             terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
         }
@@ -47,7 +44,7 @@ const Terminal: React.FC = () => {
         return () => {
             terminalRef.current?.removeEventListener('click', handleTerminalClick);
         };
-    }, [output, initialRender]);
+    }, [output]);
 
     return (
         <div ref={terminalRef} className={styles.terminal}>

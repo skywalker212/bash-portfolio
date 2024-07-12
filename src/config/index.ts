@@ -1,1 +1,1 @@
-export { terminalConfig } from "./terminalConfig";
+export { terminalConfig, initialRender } from "./terminalConfig";

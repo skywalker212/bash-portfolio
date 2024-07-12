@@ -1,9 +1,10 @@
 import { create } from 'zustand'
-import { TerminalState } from '@/types'
+import { CommandResult, TerminalState } from '@/types'
 import { terminalConfig } from '@/config'
 
 interface TerminalStore extends TerminalState {
-  addCommand: (command: string, output: string) => void
+  addCommandToHistory: (command: string) => void
+  setHistoryIndex: (index: number) => void
   changeDirectory: (newDirectory: string) => void
 }
 
@@ -12,8 +13,39 @@ export const useTerminalStore = create<TerminalStore>((set) => ({
   user: terminalConfig.user,
   host: terminalConfig.host,
   currentDirectory: terminalConfig.initialDirectory,
-  addCommand: (command, output) => set((state) => ({
-    commandHistory: [...state.commandHistory, { command, output }],
+  historyIndex: 0,
+  addCommandToHistory: (command) => set((state) => ({
+    commandHistory: [...state.commandHistory, command],
+    historyIndex: state.historyIndex + 1 
+  })),
+  setHistoryIndex: (index) => set((state) => ({
+    historyIndex: index
   })),
   changeDirectory: (newDirectory) => set({ currentDirectory: newDirectory }),
-}))
+}));
+
+export const getPreviousCommand = () => {
+  const state = useTerminalStore.getState();
+  const commandHistory = state.commandHistory;
+  const historyIndex = state.historyIndex;
+  if (historyIndex > 0){
+    state.setHistoryIndex(historyIndex - 1);
+    return commandHistory[historyIndex - 1];
+  } else {
+    return null;
+  }
+}
+
+export const getNextCommand = () => {
+  const state = useTerminalStore.getState();
+  const commandHistory = state.commandHistory;
+  const historyIndex = state.historyIndex;
+  if (historyIndex < commandHistory.length - 1){
+    state.setHistoryIndex(historyIndex + 1);
+    return commandHistory[historyIndex + 1];
+  } else if (historyIndex === commandHistory.length - 1) {
+    state.setHistoryIndex(commandHistory.length);
+    return '';
+  }
+  return null;
+}

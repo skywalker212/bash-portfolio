@@ -1,13 +1,9 @@
-export interface CommandHistory {
-    command: string;
-    output: string;
-}
-
 export interface TerminalState {
     user: string;
     host: string; 
     currentDirectory: string;
-    commandHistory: CommandHistory[];
+    commandHistory: string[];
+    historyIndex: number;
 }
 
 export type CommandHandler = (command: string) => string;
