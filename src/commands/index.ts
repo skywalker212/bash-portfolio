@@ -6,6 +6,7 @@ import { projectsCommand } from './projects';
 import { contactCommand } from './contact';
 import { clearCommand } from './clear';
 import { helloWasmCommand } from './hello-wasm';
+import { vimCommand } from './vim';
 
 export const commands = [
     helpCommand,
@@ -14,5 +15,6 @@ export const commands = [
     projectsCommand,
     contactCommand,
     clearCommand,
-    helloWasmCommand
+    helloWasmCommand,
+    vimCommand
 ] as Command[];
