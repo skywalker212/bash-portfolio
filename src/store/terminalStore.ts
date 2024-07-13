@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { CommandResult, TerminalState } from '@/types'
+import { TerminalState } from '@/types'
 import { terminalConfig } from '@/config'
 
 interface TerminalStore extends TerminalState {
@@ -18,7 +18,7 @@ export const useTerminalStore = create<TerminalStore>((set) => ({
     commandHistory: [...state.commandHistory, command],
     historyIndex: state.historyIndex + 1 
   })),
-  setHistoryIndex: (index) => set((state) => ({
+  setHistoryIndex: (index) => set(() => ({
     historyIndex: index
   })),
   changeDirectory: (newDirectory) => set({ currentDirectory: newDirectory }),

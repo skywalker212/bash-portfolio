@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface TerminalState {
     user: string;
     host: string; 
@@ -19,7 +21,7 @@ export enum CommandResultType {
 }
 
 export interface CommandResult {
-    content: any;
+    content: string[][] | ReactNode;
     type: CommandResultType;
 }
 

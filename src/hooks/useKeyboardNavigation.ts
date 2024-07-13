@@ -10,21 +10,23 @@ export const useKeyboardNavigation = (
 ) => {
     const handleKeyDown = useCallback((event: KeyboardEvent) => {
         switch (event.key) {
-            case 'ArrowUp':
+            case 'ArrowUp': {
                 event.preventDefault();
                 const prevCommand = getPreviousCommand();
                 if (prevCommand !== null) {
                     setInput(prevCommand);
                 }
                 break;
-            case 'ArrowDown':
+            }
+            case 'ArrowDown': {
                 event.preventDefault();
                 const nextCommand = getNextCommand();
                 if (nextCommand !== null) {
                     setInput(nextCommand);
                 }
                 break;
-            case 'Tab':
+            }
+            case 'Tab': {
                 event.preventDefault();
                 const val = inputRef.current?.value;
                 if (val) {
@@ -33,15 +35,19 @@ export const useKeyboardNavigation = (
                         setInput(matchingCommand.name);
                     }
                 }
-            case 'l':
+                break;
+            }
+            case 'l': {
                 if (event.ctrlKey) {
                     event.preventDefault();
                     clearTerminal();
                 }
+                break;
+            }
             default:
                 break;
         }
-    }, [getPreviousCommand, getNextCommand, setInput]);
+    }, [getPreviousCommand, getNextCommand, setInput, clearTerminal, inputRef]);
 
     useEffect(() => {
         const currentInputRef = inputRef.current;

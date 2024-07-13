@@ -11,11 +11,11 @@ export const loadWasmModule = async (name: string, imports: WebAssembly.Imports 
 
   try {
     const response = await fetch(`/wasm/${name}.wasm`);
-    const module = await WebAssembly.instantiateStreaming(response, imports);
+    const mod = await WebAssembly.instantiateStreaming(response, imports);
 
     const result = {
       name,
-      instance: module.instance
+      instance: mod.instance
     }
 
     wasmModules.push(result);

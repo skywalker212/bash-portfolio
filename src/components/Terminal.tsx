@@ -10,7 +10,7 @@ import { initialRender } from '@/config';
 
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
-    const { currentDirectory, addCommandToHistory, changeDirectory } = useTerminalStore();
+    const { currentDirectory, addCommandToHistory } = useTerminalStore();
     const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender);
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
@@ -32,19 +32,20 @@ const Terminal: React.FC = () => {
     };
 
     useEffect(() => {
-        if (terminalRef.current) {
-            terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+        const current = terminalRef.current;
+        if (current) {
+            current.scrollTop = current.scrollHeight;
         }
         const handleTerminalClick = () => {
             inputRef.current?.focus();
         };
 
-        terminalRef.current?.addEventListener('click', handleTerminalClick);
+        current?.addEventListener('click', handleTerminalClick);
 
         return () => {
-            terminalRef.current?.removeEventListener('click', handleTerminalClick);
+            current?.removeEventListener('click', handleTerminalClick);
         };
-    }, [output]);
+    }, [output, inputRef]);
 
     return (
         <div ref={terminalRef} className={styles.terminal}>

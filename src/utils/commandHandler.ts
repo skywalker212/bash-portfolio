@@ -10,10 +10,10 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
   if (command) {
     try {
       return await command.execute(args);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error executing command ${commandName}:`, error);
       return {
-        content: `Error executing command ${commandName}: ${error.message}`,
+        content: `Error executing command ${commandName}: ${(error as Error).message}`,
         type: CommandResultType.ERROR
       };
     }

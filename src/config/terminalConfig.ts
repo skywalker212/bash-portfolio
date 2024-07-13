@@ -2,15 +2,15 @@ import { CommandResult, CommandResultType } from "@/types";
 
 export const MOTD = `Welcome to akash.is!`;
 
-const getLastLogin = (): string => {
-    const lastLogin = localStorage.getItem('lastLogin');
-    const currentLogin = new Date().toISOString();
-    localStorage.setItem('lastLogin', currentLogin);
-    return lastLogin || 'No previous login recorded';
-};
+// export const getLastLogin = (): string => {
+//     const lastLogin = localStorage.getItem('lastLogin');
+//     const currentLogin = new Date().toISOString();
+//     localStorage.setItem('lastLogin', currentLogin);
+//     return lastLogin || 'No previous login recorded';
+// };
 
 export const initialRender: CommandResult[] = [
-    { content: `Last login: ${getLastLogin()}`, type: CommandResultType.OUTPUT },
+    // { content: `Last login: ${getLastLogin()}`, type: CommandResultType.OUTPUT },
     { content: MOTD, type: CommandResultType.OUTPUT },
     { content: "Type 'help' for available commands.", type: CommandResultType.OUTPUT },
 ]
