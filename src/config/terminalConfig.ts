@@ -10,9 +10,9 @@ export const MOTD = `Welcome to akash.is!`;
 // };
 
 export const initialRender: CommandResult[] = [
-    // { content: `Last login: ${getLastLogin()}`, type: CommandResultType.OUTPUT },
-    { content: MOTD, type: CommandResultType.OUTPUT },
-    { content: "Type 'help' for available commands.", type: CommandResultType.OUTPUT },
+    // { content: `Last login: ${getLastLogin()}`, type: CommandResultType.TEXT },
+    { content: MOTD, type: CommandResultType.TEXT },
+    { content: "Type 'help' for available commands.", type: CommandResultType.TEXT },
 ]
 
 export const terminalTheme = {

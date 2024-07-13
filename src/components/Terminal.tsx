@@ -18,15 +18,16 @@ const Terminal: React.FC = () => {
     useKeyboardNavigation(inputRef, getPreviousCommand, getNextCommand, setInput, clearTerminal);
 
     const handleSubmit = async () => {
-        if (!input.trim()) return;
+        const trimmedInput = input.trim();
+        if (!trimmedInput) return;
 
-        addCommandToHistory(input);
+        addCommandToHistory(trimmedInput);
         const inputResult = { content: `${getPrompt(currentDirectory)}${input}`, type: CommandResultType.INPUT };
-        const result = await executeCommand(input);
-        if (result.content === 'CLEAR_TERMINAL') {
+        if (trimmedInput == 'clear') {
             clearTerminal();
         } else {
-            setOutput(prev => [...prev, inputResult, result]);
+            const result = await executeCommand(trimmedInput);
+            setOutput(prev => [...prev, inputResult, ...result]);
         }
         setInput('');
     };

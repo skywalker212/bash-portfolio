@@ -6,7 +6,7 @@ export const getPrompt = (currentDirectory: string): string => {
 };
 
 export const parseCommand = (input: string): ParsedCommand => {
-  const parts = input.trim().split(' ');
+  const parts = input.split(' ');
   return {
     command: parts[0],
     args: parts.slice(1),

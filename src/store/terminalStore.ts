@@ -16,7 +16,7 @@ export const useTerminalStore = create<TerminalStore>((set) => ({
   historyIndex: 0,
   addCommandToHistory: (command) => set((state) => ({
     commandHistory: [...state.commandHistory, command],
-    historyIndex: state.historyIndex + 1 
+    historyIndex: state.commandHistory.length + 1
   })),
   setHistoryIndex: (index) => set(() => ({
     historyIndex: index

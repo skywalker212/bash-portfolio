@@ -1,10 +1,11 @@
-import { Command, CommandArgumentTypeEnum, CommandArgumentType, CommandResultType } from '@/types';
+import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
 import { loadWasmModule } from '@/utils';
 
 const name = 'hello-wasm';
 
 type HelloWasmCommand = Command<[number, number]>;
 
+type AddFunction = (num1: number, num2: number) => number;
 
 export const helloWasmCommand: HelloWasmCommand = {
     name,
@@ -23,10 +24,10 @@ export const helloWasmCommand: HelloWasmCommand = {
         try {
             const helloWasmInstance = await loadWasmModule(name);
             if (helloWasmInstance) {
-                const add = helloWasmInstance.instance.exports.add as Function;
+                const add = helloWasmInstance.instance.exports.add as AddFunction;
                 return {
                     content: `Hello World! addResult: ${add(num1, num2)}`,
-                    type: CommandResultType.OUTPUT
+                    type: CommandResultType.TEXT
                 };
             } else {
                 throw Error(`Module ${name}.wasm not found.`);

@@ -1,12 +1,8 @@
-import { Command, CommandResultType } from '@/types';
+import { Command } from '@/types';
 
-export const clearCommand: Command = {
+type ClearCommand = Omit<Command<[]>, 'execute'>;
+
+export const clearCommand: ClearCommand = {
     name: 'clear',
-    description: 'Clear the terminal screen',
-    execute: () => {
-        return {
-            content: 'CLEAR_TERMINAL',
-            type: CommandResultType.CUSTOM
-        };
-    }
+    description: 'Clear the terminal screen'
 };

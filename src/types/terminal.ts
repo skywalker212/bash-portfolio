@@ -12,7 +12,7 @@ export type CommandHandler = (command: string) => string;
 
 export enum CommandResultType {
     INPUT = 'input',
-    OUTPUT = 'output',
+    TEXT = 'text',
     ERROR = 'error',
     SUCCESS = 'success',
     INFO = 'info',
@@ -43,7 +43,7 @@ export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]
     name: string;
     description: string;
     args?: CommandArgument[]
-    execute: (...args: T) => Promise<CommandResult> | CommandResult;
+    execute: (...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }
 
 export interface WasmModule {

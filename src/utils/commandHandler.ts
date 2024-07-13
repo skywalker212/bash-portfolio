@@ -2,7 +2,7 @@ import { commands } from '../commands';
 import { parseCommand } from './terminalUtils';
 import { CommandArgument, CommandArgumentTypeEnum, CommandResult, CommandResultType } from '@/types';
 
-export const handleCommand = async (input: string): Promise<CommandResult> => {
+export const handleCommand = async (input: string): Promise<CommandResult[]> => {
   const { command: commandName, args } = parseCommand(input);
 
   const command = commands.find(cmd => cmd.name === commandName);
@@ -16,7 +16,7 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
       } else if (cmdArgs.length < args.length) {
         throw Error(`Provided too many arguments. Possible arguments: ${cmdArgs.length}, Provided: ${args.length}`);
       } else {
-        return await command.execute(...args.map((arg, index) => {
+        const result = await command.execute(...args.map((arg, index) => {
           const cmdArg: CommandArgument = cmdArgs[index];
           switch (cmdArg.type) {
             case CommandArgumentTypeEnum.NUMBER:
@@ -27,18 +27,19 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
               return arg;
           }
         }));
+        return Array.isArray(result) ? result : [result];
       }
     } catch (error: unknown) {
       console.error(`Error executing command ${commandName}:`, error);
-      return {
+      return [{
         content: `Error executing command ${commandName}: ${(error as Error).message}`,
         type: CommandResultType.ERROR
-      };
+      }];
     }
   } else {
-    return {
+    return [{
       content: `Command not found: ${commandName}. Type 'help' for a list of available commands.`,
       type: CommandResultType.ERROR
-    };
+    }];
   }
 };
