@@ -31,5 +31,5 @@ export interface Command {
 
 export interface WasmModule {
     name: string;
-    module: WebAssembly.Module;
+    instance: WebAssembly.Instance;
 }

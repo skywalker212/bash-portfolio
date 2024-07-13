@@ -5,6 +5,7 @@ import { skillsCommand } from './skills';
 import { projectsCommand } from './projects';
 import { contactCommand } from './contact';
 import { clearCommand } from './clear';
+import { cowsayCommand } from './cowsay';
 
 export const commands: Command[] = [
     helpCommand,
@@ -13,4 +14,5 @@ export const commands: Command[] = [
     projectsCommand,
     contactCommand,
     clearCommand,
+    cowsayCommand
 ];
