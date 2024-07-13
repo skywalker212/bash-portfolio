@@ -1,6 +1,6 @@
 import { commands } from '../commands';
 import { parseCommand } from './terminalUtils';
-import { CommandResult, CommandResultType } from '@/types';
+import { CommandArgument, CommandArgumentTypeEnum, CommandResult, CommandResultType } from '@/types';
 
 export const handleCommand = async (input: string): Promise<CommandResult> => {
   const { command: commandName, args } = parseCommand(input);
@@ -9,7 +9,25 @@ export const handleCommand = async (input: string): Promise<CommandResult> => {
 
   if (command) {
     try {
-      return await command.execute(args);
+      const cmdArgs = command.args ? command.args : [];
+      const requiredArgs = cmdArgs.reduce((val, curr) => val + (curr.optional ? 0 : 1),0);
+      if (requiredArgs > args.length) {
+        throw Error(`Required number of arguments: ${requiredArgs}, Provided: ${args.length}`);
+      } else if (cmdArgs.length < args.length) {
+        throw Error(`Provided too many arguments. Possible arguments: ${cmdArgs.length}, Provided: ${args.length}`);
+      } else {
+        return await command.execute(...args.map((arg, index) => {
+          const cmdArg: CommandArgument = cmdArgs[index];
+          switch (cmdArg.type) {
+            case CommandArgumentTypeEnum.NUMBER:
+              return parseInt(arg);
+            case CommandArgumentTypeEnum.BOOLEAN:
+              return Boolean(arg);
+            case CommandArgumentTypeEnum.STRING:
+              return arg;
+          }
+        }));
+      }
     } catch (error: unknown) {
       console.error(`Error executing command ${commandName}:`, error);
       return {

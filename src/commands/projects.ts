@@ -1,4 +1,4 @@
-import { Command, CommandResultType, Project } from '@/types';
+import { Command, CommandArgumentTypeEnum, CommandResultType, Project } from '@/types';
 import { titleCase } from '@/utils';
 
 const projects: { [id: string]: Project } = {
@@ -10,11 +10,20 @@ const projects: { [id: string]: Project } = {
     }
 }
 
-export const projectsCommand: Command = {
+type ProjectCommand = Command<[string]>;
+
+export const projectsCommand: ProjectCommand = {
     name: 'projects',
     description: 'Display my notable projects',
-    execute: (args: string[]) => {
-        if (args.length === 0) {
+    args: [
+        {
+            name: 'projectName',
+            type: CommandArgumentTypeEnum.STRING,
+            optional: true
+        }
+    ],
+    execute: (projectName: string) => {
+        if (!projectName) {
             return {
                 content: [
                     ['Project', 'Description', 'Technologies'],
@@ -27,10 +36,10 @@ export const projectsCommand: Command = {
                 type: CommandResultType.TABLE
             };
         } else {
-            const project = projects[args[0]];
+            const project = projects[projectName];
             if (!project) {
                 return {
-                    content: `Project "${args[0]}" not found.`,
+                    content: `Project "${projectName}" not found.`,
                     type: CommandResultType.ERROR
                 };
             }

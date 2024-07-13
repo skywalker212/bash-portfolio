@@ -25,13 +25,28 @@ export interface CommandResult {
     type: CommandResultType;
 }
 
-export interface Command {
+export enum CommandArgumentTypeEnum {
+    NUMBER = 'number',
+    STRING = 'string',
+    BOOLEAN = 'boolean'
+}
+
+export type CommandArgumentType = string | number | boolean;
+
+export interface CommandArgument {
+    name: string,
+    type: CommandArgumentTypeEnum,
+    optional?: boolean
+}
+
+export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]> {
     name: string;
     description: string;
-    execute: (args: string[]) => Promise<CommandResult> | CommandResult;
+    args?: CommandArgument[]
+    execute: (...args: T) => Promise<CommandResult> | CommandResult;
 }
 
 export interface WasmModule {
     name: string;
-    instance: WebAssembly.Instance;
+    instance: WebAssembly.WebAssemblyInstantiatedSource;
 }

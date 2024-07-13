@@ -5,14 +5,14 @@ import { skillsCommand } from './skills';
 import { projectsCommand } from './projects';
 import { contactCommand } from './contact';
 import { clearCommand } from './clear';
-import { cowsayCommand } from './cowsay';
+import { helloWasmCommand } from './hello-wasm';
 
-export const commands: Command[] = [
+export const commands = [
     helpCommand,
     aboutCommand,
     skillsCommand,
     projectsCommand,
     contactCommand,
     clearCommand,
-    cowsayCommand
-];
+    helloWasmCommand
+] as Command[];
