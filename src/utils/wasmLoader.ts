@@ -1,48 +1,62 @@
-import { WasmModule } from '@/types';
+import { WasmExports, WasmModule } from '@/types';
 
-const wasmModules: WasmModule[] = [];
+const wasmModules: { name: string, instance: WasmModule }[] = [];
 
-export const loadWasmModule = async (name: string, importObject?: WebAssembly.Imports): Promise<WebAssembly.WebAssemblyInstantiatedSource | null> => {
+export const loadWasmModule = async <T extends WasmExports = WasmExports>(name: string, type: 'wasm' | 'js', importObject?: WebAssembly.Imports): Promise<WasmModule<T>> => {
   const existingModule = wasmModules.find(m => m.name === name);
-
   if (existingModule) {
-    return existingModule.instance;
-  }
-  let response = undefined;
-
-  if (!importObject) {
-    importObject = {
-      env: {
-        abort: () => console.log("Abort!")
-      }
-    };
+    return existingModule.instance as WasmModule<T>;
   }
 
-  // Check if the browser supports streaming instantiation
-  if (WebAssembly.instantiateStreaming) {
-    // Fetch the module, and instantiate it as it is downloading
-    response = await WebAssembly.instantiateStreaming(
-      fetch(`/wasm/${name}.wasm`),
-      importObject
-    );
+  if (type === 'js') {
+    // Load WebAssembly module with JavaScript glue code
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = `/wasm/${name}/${name}.js`;
+      script.onload = () => {
+        window.Module.onRuntimeInitialized = () => {
+          const result = {
+            name,
+            instance: { exports: window.Module } as WasmModule
+          };
+          wasmModules.push(result);
+          resolve(result.instance as WasmModule<T>);
+        };
+      };
+      script.onerror = () => {
+        reject(new Error(`Failed to load ${name}.js`));
+      };
+      document.body.appendChild(script);
+    });
   } else {
-    // Fallback to using fetch to download the entire module
-    // And then instantiate the module
-    const fetchAndInstantiateTask = async () => {
-      const wasmArrayBuffer = await fetch(`/wasm/${name}.wasm`).then(response =>
+    // Load standalone WebAssembly module
+    if (!importObject) {
+      importObject = {
+        env: {
+          memory: new WebAssembly.Memory({ initial: 256, maximum: 256 })
+        }
+      };
+    }
+
+    let response: WebAssembly.WebAssemblyInstantiatedSource;
+
+    if (WebAssembly.instantiateStreaming) {
+      response = await WebAssembly.instantiateStreaming(
+        fetch(`/wasm/${name}/${name}.wasm`),
+        importObject
+      );
+    } else {
+      const wasmArrayBuffer = await fetch(`/wasm/${name}/${name}.wasm`).then(response =>
         response.arrayBuffer()
       );
-      return WebAssembly.instantiate(wasmArrayBuffer, importObject);
+      response = await WebAssembly.instantiate(wasmArrayBuffer, importObject);
+    }
+
+    const result = {
+      name,
+      instance: { exports: response.instance.exports as WasmExports } as WasmModule
     };
-    response = await fetchAndInstantiateTask();
+    wasmModules.push(result);
+    return result.instance as WasmModule<T>;
   }
-
-  const result = {
-    name,
-    instance: response
-  }
-
-  wasmModules.push(result);
-
-  return result.instance;
 };

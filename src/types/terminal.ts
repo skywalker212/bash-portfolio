@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 export interface TerminalState {
     user: string;
-    host: string; 
+    host: string;
     currentDirectory: string;
     commandHistory: string[];
     historyIndex: number;
@@ -46,7 +46,18 @@ export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]
     execute: (...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }
 
-export interface WasmModule {
-    name: string;
-    instance: WebAssembly.WebAssemblyInstantiatedSource;
+export type WasmExports = {
+    [name: string]: object
+};
+
+export type WasmModule<T extends WasmExports = WasmExports> = {
+    exports: T;
+};
+
+declare global {
+    interface Window {
+        Module: WasmExports & {
+            onRuntimeInitialized: () => void;
+        };
+    }
 }

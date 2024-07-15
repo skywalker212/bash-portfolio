@@ -27,7 +27,7 @@ export const helpCommand: HelpCommand = {
                     ret.push({
                         content: [
                             ['Name', 'Type', 'Required'],
-                            ...command.args?.map(arg => [arg.name, arg.type, !arg.optional])
+                            ...command.args.map(arg => [arg.name, arg.type, !arg.optional])
                         ],
                         type: CommandResultType.TABLE
                     })
