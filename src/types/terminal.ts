@@ -36,7 +36,8 @@ export type CommandArgumentType = string | number | boolean;
 export interface CommandArgument {
     name: string,
     type: CommandArgumentTypeEnum,
-    optional?: boolean
+    optional?: boolean,
+    default?: CommandArgumentType
 }
 
 export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]> {
@@ -46,18 +47,10 @@ export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]
     execute: (...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }
 
-export type WasmExports = {
-    [name: string]: object
-};
-
-export type WasmModule<T extends WasmExports = WasmExports> = {
-    exports: T;
-};
+export type WasmModule = WebAssembly.Instance | EmscriptenModule
 
 declare global {
     interface Window {
-        Module: WasmExports & {
-            onRuntimeInitialized: () => void;
-        };
+        fsModule: EmscriptenModuleFactory
     }
 }

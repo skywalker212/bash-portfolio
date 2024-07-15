@@ -4,10 +4,12 @@ import { loadWasmModule } from '@/utils';
 const name = 'hello-wasm';
 
 type HelloWasmCommand = Command<[number, number]>;
-type AddFunction = (num1: number, num2: number) => number;
-type InstanceExports = {
-    add: AddFunction
-};
+
+interface HelloWasmInstance extends WebAssembly.Instance {
+    exports: {
+        add: (num1: number, num2: number) => number;
+    }
+}
 
 
 export const helloWasmCommand: HelloWasmCommand = {
@@ -25,9 +27,9 @@ export const helloWasmCommand: HelloWasmCommand = {
     ],
     execute: async (num1: number, num2: number) => {
         try {
-            const helloWasmInstance = await loadWasmModule<InstanceExports>(name, "wasm");
+            const helloWasmInstance = await loadWasmModule<HelloWasmInstance>(name, "wasm");
             if (helloWasmInstance) {
-                const exports: InstanceExports = helloWasmInstance.exports;
+                const exports = helloWasmInstance.exports;
                 return {
                     content: `Hello World! addResult: ${exports.add(num1, num2)}`,
                     type: CommandResultType.TEXT

@@ -1,33 +1,35 @@
-import { WasmExports, WasmModule } from '@/types';
+import { WasmModule } from "@/types";
 
-const wasmModules: { name: string, instance: WasmModule }[] = [];
+const wasmModules: { [key: string]: WasmModule } = {};
 
-export const loadWasmModule = async <T extends WasmExports = WasmExports>(name: string, type: 'wasm' | 'js', importObject?: WebAssembly.Imports): Promise<WasmModule<T>> => {
-  const existingModule = wasmModules.find(m => m.name === name);
-  if (existingModule) {
-    return existingModule.instance as WasmModule<T>;
+export const loadWasmModule = async <T extends WasmModule = WasmModule>(
+  name: string,
+  type: 'wasm' | 'js',
+  importObject?: WebAssembly.Imports
+): Promise<T> => {
+  if (wasmModules[name]) {
+    return wasmModules[name] as T;
   }
 
   if (type === 'js') {
-    // Load WebAssembly module with JavaScript glue code
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const script = document.createElement('script');
       script.src = `/wasm/${name}/${name}.js`;
-      script.onload = () => {
-        window.Module.onRuntimeInitialized = () => {
-          const result = {
-            name,
-            instance: { exports: window.Module } as WasmModule
-          };
-          wasmModules.push(result);
-          resolve(result.instance as WasmModule<T>);
-        };
-      };
-      script.onerror = () => {
-        reject(new Error(`Failed to load ${name}.js`));
-      };
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load ${name}.js`));
       document.body.appendChild(script);
     });
+    // @ts-expect-error implicit any errro
+    const createModule = (window as Window)[`${name}Module`] as EmscriptenModuleFactory;
+
+    if (!createModule) {
+      throw new Error(`Create function for module ${name} not found`);
+    }
+
+    const wasmModule = await createModule();
+    wasmModules[name] = wasmModule;
+
+    return wasmModule as T;
   } else {
     // Load standalone WebAssembly module
     if (!importObject) {
@@ -52,11 +54,8 @@ export const loadWasmModule = async <T extends WasmExports = WasmExports>(name: 
       response = await WebAssembly.instantiate(wasmArrayBuffer, importObject);
     }
 
-    const result = {
-      name,
-      instance: { exports: response.instance.exports as WasmExports } as WasmModule
-    };
-    wasmModules.push(result);
-    return result.instance as WasmModule<T>;
+    const wasmModule: WebAssembly.Instance = response.instance;
+    wasmModules[name] = wasmModule;
+    return wasmModule as T;
   }
 };
