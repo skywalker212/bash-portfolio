@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build-wasm": "make",
     "dev": "npm run build-wasm && next dev",
     "build": "npm run build-wasm && next build",
     "start": "next start",
+    "setup-emscripten": "bash setup-emscripten.sh",
+    "build-wasm": "make",
     "lint": "next lint",
     "clean": "make clean"
   },
