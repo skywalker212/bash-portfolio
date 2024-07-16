@@ -12,21 +12,20 @@ export const loadWasmModule = async <T extends WasmModule = WasmModule>(
   }
 
   if (type === 'js') {
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = `/wasm/${name}/${name}.js`;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error(`Failed to load ${name}.js`));
-      document.body.appendChild(script);
-    });
-    // @ts-expect-error implicit any errro
-    const createModule = (window as Window)[`${name}Module`] as EmscriptenModuleFactory;
+    // Dynamic import for JS-wrapped WASM modules
+    const moduleImport = await import(`@/public/wasm/${name}/${name}.js`);
+    const createModule = moduleImport.default as EmscriptenModuleFactory;
 
     if (!createModule) {
       throw new Error(`Create function for module ${name} not found`);
     }
 
-    const wasmModule = await createModule();
+    const wasmModule = await createModule({
+      locateFile: (path, prefix) => {
+        if (path.endsWith(".wasm")) return `/wasm/${name}/` + path;
+        return prefix + path;
+      }
+    });
     wasmModules[name] = wasmModule;
 
     return wasmModule as T;
