@@ -6,10 +6,9 @@ const name = 'fs';
 type LsCommand = Command<[string]>;
 
 interface FSInstance extends EmscriptenModule {
-    memory: WebAssembly.Memory;
     _list_directory: (pathPtr: number) => number;
-    _my_malloc: (size: number) => number;
-    _my_free: (ptr: number) => void;
+    stringToUTF8: typeof stringToUTF8;
+    UTF8ToString: typeof UTF8ToString;
 }
 
 export const lsCommand: LsCommand = {
@@ -27,20 +26,21 @@ export const lsCommand: LsCommand = {
         try {
             const wasmModule = await loadWasmModule<FSInstance>(name, 'js');
             if (wasmModule) {
-                const { _list_directory, _my_free, _my_malloc, memory } = wasmModule;
+                const { _list_directory, _free, _malloc, stringToUTF8, UTF8ToString } = wasmModule;
 
-                const encoder = new TextEncoder();
-                const decoder = new TextDecoder();
+                // Allocate memory for the input path
+                const pathPtr = _malloc(path.length + 1); // +1 for null terminator
+                stringToUTF8(path, pathPtr, path.length + 1);
 
-                const pathBuffer = encoder.encode(path + '\0');
-                const pathPtr = _my_malloc(pathBuffer.length);
-                new Uint8Array(memory.buffer).set(pathBuffer, pathPtr);
-
+                // Call the WebAssembly function
                 const resultPtr = _list_directory(pathPtr);
-                const result = decoder.decode(new Uint8Array(memory.buffer, resultPtr));
 
-                _my_free(pathPtr);
-                _my_free(resultPtr);
+                // Convert the result to a JavaScript string
+                const result = UTF8ToString(resultPtr);
+
+                // Free the allocated memory
+                _free(pathPtr);
+                _free(resultPtr);
 
                 return {
                     content: result,
