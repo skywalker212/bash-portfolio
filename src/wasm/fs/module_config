@@ -1,0 +1,2 @@
+EXPORTED_FUNCTIONS=["_malloc", "_free"]
+EXPORTED_RUNTIME_METHODS=["stringToUTF8", "UTF8ToString"]

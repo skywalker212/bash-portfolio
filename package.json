@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "build-wasm": "make",
+    "dev": "npm run build-wasm && next dev",
+    "build": "npm run build-wasm && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "make clean"
   },
   "dependencies": {
     "figlet": "^1.7.0",
