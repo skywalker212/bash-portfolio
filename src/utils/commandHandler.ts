@@ -1,8 +1,9 @@
+import { TerminalStore } from '@/store';
 import { commands } from '../commands';
 import { parseCommand } from './terminalUtils';
 import { CommandArgument, CommandArgumentTypeEnum, CommandResult, CommandResultType } from '@/types';
 
-export const handleCommand = async (input: string): Promise<CommandResult[]> => {
+export const handleCommand = async (input: string, terminalStore: TerminalStore): Promise<CommandResult[]> => {
   const { command: commandName, args } = parseCommand(input);
 
   const command = commands.find(cmd => cmd.name === commandName);
@@ -10,13 +11,13 @@ export const handleCommand = async (input: string): Promise<CommandResult[]> => 
   if (command) {
     try {
       const cmdArgs = command.args ? command.args : [];
-      const requiredArgs = cmdArgs.reduce((val, curr) => val + (curr.optional ? 0 : 1),0);
+      const requiredArgs = cmdArgs.reduce((val, curr) => val + (curr.optional ? 0 : 1), 0);
       if (requiredArgs > args.length) {
         throw Error(`Required number of arguments: ${requiredArgs}, Provided: ${args.length}`);
       } else if (cmdArgs.length < args.length) {
         throw Error(`Provided too many arguments. Possible arguments: ${cmdArgs.length}, Provided: ${args.length}`);
       } else {
-        const result = await command.execute(...args.map((arg, index) => {
+        const result = await command.execute(terminalStore, ...args.map((arg, index) => {
           const cmdArg: CommandArgument = cmdArgs[index];
           switch (cmdArg.type) {
             case CommandArgumentTypeEnum.NUMBER:

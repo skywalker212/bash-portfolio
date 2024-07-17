@@ -9,7 +9,7 @@ all: $(MODULES)
 define read_config
 $(shell if [ -f $(WASM_SRC_DIR)/$(1)/module_config ]; then \
     grep -v '^#' $(WASM_SRC_DIR)/$(1)/module_config | \
-    sed -e 's/^/-s/' -e 's/=/="/' -e 's/]$$/]"/' | \
+    sed -e 's/^/-/' -e 's/=/="/' -e 's/]$$/]"/' | \
     tr '\n' ' '; \
 fi)
 endef

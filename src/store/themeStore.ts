@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { ThemeState } from '@/types'
 
-interface ThemeStore extends ThemeState {
+export interface ThemeStore extends ThemeState {
   toggleDarkMode: () => void
 }
 

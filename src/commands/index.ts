@@ -7,6 +7,7 @@ import { contactCommand } from './contact';
 import { clearCommand } from './clear';
 import { helloWasmCommand } from './hello-wasm';
 import { lsCommand } from './ls';
+import { cdCommand } from './cd';
 
 export const commands = [
     helpCommand,
@@ -16,5 +17,6 @@ export const commands = [
     contactCommand,
     clearCommand,
     helloWasmCommand,
-    lsCommand
+    lsCommand,
+    cdCommand
 ] as Command[];

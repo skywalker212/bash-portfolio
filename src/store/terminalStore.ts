@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { TerminalState } from '@/types'
 import { terminalConfig } from '@/config'
 
-interface TerminalStore extends TerminalState {
+export interface TerminalStore extends TerminalState {
   addCommandToHistory: (command: string) => void
   setHistoryIndex: (index: number) => void
   changeDirectory: (newDirectory: string) => void
@@ -28,7 +28,7 @@ export const getPreviousCommand = () => {
   const state = useTerminalStore.getState();
   const commandHistory = state.commandHistory;
   const historyIndex = state.historyIndex;
-  if (historyIndex > 0){
+  if (historyIndex > 0) {
     state.setHistoryIndex(historyIndex - 1);
     return commandHistory[historyIndex - 1];
   } else {
@@ -40,7 +40,7 @@ export const getNextCommand = () => {
   const state = useTerminalStore.getState();
   const commandHistory = state.commandHistory;
   const historyIndex = state.historyIndex;
-  if (historyIndex < commandHistory.length - 1){
+  if (historyIndex < commandHistory.length - 1) {
     state.setHistoryIndex(historyIndex + 1);
     return commandHistory[historyIndex + 1];
   } else if (historyIndex === commandHistory.length - 1) {

@@ -1,3 +1,4 @@
+import { TerminalStore } from "@/store";
 import { ReactNode } from "react";
 
 export interface TerminalState {
@@ -17,11 +18,12 @@ export enum CommandResultType {
     SUCCESS = 'success',
     INFO = 'info',
     TABLE = 'table',
-    CUSTOM = 'custom'
+    CUSTOM = 'custom',
+    NONE = 'none'
 }
 
 export interface CommandResult {
-    content: string[][] | ReactNode;
+    content?: string[][] | ReactNode;
     type: CommandResultType;
 }
 
@@ -44,13 +46,5 @@ export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]
     name: string;
     description: string;
     args?: CommandArgument[]
-    execute: (...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
-}
-
-export type WasmModule = WebAssembly.Instance | EmscriptenModule
-
-declare global {
-    interface Window {
-        fsModule: EmscriptenModuleFactory
-    }
+    execute: (terminalStore: TerminalStore, ...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }

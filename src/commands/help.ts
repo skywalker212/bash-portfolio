@@ -1,5 +1,6 @@
 import { Command, CommandArgumentTypeEnum, CommandResult, CommandResultType } from '@/types';
 import { commands } from './index';
+import { TerminalStore } from '@/store';
 
 type HelpCommand = Command<[string]>;
 
@@ -13,7 +14,7 @@ export const helpCommand: HelpCommand = {
             optional: true
         }
     ],
-    execute: (commandName: string) => {
+    execute: (_: TerminalStore, commandName: string) => {
         if (commandName) {
             const command = commands.find(cmd => commandName === cmd.name);
             if (command) {

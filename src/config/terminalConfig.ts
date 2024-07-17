@@ -25,5 +25,5 @@ export const terminalTheme = {
 export const terminalConfig = {
     user: 'skywalker212',
     host: 'akash.is',
-    initialDirectory: '~',
+    initialDirectory: '/',
 };

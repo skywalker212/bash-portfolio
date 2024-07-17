@@ -4,16 +4,15 @@ import { loadWasmModule } from '@/utils';
 
 const name = 'fs';
 
-type LsCommand = Command<[string]>;
+type CdCommand = Command<[string]>;
 
-export const lsCommand: LsCommand = {
-    name: 'ls',
-    description: 'List directory contents',
+export const cdCommand: CdCommand = {
+    name: 'cd',
+    description: 'Change Directory',
     args: [
         {
-            name: 'path',
+            name: 'Directory Name',
             type: CommandArgumentTypeEnum.STRING,
-            optional: true
         }
     ],
     execute: async (terminalStore: TerminalStore, path: string) => {
@@ -22,18 +21,18 @@ export const lsCommand: LsCommand = {
             if (wasmModule) {
                 const { FS } = wasmModule;
 
-                const files = FS.readdir(path ? path : terminalStore.currentDirectory);
+                FS.chdir(path);
+                terminalStore.changeDirectory(FS.cwd());
 
                 return {
-                    content: files.join(' '),
-                    type: CommandResultType.TEXT
+                    type: CommandResultType.NONE
                 };
             } else {
                 throw Error(`Module ${name} not found.`);
             }
         } catch (error: unknown) {
             return {
-                content: `Error executing command ls: ${(error as Error).message}`,
+                content: `Error executing command cd: ${(error as Error).message}`,
                 type: CommandResultType.ERROR
             };
         }

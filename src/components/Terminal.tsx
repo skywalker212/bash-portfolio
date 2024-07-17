@@ -10,8 +10,9 @@ import { initialRender } from '@/config';
 
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
-    const { currentDirectory, addCommandToHistory } = useTerminalStore();
-    const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender);
+    const terminalStore = useTerminalStore();
+    const { currentDirectory, addCommandToHistory } = terminalStore;
+    const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender, terminalStore);
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
 
@@ -22,11 +23,11 @@ const Terminal: React.FC = () => {
         if (!trimmedInput) return;
 
         addCommandToHistory(trimmedInput);
-        const inputResult = { content: `${getPrompt(currentDirectory)}${input}`, type: CommandResultType.INPUT };
         if (trimmedInput == 'clear') {
             clearTerminal();
         } else {
             const result = await executeCommand(trimmedInput);
+            const inputResult = { content: `${getPrompt(currentDirectory)}${input}`, type: CommandResultType.INPUT };
             setOutput(prev => [...prev, inputResult, ...result]);
         }
         setInput('');

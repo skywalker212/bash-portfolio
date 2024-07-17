@@ -42,6 +42,10 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResul
         );
     }
 
+    if (type === CommandResultType.NONE) {
+        return;
+    }
+
     return <div className={outputClass}>{content}</div>;
 };
 
