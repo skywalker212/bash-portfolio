@@ -8,6 +8,7 @@ import { clearCommand } from './clear';
 import { helloWasmCommand } from './hello-wasm';
 import { lsCommand } from './ls';
 import { cdCommand } from './cd';
+import { mkdirCommand } from './mkdir';
 
 export const commands = [
     helpCommand,
@@ -18,5 +19,6 @@ export const commands = [
     clearCommand,
     helloWasmCommand,
     lsCommand,
-    cdCommand
+    cdCommand,
+    mkdirCommand
 ] as Command[];

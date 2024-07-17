@@ -5,7 +5,7 @@ const wasmModules: { [key: string]: WasmModule } = {};
 export const loadWasmModule = async <T extends WasmModule = WasmModule>(
   name: string,
   type: 'wasm' | 'js',
-  importObject?: WebAssembly.Imports
+  importObject?: WebAssembly.Imports | EmscriptenModule
 ): Promise<T> => {
   if (wasmModules[name]) {
     return wasmModules[name] as T;
@@ -45,13 +45,13 @@ export const loadWasmModule = async <T extends WasmModule = WasmModule>(
     if (WebAssembly.instantiateStreaming) {
       response = await WebAssembly.instantiateStreaming(
         fetch(`/wasm/${name}/${name}.wasm`),
-        importObject
+        importObject as WebAssembly.Imports
       );
     } else {
       const wasmArrayBuffer = await fetch(`/wasm/${name}/${name}.wasm`).then(response =>
         response.arrayBuffer()
       );
-      response = await WebAssembly.instantiate(wasmArrayBuffer, importObject);
+      response = await WebAssembly.instantiate(wasmArrayBuffer, importObject as WebAssembly.Imports);
     }
 
     const wasmModule: WebAssembly.Instance = response.instance;
