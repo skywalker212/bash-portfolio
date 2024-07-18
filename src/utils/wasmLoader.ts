@@ -22,7 +22,7 @@ export const loadWasmModule = async <T extends WasmModule = WasmModule>(
 
     const wasmModule = await createModule({
       locateFile: (path, prefix) => {
-        if (path.endsWith(".wasm")) return `/wasm/${name}/` + path;
+        if (path.endsWith(".wasm")) return `/wasm/${name}/${path}`;
         return prefix + path;
       },
       ...importObject

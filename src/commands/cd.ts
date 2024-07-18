@@ -1,8 +1,4 @@
-import { TerminalStore } from '@/store';
-import { Command, CommandArgumentTypeEnum, CommandResultType, FSInstance } from '@/types';
-import { loadWasmModule } from '@/utils';
-
-const name = 'fs';
+import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
 
 type CdCommand = Command<[string]>;
 
@@ -15,21 +11,12 @@ export const cdCommand: CdCommand = {
             type: CommandArgumentTypeEnum.STRING,
         }
     ],
-    execute: async (terminalStore: TerminalStore, path: string) => {
+    execute: async (state, path: string) => {
         try {
-            const wasmModule = await loadWasmModule<FSInstance>(name, 'js');
-            if (wasmModule) {
-                const { FS } = wasmModule;
-
-                FS.chdir(path);
-                terminalStore.changeDirectory(FS.cwd());
-
-                return {
-                    type: CommandResultType.NONE
-                };
-            } else {
-                throw Error(`Module ${name} not found.`);
-            }
+            state.fileSystem.changeDirectory(path)
+            return {
+                type: CommandResultType.NONE
+            };
         } catch (error: unknown) {
             return {
                 content: `Error executing command cd: ${(error as Error).message}`,

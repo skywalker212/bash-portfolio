@@ -1,5 +1,7 @@
 import { CommandResult, CommandResultType } from "@/types";
 
+export const HOME_DIR = '/home/skywalker212';
+
 export const MOTD = `Welcome to akash.is!`;
 
 // export const getLastLogin = (): string => {
@@ -25,5 +27,5 @@ export const terminalTheme = {
 export const terminalConfig = {
     user: 'skywalker212',
     host: 'akash.is',
-    initialDirectory: '/',
+    initialDirectory: HOME_DIR,
 };

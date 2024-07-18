@@ -2,6 +2,7 @@ export * from './commandHandler';
 export * from './terminalUtils';
 export * from './styleUtils';
 export * from './wasmLoader';
+export * from './fileSystemUtils';
 
 export const kebabCase = (string: string) => string
     .trim()

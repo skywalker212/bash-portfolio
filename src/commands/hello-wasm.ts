@@ -1,4 +1,3 @@
-import { TerminalStore } from '@/store';
 import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
 import { loadWasmModule } from '@/utils';
 
@@ -26,7 +25,7 @@ export const helloWasmCommand: HelloWasmCommand = {
             type: CommandArgumentTypeEnum.NUMBER
         }
     ],
-    execute: async (_: TerminalStore, num1: number, num2: number) => {
+    execute: async (_, num1: number, num2: number) => {
         try {
             const helloWasmInstance = await loadWasmModule<HelloWasmInstance>(name, "wasm");
             if (helloWasmInstance) {

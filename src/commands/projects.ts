@@ -1,4 +1,3 @@
-import { TerminalStore } from '@/store';
 import { Command, CommandArgumentTypeEnum, CommandResultType, Project } from '@/types';
 import { titleCase } from '@/utils';
 
@@ -23,7 +22,7 @@ export const projectsCommand: ProjectCommand = {
             optional: true
         }
     ],
-    execute: (_: TerminalStore, projectName: string) => {
+    execute: (_, projectName: string) => {
         if (!projectName) {
             return {
                 content: [

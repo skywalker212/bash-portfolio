@@ -4,15 +4,16 @@ import TerminalOutput from './TerminalOutput';
 import { useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
 import { CommandResultType } from '@/types';
-import { getPrompt } from '@/utils';
+import { getPrompt, WASMFileSystem } from '@/utils';
 import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
 import { initialRender } from '@/config';
 
-const Terminal: React.FC = () => {
+const Terminal: React.FC = async () => {
     const [input, setInput] = useState('');
     const terminalStore = useTerminalStore();
     const { currentDirectory, addCommandToHistory } = terminalStore;
-    const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender, terminalStore);
+    const fileSystem = await WASMFileSystem.initFsModule(terminalStore);
+    const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender, terminalStore, fileSystem);
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
 

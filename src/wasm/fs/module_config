@@ -1,2 +1,3 @@
+sEXPORTED_FUNCTIONS=["_main"]
 sEXPORTED_RUNTIME_METHODS=["FS"]
 lidbfs.js

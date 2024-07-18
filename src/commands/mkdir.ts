@@ -1,8 +1,4 @@
-import { TerminalStore } from '@/store';
-import { Command, CommandArgumentTypeEnum, CommandResultType, FSInstance } from '@/types';
-import { loadWasmModule } from '@/utils';
-
-const name = 'fs';
+import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
 
 type MkdirCommand = Command<[string]>;
 
@@ -15,25 +11,14 @@ export const mkdirCommand: MkdirCommand = {
             type: CommandArgumentTypeEnum.STRING
         }
     ],
-    execute: async (_: TerminalStore, directoryName: string) => {
+    execute: async (state, directoryName: string) => {
         try {
-            const wasmModule = await loadWasmModule<FSInstance>(name, 'js');
-            if (wasmModule) {
-                const { FS } = wasmModule;
 
-                FS.mkdir(directoryName)
-                FS.syncfs((e: Error) => {
-                    if (e) {
-                        throw e;
-                    }
-                })
+            state.fileSystem.makeDirectory(directoryName);
 
-                return {
-                    type: CommandResultType.NONE
-                };
-            } else {
-                throw Error(`Module ${name} not found.`);
-            }
+            return {
+                type: CommandResultType.NONE
+            };
         } catch (error: unknown) {
             return {
                 content: `Error executing command mkdir: ${(error as Error).message}`,

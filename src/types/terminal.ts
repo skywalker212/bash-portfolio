@@ -1,4 +1,5 @@
 import { TerminalStore } from "@/store";
+import { WASMFileSystem } from "@/utils";
 import { ReactNode } from "react";
 
 export interface TerminalState {
@@ -46,5 +47,5 @@ export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]
     name: string;
     description: string;
     args?: CommandArgument[]
-    execute: (terminalStore: TerminalStore, ...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
+    execute: (state: {terminalStore: TerminalStore, fileSystem: WASMFileSystem}, ...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }

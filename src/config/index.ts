@@ -1,1 +1,1 @@
-export { terminalConfig, initialRender } from "./terminalConfig";
+export { terminalConfig, initialRender, HOME_DIR } from "./terminalConfig";
