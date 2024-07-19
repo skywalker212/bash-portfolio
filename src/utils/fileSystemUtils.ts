@@ -30,14 +30,13 @@ export class WASMFileSystem {
                 return prefix + path;
             }
         });
-        const homeDir = HOME_DIR;
         await syncFS(fsModule.FS);
-        const homeDirectory = fsModule.FS.analyzePath(homeDir);
+        const homeDirectory = fsModule.FS.analyzePath(HOME_DIR);
         if (!homeDirectory.exists) {
-            fsModule.FS.mkdir(homeDir);
+            fsModule.FS.mkdir(HOME_DIR);
             await syncFS(fsModule.FS);
         }
-        fsModule.FS.chdir(homeDir)
+        fsModule.FS.chdir(HOME_DIR)
         return new WASMFileSystem(fsModule, terminalStore);
     }
 

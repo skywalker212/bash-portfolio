@@ -7,7 +7,6 @@ export interface TerminalProps {
 export interface TerminalInputProps {
     value: string;
     onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-    onSubmit: () => void;
     prompt: string;
 }
 

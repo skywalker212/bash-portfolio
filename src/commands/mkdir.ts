@@ -14,7 +14,7 @@ export const mkdirCommand: MkdirCommand = {
     execute: async (state, directoryName: string) => {
         try {
 
-            state.fileSystem.makeDirectory(directoryName);
+            await state.fileSystem.makeDirectory(directoryName);
 
             return {
                 type: CommandResultType.NONE
