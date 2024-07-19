@@ -9,7 +9,7 @@ all: $(MODULES)
 define read_config
 $(shell if [ -f $(WASM_SRC_DIR)/$(1)/module_config ]; then \
     grep -v '^#' $(WASM_SRC_DIR)/$(1)/module_config | \
-    sed -e 's/^/-/' -e 's/=/="/' -e 's/]$$/]"/' | \
+    sed -e 's/^/-/' -e 's/=\[/="\[/' -e 's/]$$/]"/' | \
     tr '\n' ' '; \
 fi)
 endef
@@ -18,7 +18,6 @@ $(MODULES):
 	@mkdir -p $(WASM_PUBLIC_DIR)/$@
 	$(eval CONFIG := $(call read_config,$@))
 	emcc $(WASM_SRC_DIR)/$@/$@.cpp -o $(WASM_PUBLIC_DIR)/$@/$@.js \
-		-sWASM=1 \
 		-sALLOW_MEMORY_GROWTH=1 \
 		-sEXPORT_NAME='$@Module' \
 		-sMODULARIZE \
@@ -34,7 +33,6 @@ $(WASM_PUBLIC_DIR)/%/%.js: $(WASM_SRC_DIR)/%/%.cpp $(wildcard $(WASM_SRC_DIR)/%/
 	@mkdir -p $(dir $@)
 	$(eval CONFIG := $(call read_config,$*))
 	emcc $< -o $@ \
-		-sWASM=1 \
 		-sALLOW_MEMORY_GROWTH=1 \
 		-sEXPORT_NAME='$*Module' \
 		-sMODULARIZE \

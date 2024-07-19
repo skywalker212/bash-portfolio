@@ -5,7 +5,7 @@ import { FSInstance } from '@/types';
 
 const syncFS = (fs: typeof FS): Promise<boolean> => {
     return new Promise((resolve, reject) => {
-        fs.syncfs((e: Error) => {
+        fs.syncfs(true, (e: Error) => {
             if (e) {
                 reject(e);
             }
