@@ -16,6 +16,7 @@ const Terminal: React.FC = () => {
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
     const [fileSystem, setFileSystem] = useState<WASMFileSystem | null>(null);
+    const [fileSystemInitialized, setFileSystemInitialized] = useState<boolean>(false);
 
     const handleSubmit = useCallback(async () => {
         const trimmedInput = input.trim();
@@ -30,25 +31,24 @@ const Terminal: React.FC = () => {
             setOutput(prev => [...prev, inputResult, ...result]);
         }
         setInput('');
-    }, [input, addCommandToHistory, clearTerminal, executeCommand, currentDirectory, fileSystem, setOutput]);
+    }, [input, currentDirectory, fileSystem, addCommandToHistory, clearTerminal, executeCommand, setOutput]);
 
     useKeyboardNavigation(inputRef, getPreviousCommand, getNextCommand, setInput, clearTerminal, handleSubmit);
 
     useEffect(() => {
-        let isInitialized = false;
 
         const initFileSystem = async () => {
             try {
                 const fs = await WASMFileSystem.initFsModule(terminalStore);
                 setFileSystem(fs);
-                isInitialized = true;
+                setFileSystemInitialized(true);
             } catch (error) {
                 console.error('Failed to initialize file system:', error);
                 setOutput(prev => [...prev, { content: 'Failed to initialize file system. Please try again.', type: CommandResultType.ERROR }]);
             }
         };
 
-        if (!isInitialized) {
+        if (!fileSystemInitialized) {
             initFileSystem();
         }
 
@@ -62,7 +62,7 @@ const Terminal: React.FC = () => {
         return () => {
             current?.removeEventListener('click', handleTerminalClick);
         };
-    }, [terminalStore, inputRef, setOutput]);
+    }, [terminalStore, inputRef, fileSystemInitialized, setOutput]);
 
     useEffect(() => {
         const current = terminalRef.current;
