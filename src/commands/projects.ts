@@ -1,4 +1,4 @@
-import { Command, CommandArgumentTypeEnum, CommandResultType, Project } from '@/types';
+import { Command, CommandArgumentTypeEnum, CommandResult, CommandResultType, Project, TableCommandResult, TableType } from '@/types';
 import { titleCase } from '@/utils';
 
 const projects: { [id: string]: Project } = {
@@ -15,25 +15,28 @@ type ProjectCommand = Command<[string]>;
 export const projectsCommand: ProjectCommand = {
     name: 'projects',
     description: 'Display my notable projects',
-    args: [
-        {
-            name: 'projectName',
-            type: CommandArgumentTypeEnum.STRING,
-            optional: true
-        }
-    ],
-    execute: (_, projectName: string) => {
+    args: {
+        optional: [
+            {
+                name: 'project_name',
+                type: CommandArgumentTypeEnum.STRING
+            }
+        ]
+    },
+    execute: (_, projectName: string): CommandResult | TableCommandResult => {
         if (!projectName) {
             return {
                 content: [
-                    ['Project', 'Description', 'Technologies'],
+                    ['Project', 'Technologies', 'Description'],
                     ...Object.values(projects).map(project => [
                         project.name,
-                        project.description,
-                        project.technologies.join(', ')
+                        project.technologies.join(', '),
+                        project.description
                     ])
                 ],
-                type: CommandResultType.TABLE
+                type: CommandResultType.TABLE,
+                tableType: TableType.NORMAL,
+                columns: [{width: 20}, {width: 30}, {width: 50}]
             };
         } else {
             const project = projects[projectName];
@@ -48,7 +51,8 @@ export const projectsCommand: ProjectCommand = {
                     titleCase(key),
                     Array.isArray(val) ? val.join(', ') : String(val)
                 ]),
-                type: CommandResultType.TABLE
+                type: CommandResultType.TABLE,
+                columns: [{width: 15}, {width: 55}]
             };
         }
     }

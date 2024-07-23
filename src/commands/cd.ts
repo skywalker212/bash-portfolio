@@ -5,12 +5,14 @@ type CdCommand = Command<[string]>;
 export const cdCommand: CdCommand = {
     name: 'cd',
     description: 'Change Directory',
-    args: [
-        {
-            name: 'Directory Name',
-            type: CommandArgumentTypeEnum.STRING,
-        }
-    ],
+    args: {
+        optional: [
+            {
+                name: 'directory_name',
+                type: CommandArgumentTypeEnum.STRING,
+            }
+        ]
+    },
     execute: async (state, path: string) => {
         try {
             state.fileSystem.changeDirectory(path)

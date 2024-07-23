@@ -1,9 +1,9 @@
-import { Command, CommandResultType } from '@/types';
+import { Command, CommandResultType, TableCommandResult, TableType } from '@/types';
 
 export const skillsCommand: Command = {
     name: 'skills',
     description: 'List my technical skills',
-    execute: () => {
+    execute: (): TableCommandResult => {
         return {
             content: [
                 ['Category', 'Skills'],
@@ -14,7 +14,9 @@ export const skillsCommand: Command = {
                 ['DevOps', 'Docker, Kubernetes, Jenkins'],
                 ['Other', 'pyTorch, Kafka']
             ],
-            type: CommandResultType.TABLE
+            type: CommandResultType.TABLE,
+            tableType: TableType.NORMAL,
+            columns: [{width: 15}, {width: 30}]
         };
     }
 };

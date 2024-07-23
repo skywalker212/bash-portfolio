@@ -3,10 +3,11 @@ import TerminalInput from './TerminalInput';
 import TerminalOutput from './TerminalOutput';
 import { useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
-import { CommandResultType } from '@/types';
+import { CommandResultType, TableCommandResult } from '@/types';
 import { getPrompt, WASMFileSystem } from '@/utils';
 import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
 import { initialRender } from '@/config';
+import TableOutput from './TableOutput';
 
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
@@ -33,7 +34,7 @@ const Terminal: React.FC = () => {
         setInput('');
     }, [input, currentDirectory, fileSystem, addCommandToHistory, clearTerminal, executeCommand, setOutput]);
 
-    useKeyboardNavigation(inputRef, getPreviousCommand, getNextCommand, setInput, clearTerminal, handleSubmit);
+    useKeyboardNavigation(inputRef, fileSystem as WASMFileSystem, getPreviousCommand, getNextCommand, setInput, clearTerminal, handleSubmit);
 
     useEffect(() => {
 
@@ -73,9 +74,14 @@ const Terminal: React.FC = () => {
 
     return (
         <div ref={terminalRef} className={styles.terminal}>
-            {output.map((item, index) => (
-                <TerminalOutput key={index} content={item.content} type={item.type} />
-            ))}
+            {output.map((item, index) => {
+                if (item.type === CommandResultType.TABLE) {
+                    const tableResult = item as TableCommandResult;
+                    return <TableOutput key={index} content={tableResult.content} type={tableResult.type} tableType={tableResult.tableType} columns={tableResult.columns}/>
+                } else {
+                    return <TerminalOutput key={index} content={item.content} type={item.type}/>
+                }
+            })}
             <TerminalInput
                 ref={inputRef}
                 value={input}

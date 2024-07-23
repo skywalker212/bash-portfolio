@@ -1,5 +1,5 @@
 .output {
-    @apply mb-2 whitespace-pre-wrap break-words;
+    @apply mb-2 whitespace-pre break-words;
 }
 
 .input {
@@ -20,6 +20,10 @@
 
 .info {
     @apply text-blue-500;
+}
+
+.terminalLink {
+    @apply underline;
 }
 
 @media (max-width: 640px) {

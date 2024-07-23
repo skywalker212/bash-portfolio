@@ -1,19 +1,21 @@
-import { Command, CommandArgumentTypeEnum, CommandResult, CommandResultType } from '@/types';
+import { Command, CommandArgumentTypeEnum, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
 import { commands } from './index';
+import { generateUsageString } from '@/utils';
 
 type HelpCommand = Command<[string]>;
 
 export const helpCommand: HelpCommand = {
     name: 'help',
     description: "List all available commands. Type 'help <command>' to see command related help.",
-    args: [
-        {
-            name: 'commandName',
-            type: CommandArgumentTypeEnum.STRING,
-            optional: true
-        }
-    ],
-    execute: (_, commandName: string) => {
+    args: {
+        optional: [
+            {
+                name: 'command_name',
+                type: CommandArgumentTypeEnum.STRING
+            }
+        ]
+    },
+    execute: (_, commandName: string): CommandResult | CommandResult[] | TableCommandResult => {
         if (commandName) {
             const command = commands.find(cmd => commandName === cmd.name);
             if (command) {
@@ -22,16 +24,11 @@ export const helpCommand: HelpCommand = {
                         content: command.description,
                         type: CommandResultType.TEXT
                     },
+                    {
+                        content: generateUsageString(command),
+                        type: CommandResultType.TEXT
+                    },
                 ];
-                if (command.args) {
-                    ret.push({
-                        content: [
-                            ['Name', 'Type', 'Required'],
-                            ...command.args.map(arg => [arg.name, arg.type, !arg.optional])
-                        ],
-                        type: CommandResultType.TABLE
-                    })
-                }
                 return ret;
             } else {
                 return {
@@ -46,7 +43,9 @@ export const helpCommand: HelpCommand = {
                     ['Command', 'Description'],
                     ...commandList
                 ],
-                type: CommandResultType.TABLE
+                type: CommandResultType.TABLE,
+                tableType: TableType.NORMAL,
+                columns: [{width: 20}, {width: 50}]
             };
         }
     }

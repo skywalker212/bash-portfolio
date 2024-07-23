@@ -15,16 +15,18 @@ interface HelloWasmInstance extends WebAssembly.Instance {
 export const helloWasmCommand: HelloWasmCommand = {
     name,
     description: 'Hello World in Web Assembly!',
-    args: [
-        {
-            name: 'numberOne',
-            type: CommandArgumentTypeEnum.NUMBER
-        },
-        {
-            name: 'numberTwo',
-            type: CommandArgumentTypeEnum.NUMBER
-        }
-    ],
+    args: {
+        required: [
+            {
+                name: 'numberOne',
+                type: CommandArgumentTypeEnum.NUMBER
+            },
+            {
+                name: 'numberTwo',
+                type: CommandArgumentTypeEnum.NUMBER
+            }
+        ]
+    },
     execute: async (_, num1: number, num2: number) => {
         try {
             const helloWasmInstance = await loadWasmModule<HelloWasmInstance>(name, "wasm");

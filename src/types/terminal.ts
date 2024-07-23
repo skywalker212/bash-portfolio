@@ -28,6 +28,18 @@ export interface CommandResult {
     type: CommandResultType;
 }
 
+export enum TableType {
+    NORMAL = 'normal',
+    BORDERLESS = 'borderless',
+    TEXT = 'text'
+}
+
+export interface TableCommandResult extends CommandResult {
+    type: CommandResultType.TABLE,
+    tableType: TableType,
+    columns?: {width: number}[]
+}
+
 export enum CommandArgumentTypeEnum {
     NUMBER = 'number',
     STRING = 'string',
@@ -39,13 +51,15 @@ export type CommandArgumentType = string | number | boolean;
 export interface CommandArgument {
     name: string,
     type: CommandArgumentTypeEnum,
-    optional?: boolean,
     default?: CommandArgumentType
 }
 
 export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]> {
     name: string;
     description: string;
-    args?: CommandArgument[]
+    args?: {
+        optional?: CommandArgument[],
+        required?: CommandArgument[]
+    },
     execute: (state: {terminalStore: TerminalStore, fileSystem: WASMFileSystem}, ...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }

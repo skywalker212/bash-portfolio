@@ -5,12 +5,14 @@ type MkdirCommand = Command<[string]>;
 export const mkdirCommand: MkdirCommand = {
     name: 'mkdir',
     description: 'Make new Directory',
-    args: [
-        {
-            name: 'Directory Name',
-            type: CommandArgumentTypeEnum.STRING
-        }
-    ],
+    args: {
+        required: [
+            {
+                name: 'directory_name',
+                type: CommandArgumentTypeEnum.STRING
+            }
+        ]
+    },
     execute: async (state, directoryName: string) => {
         try {
 

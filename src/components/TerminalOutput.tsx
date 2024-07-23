@@ -1,7 +1,6 @@
 import React from 'react';
 import { CommandResult, CommandResultType } from '@/types';
 import styles from '@/styles/TerminalOutput.module.css';
-import { table, getBorderCharacters } from 'table';
 
 const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResult) => {
     let outputClass = styles.output;
@@ -19,16 +18,6 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResul
         case CommandResultType.INPUT:
             outputClass += ` ${styles.input}`;
             break;
-    }
-
-    if (type === CommandResultType.TABLE) {
-        return (
-            <div className={outputClass}>
-                {table(content as string[][], {
-                    border: getBorderCharacters('ramac')
-                })}
-            </div>
-        );
     }
 
     if (type === CommandResultType.INPUT) {

@@ -5,13 +5,14 @@ type LsCommand = Command<[string]>;
 export const lsCommand: LsCommand = {
     name: 'ls',
     description: 'List directory contents',
-    args: [
-        {
-            name: 'path',
-            type: CommandArgumentTypeEnum.STRING,
-            optional: true
-        }
-    ],
+    args: {
+        optional: [
+            {
+                name: 'path',
+                type: CommandArgumentTypeEnum.STRING
+            }
+        ]
+    },
     execute: async (state, path: string) => {
         try {
             const files = state.fileSystem.listDirectory(path);

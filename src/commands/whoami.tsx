@@ -1,25 +1,24 @@
-import { Command, CommandResultType } from '@/types';
+import { Command, CommandResultType, TableType } from '@/types';
+import styles from '@/styles/TerminalOutput.module.css';
+import { WHOAMI_TEXT } from '@/config';
 
 export const whoamiCommand: Command = {
     name: 'whoami',
     description: 'Display information about me',
     execute: () => {
         return [{
-            content: [
-                ['Name', 'Akash Gajjar'],
-                ['Role', 'Software Engineer'],
-                ['Education', 'M.S. in Computer Science, University of Florida'],
-                ['Experience', '3+ years in software development'],
-                ['Interests', 'Machine Learning, Web Development, Cyber Security']
-            ],
-            type: CommandResultType.TABLE
+            content: [[WHOAMI_TEXT]],
+            type: CommandResultType.TABLE,
+            tableType: TableType.TEXT,
+            columns: [{width: 75, alignment: 'justify', wrapWord: true}]
         },
         {
             content: (
                 <div>
-                    <p>Email: akashgajjar8@gmail.com</p>
-                    <p>LinkedIn: <a href="https://www.linkedin.com/in/akashagajjar" target = "_blank" rel = "noopener noreferrer" className = "terminal-link" >linkedin.com/in/akashagajjar</a> </p>
-                    <p>GitHub: <a href="https://github.com/skywalker212" target = "_blank" rel = "noopener noreferrer" className = "terminal-link" >github.com/skywalker212</a></p>
+                    <p><b>Resume:</b> <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >{window.location.origin}/resume.pdf</a></p>
+                    <p><b>Email:</b> <a href="mailto:me@akash.is" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >me@akash.is</a></p>
+                    <p><b>LinkedIn:</b> <a href="https://www.linkedin.com/in/akashagajjar" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >linkedin.com/in/akashagajjar</a> </p>
+                    <p><b>GitHub:</b> <a href="https://github.com/skywalker212" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >github.com/skywalker212</a></p>
                 </div>
             ),
             type: CommandResultType.CUSTOM

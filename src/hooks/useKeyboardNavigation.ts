@@ -1,8 +1,9 @@
-import { commands } from '@/commands';
+import { WASMFileSystem } from '@/utils';
 import { useEffect, useCallback } from 'react';
 
 export const useKeyboardNavigation = (
     inputRef: React.RefObject<HTMLInputElement>,
+    fileSystem: WASMFileSystem,
     getPreviousCommand: () => string | null,
     getNextCommand: () => string | null,
     setInput: (value: string) => void,
@@ -36,9 +37,9 @@ export const useKeyboardNavigation = (
                 event.preventDefault();
                 const val = inputRef.current?.value;
                 if (val) {
-                    const matchingCommand = commands.find(command => command.name.startsWith(val))
+                    const matchingCommand = fileSystem.listDirectory('/bin').find(name => name.startsWith(val))
                     if (matchingCommand) {
-                        setInput(matchingCommand.name);
+                        setInput(matchingCommand);
                     }
                 }
                 break;
@@ -53,7 +54,7 @@ export const useKeyboardNavigation = (
             default:
                 break;
         }
-    }, [inputRef, handleSubmit, getPreviousCommand, setInput, getNextCommand, clearTerminal]);
+    }, [inputRef, fileSystem, handleSubmit, getPreviousCommand, setInput, getNextCommand, clearTerminal]);
 
     useEffect(() => {
         const currentInputRef = inputRef.current;
