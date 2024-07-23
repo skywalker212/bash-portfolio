@@ -26,7 +26,7 @@ export class WASMFileSystem {
     static async initFsModule(terminalStore: TerminalStore) {
         const fsModule = await createModule({
             locateFile: (path: string, prefix: string) => {
-                if (path.endsWith(".wasm")) return `/wasm/fs/${path}`;
+                if (path.endsWith(".wasm") || path.endsWith(".data")) return `/wasm/fs/${path}`;
                 return prefix + path;
             }
         });
