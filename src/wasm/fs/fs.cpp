@@ -1,6 +1,13 @@
 #include <emscripten.h>
 
-int main() {
-    EM_ASM(FS.mount(IDBFS, {}, '/home'));
-    return 0;
+EMSCRIPTEN_KEEPALIVE
+extern "C" {
+    void setup_filesystem() {
+        EM_ASM({
+            const home_dir = '/home/skywalker212';
+            FS.rmdir('/home/web_user');
+            FS.mkdir(home_dir);
+            FS.mount(IDBFS, {autoPersist: true}, home_dir);
+        });
+    }
 }

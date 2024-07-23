@@ -6,3 +6,4 @@
 ### Improvements
 
 - [ ] Implement proper error handling
+- [ ] Use web workers for file system operations
