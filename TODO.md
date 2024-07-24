@@ -7,3 +7,4 @@
 
 - [ ] Implement proper error handling
 - [ ] Use web workers for file system operations
+- [ ] Look at dependency arrays of UseEffect

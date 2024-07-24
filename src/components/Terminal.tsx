@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TerminalInput from './TerminalInput';
-import TerminalOutput from './TerminalOutput';
 import { useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
-import { CommandResultType, TableCommandResult } from '@/types';
+import { CommandResultType } from '@/types';
 import { getPrompt, WASMFileSystem } from '@/utils';
 import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
 import { initialRender } from '@/config';
-import TableOutput from './TableOutput';
+import Output from './Output';
 
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
@@ -32,7 +31,8 @@ const Terminal: React.FC = () => {
             setOutput(prev => [...prev, inputResult, ...result]);
         }
         setInput('');
-    }, [input, currentDirectory, fileSystem, addCommandToHistory, clearTerminal, executeCommand, setOutput]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [input, fileSystem, currentDirectory, addCommandToHistory, clearTerminal, executeCommand, setOutput]);
 
     useKeyboardNavigation(inputRef, fileSystem as WASMFileSystem, getPreviousCommand, getNextCommand, setInput, clearTerminal, handleSubmit);
 
@@ -63,7 +63,8 @@ const Terminal: React.FC = () => {
         return () => {
             current?.removeEventListener('click', handleTerminalClick);
         };
-    }, [terminalStore, inputRef, fileSystemInitialized, setOutput]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         const current = terminalRef.current;
@@ -74,14 +75,7 @@ const Terminal: React.FC = () => {
 
     return (
         <div ref={terminalRef} className={styles.terminal}>
-            {output.map((item, index) => {
-                if (item.type === CommandResultType.TABLE) {
-                    const tableResult = item as TableCommandResult;
-                    return <TableOutput key={index} content={tableResult.content} type={tableResult.type} tableType={tableResult.tableType} columns={tableResult.columns}/>
-                } else {
-                    return <TerminalOutput key={index} content={item.content} type={item.type}/>
-                }
-            })}
+            <Output outputs={output} />
             <TerminalInput
                 ref={inputRef}
                 value={input}
