@@ -1,6 +1,7 @@
 export interface ParsedCommand {
     command: string;
     args: string[];
+    file: string;
 }
 
 export interface TerminalStyle {

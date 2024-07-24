@@ -1,3 +1,4 @@
+import { HOME_DIR } from '@/config';
 import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
 
 type CdCommand = Command<[string]>;
@@ -9,13 +10,13 @@ export const cdCommand: CdCommand = {
         optional: [
             {
                 name: 'directory_name',
-                type: CommandArgumentTypeEnum.STRING,
+                type: CommandArgumentTypeEnum.STRING
             }
         ]
     },
     execute: async (state, path: string) => {
         try {
-            state.fileSystem.changeDirectory(path)
+            state.fileSystem.changeDirectory(path ? path : HOME_DIR)
             return {
                 type: CommandResultType.NONE
             };
