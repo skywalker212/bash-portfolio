@@ -9,7 +9,7 @@ export const getPrompt = (currentDirectory: string): string => {
 
 export const parseCommand = (input: string): ParsedCommand => {
   const [command, file] = input.split('>')
-  const parts = command.split(' ');
+  const parts = command.trim().split(' ');
   return {
     command: parts[0],
     args: parts.slice(1),

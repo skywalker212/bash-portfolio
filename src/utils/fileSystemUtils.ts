@@ -36,6 +36,10 @@ export class WASMFileSystem {
         return new WASMFileSystem(fsModule, terminalStore);
     }
 
+    writeFile(path: string, data: string): void {
+        this.fsModule.FS.writeFile(path, data, {flags: 'a'});
+    }
+
     readFile(path: string): string {
         if (this.fsModule.FS.isFile(this.fsModule.FS.stat(path).mode)) {
             const fileContents = this.fsModule.FS.readFile(path, {encoding: "utf8"});

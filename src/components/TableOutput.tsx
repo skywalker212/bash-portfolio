@@ -1,9 +1,13 @@
-import React from 'react';
-import { TableCommandResult, TableType } from '@/types';
+import React, { useContext } from 'react';
+import { TableCommandResult, TableType, TerminalOutputStream } from '@/types';
 import styles from '@/styles/TerminalOutput.module.css';
 import { table, getBorderCharacters } from 'table';
+import { getOutputStream } from '@/store/terminalStore';
+import htmlInnerText from 'react-innertext';
+import { FileSystemContext } from './Terminal';
 
-const TableOutput: React.FC<TableCommandResult> = ( { content, tableType, columns }: TableCommandResult) => {
+const TableOutput: React.FC<TableCommandResult> = ({ content, tableType, columns }: TableCommandResult) => {
+    const fileSystem = useContext(FileSystemContext);
     let tableConfig = null;
     switch (tableType) {
         case TableType.NORMAL:
@@ -66,11 +70,21 @@ const TableOutput: React.FC<TableCommandResult> = ( { content, tableType, column
         });
     };
     const tableOutput = table(content as string[][], tableConfig);
-    return (
+    const output =  (
         <div className={styles.output}>
             {processTableOutput(tableOutput)}
         </div>
     );
+    const { outputStream, streamInfo } = getOutputStream();
+    if (outputStream === TerminalOutputStream.STDOUT) {
+        return output;
+    } else {
+        const text = htmlInnerText(output);
+        if (fileSystem && streamInfo) {
+            fileSystem.writeFile(streamInfo.name, text);
+        }
+        return;
+    }
 };
 
 export default TableOutput;

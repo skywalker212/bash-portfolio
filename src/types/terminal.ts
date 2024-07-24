@@ -3,9 +3,20 @@ import { WASMFileSystem } from "@/utils";
 import { ReactNode } from "react";
 import { Alignment } from "table";
 
+export enum TerminalOutputStream {
+    STDOUT = 'stdout',
+    FILE = 'file'
+}
+
+export interface FileOutputStream {
+    name: string
+}
+
 export interface TerminalState {
     user: string;
     host: string;
+    outputStream: TerminalOutputStream,
+    streamInfo?: FileOutputStream,
     currentDirectory: string;
     commandHistory: string[];
     historyIndex: number;

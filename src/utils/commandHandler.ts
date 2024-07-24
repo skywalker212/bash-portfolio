@@ -1,10 +1,10 @@
 import { TerminalStore } from '@/store';
 import { commands } from '../commands';
 import { parseCommand } from './terminalUtils';
-import { Command, CommandArgument, CommandArgumentTypeEnum, CommandResult, CommandResultType } from '@/types';
+import { Command, CommandArgument, CommandArgumentTypeEnum, CommandResult, CommandResultType, TerminalOutputStream } from '@/types';
 import { WASMFileSystem } from './fileSystemUtils';
 
-class ArgError extends Error {}
+class ArgError extends Error { }
 
 export const generateUsageString = (command: Command): string => {
   const cmdArgs = command.args ? command.args : {};
@@ -14,7 +14,12 @@ export const generateUsageString = (command: Command): string => {
 }
 
 export const handleCommand = async (input: string, terminalStore: TerminalStore, fileSystem: WASMFileSystem): Promise<CommandResult[]> => {
-  const { command: commandName, args } = parseCommand(input);
+  const { command: commandName, args, file } = parseCommand(input);
+  if (file) {
+    terminalStore.setOutputStream(TerminalOutputStream.FILE, { name: file });
+  } else {
+    terminalStore.setOutputStream(TerminalOutputStream.STDOUT);
+  }
 
   const command = commands.find(cmd => cmd.name === commandName);
 
@@ -28,7 +33,7 @@ export const handleCommand = async (input: string, terminalStore: TerminalStore,
         throw new ArgError(generateUsageString(command));
       } else {
         const cmdArgs = args.length > requiredArgs.length ? [...optionalArgs, ...requiredArgs] : requiredArgs;
-        const result = await command.execute({terminalStore, fileSystem}, ...args.map((arg, index) => {
+        const result = await command.execute({ terminalStore, fileSystem }, ...args.map((arg, index) => {
           const cmdArg: CommandArgument = cmdArgs[index];
           switch (cmdArg.type) {
             case CommandArgumentTypeEnum.NUMBER:

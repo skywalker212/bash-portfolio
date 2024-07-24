@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, createContext } from 'react';
 import TerminalInput from './TerminalInput';
 import { useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
@@ -8,6 +8,8 @@ import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
 import { initialRender } from '@/config';
 import Output from './Output';
 
+export const FileSystemContext = createContext<WASMFileSystem | null>(null)
+
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
     const terminalStore = useTerminalStore();
@@ -16,7 +18,6 @@ const Terminal: React.FC = () => {
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
     const [fileSystem, setFileSystem] = useState<WASMFileSystem | null>(null);
-    const [fileSystemInitialized, setFileSystemInitialized] = useState<boolean>(false);
 
     const handleSubmit = useCallback(async () => {
         const trimmedInput = input.trim();
@@ -42,14 +43,13 @@ const Terminal: React.FC = () => {
             try {
                 const fs = await WASMFileSystem.initFsModule(terminalStore);
                 setFileSystem(fs);
-                setFileSystemInitialized(true);
             } catch (error) {
                 console.error('Failed to initialize file system:', error);
                 setOutput(prev => [...prev, { content: 'Failed to initialize file system. Please try again.', type: CommandResultType.ERROR }]);
             }
         };
 
-        if (!fileSystemInitialized) {
+        if (!fileSystem) {
             initFileSystem();
         }
 
@@ -75,13 +75,15 @@ const Terminal: React.FC = () => {
 
     return (
         <div ref={terminalRef} className={styles.terminal}>
-            <Output outputs={output} />
-            <TerminalInput
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                prompt={getPrompt(currentDirectory)}
-            />
+            <FileSystemContext.Provider value={fileSystem}>
+                <Output outputs={output} />
+                <TerminalInput
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    prompt={getPrompt(currentDirectory)}
+                />
+            </FileSystemContext.Provider>
         </div>
     );
 };
