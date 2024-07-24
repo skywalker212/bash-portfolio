@@ -1,14 +1,13 @@
 import React, { useMemo } from 'react';
+import dynamic from "next/dynamic";
 import { CommandResult, CommandResultType, TableCommandResult } from '@/types';
-import TableOutput from './TableOutput';
-import TerminalOutput from './TerminalOutput';
 
 interface OutputProps {
   outputs: CommandResult[];
 }
 
-const MemoizedTableOutput = React.memo(TableOutput);
-const MemoizedTerminalOutput = React.memo(TerminalOutput);
+const MemoizedTableOutput = React.memo(dynamic(() => import('./TableOutput')));
+const MemoizedTerminalOutput = React.memo(dynamic(() => import('./TerminalOutput')));
 
 const Output: React.FC<OutputProps> = ({ outputs }) => {
   const renderedOutputs = useMemo(() => {

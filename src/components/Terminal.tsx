@@ -77,12 +77,12 @@ const Terminal: React.FC = () => {
         <div ref={terminalRef} className={styles.terminal}>
             <FileSystemContext.Provider value={fileSystem}>
                 <Output outputs={output} />
-                <TerminalInput
+                {fileSystem && <TerminalInput
                     ref={inputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     prompt={getPrompt(currentDirectory)}
-                />
+                />}
             </FileSystemContext.Provider>
         </div>
     );
