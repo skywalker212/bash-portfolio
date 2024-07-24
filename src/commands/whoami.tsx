@@ -1,6 +1,6 @@
 import { Command, CommandResultType, TableType } from '@/types';
 import styles from '@/styles/TerminalOutput.module.css';
-import { WHOAMI_TEXT } from '@/config';
+import { EXPERIENCE_TABLE, INTERNSHIP_TABLE, WHOAMI_TEXT } from '@/config';
 
 export const whoamiCommand: Command = {
     name: 'whoami',
@@ -10,7 +10,27 @@ export const whoamiCommand: Command = {
             content: [[WHOAMI_TEXT]],
             type: CommandResultType.TABLE,
             tableType: TableType.TEXT,
-            columns: [{width: 75, alignment: 'justify', wrapWord: true}]
+            columns: [{width: 83, alignment: 'justify', wrapWord: true}]
+        },
+        {
+            content: <b>EXPERIENCE</b>,
+            type: CommandResultType.CUSTOM
+        },
+        {
+            content: EXPERIENCE_TABLE,
+            type: CommandResultType.TABLE,
+            tableType: TableType.NORMAL,
+            columns: [{width: 15}, {width: 30}, {width: 28}]
+        },
+        {
+            content: <b>INTERNSHIPS</b>,
+            type: CommandResultType.CUSTOM
+        },
+        {
+            content: INTERNSHIP_TABLE,
+            type: CommandResultType.TABLE,
+            tableType: TableType.NORMAL,
+            columns: [{width: 15}, {width: 30}, {width: 28, wrapWord: true}]
         },
         {
             content: (

@@ -1,14 +1,7 @@
-import { Command, CommandArgumentTypeEnum, CommandResult, CommandResultType, Project, TableCommandResult, TableType } from '@/types';
+import { PROJECTS } from '@/config';
+import { Command, CommandArgumentTypeEnum, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
+import styles from '@/styles/TerminalOutput.module.css';
 import { titleCase } from '@/utils';
-
-const projects: { [id: string]: Project } = {
-    "bash-portfolio": {
-        name: 'Bash Portfolio',
-        description: 'A bash-style portfolio website built with Next.js and TypeScript',
-        technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Zustand'],
-        link: 'https://github.com/skywalker212/bash-portfolio'
-    }
-}
 
 type ProjectCommand = Command<[string]>;
 
@@ -23,21 +16,25 @@ export const projectsCommand: ProjectCommand = {
             }
         ]
     },
-    execute: (_, projectName: string): CommandResult | TableCommandResult => {
+    execute: (_, projectName: string): CommandResult | TableCommandResult | (CommandResult | TableCommandResult)[] => {
+        const projects = PROJECTS(window.location.origin);
         if (!projectName) {
-            return {
+            return [{
                 content: [
-                    ['Project', 'Technologies', 'Description'],
+                    ['Project', 'Technologies', 'Link'],
                     ...Object.values(projects).map(project => [
                         project.name,
                         project.technologies.join(', '),
-                        project.description
+                        project.link
                     ])
                 ],
                 type: CommandResultType.TABLE,
                 tableType: TableType.NORMAL,
-                columns: [{width: 20}, {width: 30}, {width: 50}]
-            };
+                columns: [{ width: 25 }, { width: 30, wrapWord: true }, { width: 55 }]
+            }, {
+                content: <p>More at: <a href="https://github.com/skywalker212" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >github.com/skywalker212</a></p>,
+                type: CommandResultType.CUSTOM
+            }];
         } else {
             const project = projects[projectName];
             if (!project) {
@@ -52,7 +49,7 @@ export const projectsCommand: ProjectCommand = {
                     Array.isArray(val) ? val.join(', ') : String(val)
                 ]),
                 type: CommandResultType.TABLE,
-                columns: [{width: 15}, {width: 55}]
+                columns: [{ width: 15 }, { width: 55 }]
             };
         }
     }

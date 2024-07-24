@@ -1,6 +1,7 @@
 import { TerminalStore } from "@/store";
 import { WASMFileSystem } from "@/utils";
 import { ReactNode } from "react";
+import { Alignment } from "table";
 
 export interface TerminalState {
     user: string;
@@ -37,7 +38,7 @@ export enum TableType {
 export interface TableCommandResult extends CommandResult {
     type: CommandResultType.TABLE,
     tableType: TableType,
-    columns?: {width: number}[]
+    columns?: {width: number, wrapWord?: boolean, alignment?: Alignment}[]
 }
 
 export enum CommandArgumentTypeEnum {
