@@ -36,6 +36,15 @@ export class WASMFileSystem {
         return new WASMFileSystem(fsModule, terminalStore);
     }
 
+    readFile(path: string): string {
+        if (this.fsModule.FS.isFile(this.fsModule.FS.stat(path).mode)) {
+            const fileContents = this.fsModule.FS.readFile(path, {encoding: "utf8"});
+            return fileContents;
+        } else {
+            throw Error("Not a file");
+        }
+    }
+
     listDirectory(path?: string): string[] {
         const files = this.fsModule.FS.readdir(path ? path : this.fsModule.FS.cwd());
         return files;

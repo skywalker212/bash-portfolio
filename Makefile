@@ -22,7 +22,7 @@ $(MODULES):
 		-sEXPORT_NAME='$@Module' \
 		-sMODULARIZE \
 		-sENVIRONMENT=web \
-		-O2 \
+		-O3 \
 		$(CONFIG)
 
 clean:
@@ -37,5 +37,5 @@ $(WASM_PUBLIC_DIR)/%/%.js: $(WASM_SRC_DIR)/%/%.cpp $(wildcard $(WASM_SRC_DIR)/%/
 		-sEXPORT_NAME='$*Module' \
 		-sMODULARIZE \
 		-sENVIRONMENT=web \
-		-O2 \
+		-O3 \
 		$(CONFIG)

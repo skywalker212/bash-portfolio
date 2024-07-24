@@ -7,6 +7,7 @@ import { clearCommand } from './clear';
 import { lsCommand } from './ls';
 import { cdCommand } from './cd';
 import { mkdirCommand } from './mkdir';
+import { catCommand } from './cat';
 
 export const commands = [
     helpCommand,
@@ -16,5 +17,6 @@ export const commands = [
     clearCommand,
     lsCommand,
     cdCommand,
-    mkdirCommand
+    mkdirCommand,
+    catCommand
 ] as Command[];
