@@ -25,15 +25,3 @@
 .terminalLink {
     @apply underline;
 }
-
-@media (max-width: 640px) {
-
-    .output,
-    .input,
-    .prompt,
-    .error,
-    .success,
-    .info {
-        @apply text-xs;
-    }
-}

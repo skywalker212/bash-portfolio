@@ -20,6 +20,12 @@ export const PROJECTS = (origin: string): { [id: string]: Project } => ({
         technologies: ["Node.js", "Angular", "MongoDB", "Kubernetes", "Kafka"],
         link: `${origin}/infosys-equinox-studio`
     },
+    "bash-portfolio": {
+        name: 'Bash Portfolio',
+        description: 'A bash-style portfolio website built with Next.js and TypeScript',
+        technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Zustand'],
+        link: 'https://github.com/skywalker212/bash-portfolio'
+    },
     "tweeter": {
         name: "Tweeter",
         description: "A light-weight twitter clone written in Erlang",
@@ -49,12 +55,5 @@ export const PROJECTS = (origin: string): { [id: string]: Project } => ({
         description: "A Spotify-like Music Recommandation Engine",
         technologies: ["Python", "NumPy"],
         link: "https://github.com/skywalker212/fitopsY"
-    },
-    "bash-portfolio": {
-        name: 'Bash Portfolio',
-        description: 'A bash-style portfolio website built with Next.js and TypeScript',
-        technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Zustand'],
-        link: 'https://github.com/skywalker212/bash-portfolio'
     }
-
 })

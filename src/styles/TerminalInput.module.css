@@ -9,13 +9,3 @@
 .input {
     @apply bg-transparent outline-none w-full text-[var(--terminal-text)] min-w-0;
 }
-
-@media (max-width: 640px) {
-    .prompt {
-        @apply text-xs;
-    }
-
-    .input {
-        @apply text-xs;
-    }
-}
