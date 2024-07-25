@@ -1,4 +1,4 @@
-Command to read fileCommand to change directory Command to clear terminal screenCommand to get helpCommand to list directoryCommand to make directoryCommand to get information about projectsCommand to get information about Akash's skillsCommand to show information about Akash+---------------------------+--------------------------------+---------------------------------------------------------+
++---------------------------+--------------------------------+---------------------------------------------------------+
 | Project                   | Technologies                   | Link                                                    |
 |---------------------------|--------------------------------|---------------------------------------------------------|
 | Infosys Equinox Studio    | Node.js, Angular, MongoDB,     | http://beta.akash.is/infosys-equinox-studio            |
@@ -18,18 +18,4 @@ Command to read fileCommand to change directory Command to clear terminal screen
 | fitopsY                   | Python, NumPy                  | https://github.com/skywalker212/fitopsY                 |
 +---------------------------+--------------------------------+---------------------------------------------------------+
 
-More at: github.com/skywalker212+-----------------+--------------------------------+
-| Category        | Skills                         |
-|-----------------|--------------------------------|
-| Languages       | Python, TypeScript, Java       |
-|-----------------|--------------------------------|
-| Frontend        | Next.js, Angular, React        |
-|-----------------|--------------------------------|
-| Backend         | Node.js, Express, Django       |
-|-----------------|--------------------------------|
-| Databases       | PostgreSQL, MongoDB, Redis     |
-|-----------------|--------------------------------|
-| DevOps          | Docker, Kubernetes, Jenkins    |
-|-----------------|--------------------------------|
-| Other           | pyTorch, Kafka                 |
-+-----------------+--------------------------------+
+More at: github.com/skywalker212

@@ -44,7 +44,7 @@ export const helpCommand: HelpCommand = {
                     ...commandList
                 ],
                 type: CommandResultType.TABLE,
-                tableType: TableType.NORMAL,
+                tableType: TableType.BORDERLESS,
                 columns: [{width: 20}, {width: 50}]
             };
         }

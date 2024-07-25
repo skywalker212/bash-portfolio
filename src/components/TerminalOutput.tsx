@@ -1,9 +1,10 @@
 import React, { useContext } from 'react';
 import { CommandResult, CommandResultType, TerminalOutputStream } from '@/types';
-import styles from '@/styles/TerminalOutput.module.css';
+import styles from '@/styles/Output.module.css';
 import { getOutputStream } from '@/store/terminalStore';
 import htmlInnerText from 'react-innertext';
 import { FileSystemContext } from './Terminal';
+import { injectLinkToText } from './Output';
 
 const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResult) => {
     const fileSystem = useContext(FileSystemContext);
@@ -37,7 +38,7 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResul
     } else if (type === CommandResultType.NONE) {
         output = null;
     } else {
-        output = <div className={outputClass}>{content}</div>;
+        output = <div className={outputClass}>{type === CommandResultType.TEXT ? injectLinkToText(content as string) : content}</div>;
     }
 
     const { outputStream, streamInfo } = getOutputStream();

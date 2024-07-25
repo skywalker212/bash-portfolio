@@ -1,6 +1,6 @@
 import { PROJECTS } from '@/config';
 import { Command, CommandArgumentTypeEnum, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
-import styles from '@/styles/TerminalOutput.module.css';
+import styles from '@/styles/Output.module.css';
 import { titleCase } from '@/utils';
 
 type ProjectCommand = Command<[string]>;

@@ -6,8 +6,8 @@ extern "C" {
         EM_ASM({
             const home_dir = '/home/skywalker212';
             FS.rmdir('/home/web_user');
-            FS.mkdir(home_dir);
-            FS.mount(IDBFS, {autoPersist: true}, home_dir);
+            // FS.mount(IDBFS, {}, home_dir);
+            FS.chdir(home_dir);
         });
     }
 }

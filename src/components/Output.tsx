@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import styles from '@/styles/Output.module.css';
 import dynamic from "next/dynamic";
 import { CommandResult, CommandResultType, TableCommandResult } from '@/types';
 
@@ -8,6 +9,28 @@ interface OutputProps {
 
 const MemoizedTableOutput = React.memo(dynamic(() => import('./TableOutput')));
 const MemoizedTerminalOutput = React.memo(dynamic(() => import('./TerminalOutput')));
+
+export const injectLinkToText = (text: string) => {
+    const linkRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(linkRegex);
+
+    return parts.map((part, index) => {
+        if (part.match(linkRegex)) {
+            return (
+                <a
+                    key={index}
+                    href={part}
+                    className={styles.terminalLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    {part}
+                </a>
+            );
+        }
+        return part;
+    });
+};
 
 const Output: React.FC<OutputProps> = ({ outputs }) => {
   const renderedOutputs = useMemo(() => {

@@ -1,5 +1,5 @@
 import { Command, CommandResultType, TableType } from '@/types';
-import styles from '@/styles/TerminalOutput.module.css';
+import styles from '@/styles/Output.module.css';
 import { EXPERIENCE_TABLE, INTERNSHIP_TABLE, WHOAMI_TEXT } from '@/config';
 
 export const whoamiCommand: Command = {
