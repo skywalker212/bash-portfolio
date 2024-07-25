@@ -15,6 +15,7 @@ const TerminalInput = forwardRef<HTMLInputElement, TerminalInputProps>(
           value={value}
           onChange={onChange}
           className={styles.input}
+          autoFocus
         />
       </div>
     );
