@@ -1,35 +1,36 @@
-Command to read fileCommand to change directory Command to clear terminal screenCommand to get helpCommand to list directoryCommand to make directoryCommand to get information about projectsCommand to get information about Akash's skillsCommand to show information about Akash+---------------------------+--------------------------------+---------------------------------------------------------+
-| Project                   | Technologies                   | Link                                                    |
-|---------------------------|--------------------------------|---------------------------------------------------------|
-| Infosys Equinox Studio    | Node.js, Angular, MongoDB,     | http://beta.akash.is/infosys-equinox-studio            |
-|                           | Kubernetes, Kafka              |                                                         |
-|---------------------------|--------------------------------|---------------------------------------------------------|
-| Bash Portfolio            | Next.js, TypeScript, Tailwind  | https://github.com/skywalker212/bash-portfolio          |
-|                           | CSS, Zustand                   |                                                         |
-|---------------------------|--------------------------------|---------------------------------------------------------|
-| Tweeter                   | Erlang, Cowboy                 | https://github.com/skywalker212/tweeter                 |
-|---------------------------|--------------------------------|---------------------------------------------------------|
-| Shadowfax                 | Java, ASM, JUnit               | https://github.com/skywalker212/shadowfax               |
-|---------------------------|--------------------------------|---------------------------------------------------------|
-| HPA Classification        | Python, Tensorflow             | https://github.com/skywalker212/hpa-classification      |
-|---------------------------|--------------------------------|---------------------------------------------------------|
-| Tiny Shell                | C                              | https://github.com/skywalker212/tiny-shell              |
-|---------------------------|--------------------------------|---------------------------------------------------------|
-| fitopsY                   | Python, NumPy                  | https://github.com/skywalker212/fitopsY                 |
-+---------------------------+--------------------------------+---------------------------------------------------------+
+Command to read fileCommand to change directory Command to clear terminal screenCommand to get helpCommand to list directoryCommand to make directoryCommand to get information about projectsCommand to get information about Akash's skillsCommand to show information about Akash+---------------------------+--------------------------------+----------------------------------------------------------------------+
+| Project                   | Technologies                   | Link                                                                 |
+|---------------------------|--------------------------------|----------------------------------------------------------------------|
+| Infosys Equinox Studio    | Node.js, Angular, MongoDB,     | https://www.infosysequinox.com/offerings/infosys-equinox-studio.html |
+|                           | Kubernetes, Kafka              |                                                                      |
+|---------------------------|--------------------------------|----------------------------------------------------------------------|
+| Bash Portfolio            | Next.js, TypeScript, Tailwind  | https://github.com/skywalker212/bash-portfolio                       |
+|                           | CSS, Zustand                   |                                                                      |
+|---------------------------|--------------------------------|----------------------------------------------------------------------|
+| Tweeter                   | Erlang, Cowboy                 | https://github.com/skywalker212/tweeter                              |
+|---------------------------|--------------------------------|----------------------------------------------------------------------|
+| Shadowfax                 | Java, ASM, JUnit               | https://github.com/skywalker212/shadowfax                            |
+|---------------------------|--------------------------------|----------------------------------------------------------------------|
+| HPA Classification        | Python, Tensorflow             | https://github.com/skywalker212/hpa-classification                   |
+|---------------------------|--------------------------------|----------------------------------------------------------------------|
+| Tiny Shell                | C                              | https://github.com/skywalker212/tiny-shell                           |
+|---------------------------|--------------------------------|----------------------------------------------------------------------|
+| fitopsY                   | Python, NumPy                  | https://github.com/skywalker212/fitopsY                              |
++---------------------------+--------------------------------+----------------------------------------------------------------------+
 
-More at: github.com/skywalker212+-----------------+--------------------------------+
-| Category        | Skills                         |
-|-----------------|--------------------------------|
-| Languages       | Python, TypeScript, Java       |
-|-----------------|--------------------------------|
-| Frontend        | Next.js, Angular, React        |
-|-----------------|--------------------------------|
-| Backend         | Node.js, Express, Django       |
-|-----------------|--------------------------------|
-| Databases       | PostgreSQL, MongoDB, Redis     |
-|-----------------|--------------------------------|
-| DevOps          | Docker, Kubernetes, Jenkins    |
-|-----------------|--------------------------------|
-| Other           | pyTorch, Kafka                 |
-+-----------------+--------------------------------+
+More at: github.com/skywalker212+-----------------+-------------------------------------------+
+| Category        | Skills                                    |
+|-----------------|-------------------------------------------|
+| Languages       | Python, TypeScript, Java, Erlang          |
+|-----------------|-------------------------------------------|
+| Frontend        | Next.js, Angular, React                   |
+|-----------------|-------------------------------------------|
+| Backend         | Node.js, Express, FastAPI                 |
+|-----------------|-------------------------------------------|
+| Databases       | MongoDB, Elasticsearch, Redis, PostgreSQL |
+|-----------------|-------------------------------------------|
+| DevOps          | Kubernetes, Jenkins, JFrog Artifactory    |
+|-----------------|-------------------------------------------|
+| Other           | PyTorch, Apache Kafka, GraphQL, Jaeger,   |
+|                 | Ghidra                                    |
++-----------------+-------------------------------------------+

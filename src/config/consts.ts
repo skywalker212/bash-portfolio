@@ -13,12 +13,12 @@ export const INTERNSHIP_TABLE = [
     ['DAIICT', 'Jan 2019 – May 2019', 'Machine Learning Research Intern']
 ];
 
-export const PROJECTS = (origin: string): { [id: string]: Project } => ({
+export const PROJECTS: { [id: string]: Project } = {
     "equinox-studio": {
         name: "Infosys Equinox Studio",
         description: "Low-code digital commerce front-end builder",
         technologies: ["Node.js", "Angular", "MongoDB", "Kubernetes", "Kafka"],
-        link: `${origin}/infosys-equinox-studio`
+        link: "https://www.infosysequinox.com/offerings/infosys-equinox-studio.html"
     },
     "bash-portfolio": {
         name: 'Bash Portfolio',
@@ -56,4 +56,4 @@ export const PROJECTS = (origin: string): { [id: string]: Project } => ({
         technologies: ["Python", "NumPy"],
         link: "https://github.com/skywalker212/fitopsY"
     }
-})
+}

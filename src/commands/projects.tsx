@@ -17,12 +17,11 @@ export const projectsCommand: ProjectCommand = {
         ]
     },
     execute: (_, projectName: string): CommandResult | TableCommandResult | (CommandResult | TableCommandResult)[] => {
-        const projects = PROJECTS(window.location.origin);
         if (!projectName) {
             return [{
                 content: [
                     ['Project', 'Technologies', 'Link'],
-                    ...Object.values(projects).map(project => [
+                    ...Object.values(PROJECTS).map(project => [
                         project.name,
                         project.technologies.join(', '),
                         project.link
@@ -30,13 +29,13 @@ export const projectsCommand: ProjectCommand = {
                 ],
                 type: CommandResultType.TABLE,
                 tableType: TableType.NORMAL,
-                columns: [{ width: 25 }, { width: 30, wrapWord: true }, { width: 55 }]
+                columns: [{ width: 25 }, { width: 30, wrapWord: true }, { width: 68 }]
             }, {
                 content: <p>More at: <a href="https://github.com/skywalker212" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >github.com/skywalker212</a></p>,
                 type: CommandResultType.CUSTOM
             }];
         } else {
-            const project = projects[projectName];
+            const project = PROJECTS[projectName];
             if (!project) {
                 return {
                     content: `Project "${projectName}" not found.`,
