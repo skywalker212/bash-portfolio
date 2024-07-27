@@ -13,3 +13,4 @@
 - [ ] Command argument passing
 - [ ] Command tab completion
 - [ ] Use file system provided /dev/stdout and other things based on hooks to write to file/terminal
+- [ ] Think if persistance is really needed using IndexDB

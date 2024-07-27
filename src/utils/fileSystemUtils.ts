@@ -2,17 +2,6 @@ import createModule from '@/public/wasm/fs/fs.js';
 import { TerminalStore } from '@/store';
 import { FSInstance } from '@/types';
 
-// const syncFS = (fs: typeof FS, memoryToIDB: boolean = false): Promise<boolean> => {
-//     return new Promise((resolve, reject) => {
-//         fs.syncfs(memoryToIDB, (e: Error) => {
-//             if (e) {
-//                 reject(e);
-//             }
-//             resolve(true);
-//         })
-//     });
-// }
-
 export class WASMFileSystem {
     private fsModule: FSInstance;
     private terminalStore: TerminalStore;
@@ -30,8 +19,6 @@ export class WASMFileSystem {
             }
         });
         fsModule._setup_filesystem();
-        // await syncFS(fsModule.FS, true);
-        // fsModule.FS.chdir(HOME_DIR)
         return new WASMFileSystem(fsModule, terminalStore);
     }
 
@@ -55,7 +42,6 @@ export class WASMFileSystem {
 
     async makeDirectory(name: string): Promise<boolean> {
         this.fsModule.FS.mkdir(name)
-        // await syncFS(this.fsModule.FS);
         return true;
     }
 

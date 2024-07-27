@@ -1,1 +1,16 @@
-Command to get information about Akash's skills
++-----------------+-------------------------------------------+
+| Category        | Skills                                    |
+|-----------------|-------------------------------------------|
+| Languages       | Python, TypeScript, Java, Erlang          |
+|-----------------|-------------------------------------------|
+| Frontend        | Next.js, Angular, React                   |
+|-----------------|-------------------------------------------|
+| Backend         | Node.js, Express, FastAPI                 |
+|-----------------|-------------------------------------------|
+| Databases       | MongoDB, Elasticsearch, Redis, PostgreSQL |
+|-----------------|-------------------------------------------|
+| DevOps          | Kubernetes, Jenkins, JFrog Artifactory    |
+|-----------------|-------------------------------------------|
+| Other           | PyTorch, Apache Kafka, GraphQL, Jaeger,   |
+|                 | Ghidra                                    |
++-----------------+-------------------------------------------+

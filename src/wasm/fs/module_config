@@ -1,4 +1,3 @@
 sEXPORTED_FUNCTIONS=["_setup_filesystem"]
 sEXPORTED_RUNTIME_METHODS=["FS"]
-lidbfs.js
 -preload-file data@/

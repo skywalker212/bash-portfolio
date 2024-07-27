@@ -39,6 +39,7 @@ export const whoamiCommand: Command = {
                     <p><b>Email:</b> <a href="mailto:me@akash.is" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >me@akash.is</a></p>
                     <p><b>LinkedIn:</b> <a href="https://www.linkedin.com/in/akashagajjar" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >linkedin.com/in/akashagajjar</a> </p>
                     <p><b>GitHub:</b> <a href="https://github.com/skywalker212" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >github.com/skywalker212</a></p>
+                    <p><b>Blog:</b> <a href="https://blog.akash.is" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >blog.akash.is</a></p>
                 </div>
             ),
             type: CommandResultType.CUSTOM
