@@ -8,7 +8,7 @@ export const catCommand: CatCommand = {
     args: {
         required: [
             {
-                name: 'path',
+                name: 'file_path',
                 type: CommandArgumentTypeEnum.STRING
             }
         ]

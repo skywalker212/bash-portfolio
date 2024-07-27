@@ -6,7 +6,7 @@ type HelpCommand = Command<[string]>;
 
 export const helpCommand: HelpCommand = {
     name: 'help',
-    description: "List all available commands. Type 'help <command>' to see command related help.",
+    description: "List all available commands",
     args: {
         optional: [
             {
@@ -45,7 +45,7 @@ export const helpCommand: HelpCommand = {
                 ],
                 type: CommandResultType.TABLE,
                 tableType: TableType.BORDERLESS,
-                columns: [{width: 20}, {width: 50}]
+                columns: [{width: 10}, {width: 50}]
             };
         }
     }
