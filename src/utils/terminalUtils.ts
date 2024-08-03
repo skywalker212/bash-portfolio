@@ -12,7 +12,7 @@ export const parseCommand = (input: string): ParsedCommand => {
   const parts = command.trim().split(' ');
   return {
     command: parts[0],
-    args: parts.slice(1),
+    args: parts.slice(1).join(' '),
     file: file ? file.trim() : ''
   };
 };

@@ -1,8 +1,13 @@
 import { Command } from '@/types';
+import { ArgumentParser } from 'js-argparse';
 
-type ClearCommand = Omit<Command<[]>, 'execute'>;
+const name = "clear";
+
+type ClearCommand = Omit<Command, 'execute'>;
+
+const clearArgs = new ArgumentParser(name, "Clear the terminal screen");
 
 export const clearCommand: ClearCommand = {
-    name: 'clear',
-    description: 'Clear the terminal screen'
+    name,
+    args: clearArgs
 };

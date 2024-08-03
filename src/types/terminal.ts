@@ -1,5 +1,6 @@
 import { TerminalStore } from "@/store";
 import { WASMFileSystem } from "@/utils";
+import { ArgumentParser } from "js-argparse";
 import { ReactNode } from "react";
 import { Alignment } from "table";
 
@@ -52,26 +53,8 @@ export interface TableCommandResult extends CommandResult {
     columns?: {width: number, wrapWord?: boolean, alignment?: Alignment}[]
 }
 
-export enum CommandArgumentTypeEnum {
-    NUMBER = 'number',
-    STRING = 'string',
-    BOOLEAN = 'boolean'
-}
-
-export type CommandArgumentType = string | number | boolean;
-
-export interface CommandArgument {
-    name: string,
-    type: CommandArgumentTypeEnum,
-    default?: CommandArgumentType
-}
-
-export interface Command<T extends CommandArgumentType[] = CommandArgumentType[]> {
+export interface Command<T extends Record<string, unknown> = Record<string, unknown>> {
     name: string;
-    description: string;
-    args?: {
-        optional?: CommandArgument[],
-        required?: CommandArgument[]
-    },
-    execute: (state: {terminalStore: TerminalStore, fileSystem: WASMFileSystem}, ...args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
+    args: ArgumentParser,
+    execute: (state: {terminalStore: TerminalStore, fileSystem: WASMFileSystem}, args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }

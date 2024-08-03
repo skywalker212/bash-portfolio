@@ -1,17 +1,9 @@
 import { TerminalStore } from '@/store';
 import { commands } from '../commands';
 import { parseCommand } from './terminalUtils';
-import { Command, CommandArgument, CommandArgumentTypeEnum, CommandResult, CommandResultType, TerminalOutputStream } from '@/types';
+import { CommandResult, CommandResultType, TerminalOutputStream } from '@/types';
 import { WASMFileSystem } from './fileSystemUtils';
-
-class ArgError extends Error { }
-
-export const generateUsageString = (command: Command): string => {
-  const cmdArgs = command.args ? command.args : {};
-  const requiredArgs = cmdArgs.required ? cmdArgs.required : [];
-  const optionalArgs = cmdArgs.optional ? cmdArgs.optional : [];
-  return `usage: ${command.name}${optionalArgs.length > 0 ? ` ${optionalArgs.map(arg => `[${arg.name}]`).join(" ")}` : ``} ${requiredArgs.map(arg => `${arg.name}`)}`
-}
+import { ArgumentParserError, ArgumentTypeError, InvalidChoiceError, InvalidNargsError, MissingRequiredArgumentError, UnknownArgumentError } from 'js-argparse';
 
 export const handleCommand = async (input: string, terminalStore: TerminalStore, fileSystem: WASMFileSystem): Promise<CommandResult[]> => {
   const { command: commandName, args, file } = parseCommand(input);
@@ -25,33 +17,47 @@ export const handleCommand = async (input: string, terminalStore: TerminalStore,
 
   if (command) {
     try {
-      const allArgs = command.args ? command.args : {};
-      const requiredArgs = allArgs.required ? allArgs.required : [];
-      const optionalArgs = allArgs.optional ? allArgs.optional : [];
-      if (requiredArgs.length > args.length || (optionalArgs.length + requiredArgs.length < args.length)) {
-        // http://courses.cms.caltech.edu/cs11/material/general/usage.html
-        throw new ArgError(generateUsageString(command));
-      } else {
-        const cmdArgs = args.length > requiredArgs.length ? [...optionalArgs, ...requiredArgs] : requiredArgs;
-        const result = await command.execute({ terminalStore, fileSystem }, ...args.map((arg, index) => {
-          const cmdArg: CommandArgument = cmdArgs[index];
-          switch (cmdArg.type) {
-            case CommandArgumentTypeEnum.NUMBER:
-              return parseInt(arg);
-            case CommandArgumentTypeEnum.BOOLEAN:
-              return Boolean(arg);
-            case CommandArgumentTypeEnum.STRING:
-              return arg;
-          }
-        }));
-        return Array.isArray(result) ? result : [result];
-      }
+      const parsedArgs = command.args.parseArgs(args);
+      const result = await command.execute({ terminalStore, fileSystem }, parsedArgs);
+      return Array.isArray(result) ? result : [result];
     } catch (error: unknown) {
-      if (error instanceof ArgError) {
-        return [{
-          content: error.message,
-          type: CommandResultType.TEXT
-        }];
+      const result: CommandResult[] = []
+      if (error instanceof ArgumentTypeError) {
+        console.error('Invalid argument type:', error.message);
+        result.push({
+          content: `Invalid argument type: ${(error as Error).message}`,
+          type: CommandResultType.ERROR
+        });
+      } else if (error instanceof UnknownArgumentError) {
+        console.error('Unknown argument:', error.message);
+        result.push({
+          content: `Unknown argument: ${(error as Error).message}`,
+          type: CommandResultType.ERROR
+        });
+      } else if (error instanceof MissingRequiredArgumentError) {
+        console.error('Missing required argument:', error.message);
+        result.push({
+          content: `Missing required argument: ${(error as Error).message}`,
+          type: CommandResultType.ERROR
+        });
+      } else if (error instanceof InvalidChoiceError) {
+        console.error('Invalid choice:', error.message);
+        result.push({
+          content: `Invalid choice: ${(error as Error).message}`,
+          type: CommandResultType.ERROR
+        });
+      } else if (error instanceof InvalidNargsError) {
+        console.error('Invalid number of arguments:', error.message);
+        result.push({
+          content: `Invalid number of arguments: ${(error as Error).message}`,
+          type: CommandResultType.ERROR
+        });
+      } else if (error instanceof ArgumentParserError) {
+        console.error('Argument parsing error:', error.message);
+        result.push({
+          content: `Argument parsing error: ${(error as Error).message}`,
+          type: CommandResultType.ERROR
+        });
       } else {
         console.error(`Error executing command ${commandName}:`, error);
         return [{
@@ -59,6 +65,11 @@ export const handleCommand = async (input: string, terminalStore: TerminalStore,
           type: CommandResultType.ERROR
         }];
       }
+      result.push({
+        content: command.args.usage(),
+        type: CommandResultType.ERROR
+      });
+      return result;
     }
   } else {
     return [{

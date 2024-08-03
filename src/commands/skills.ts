@@ -1,8 +1,13 @@
 import { Command, CommandResultType, TableCommandResult, TableType } from '@/types';
+import { ArgumentParser } from 'js-argparse';
+
+const name = "skills";
+
+const skillsArgs = new ArgumentParser(name, "List my technical skills");
 
 export const skillsCommand: Command = {
-    name: 'skills',
-    description: 'List my technical skills',
+    name,
+    args: skillsArgs,
     execute: (): TableCommandResult => {
         return {
             content: [

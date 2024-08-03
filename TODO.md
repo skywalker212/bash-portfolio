@@ -3,6 +3,7 @@
 - [ ] Update current directory in web assembly
 - [ ] Call syncfs every few seconds or before the application shutdown instead of on every operation
 - [ ] Implement input redirection
+- [ ] Think about what to do with routes
 - [x] Implement output redirection
 
 ### Improvements

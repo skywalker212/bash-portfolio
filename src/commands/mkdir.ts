@@ -1,22 +1,28 @@
-import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
+import { Command, CommandResultType } from '@/types';
+import { ArgumentParser } from 'js-argparse';
 
-type MkdirCommand = Command<[string]>;
+const name = "mkdir";
+
+type Args = {
+    directory_name: string 
+}
+
+type MkdirCommand = Command<Args>;
+
+const mkdirArgs = new ArgumentParser<Args>(name, "Make new Directory");
+
+mkdirArgs.addArgument(['directory_name'], {
+    metavar: "DIRECTORY_NAME",
+    help: "Name of new directory"
+});
 
 export const mkdirCommand: MkdirCommand = {
-    name: 'mkdir',
-    description: 'Make new Directory',
-    args: {
-        required: [
-            {
-                name: 'directory_name',
-                type: CommandArgumentTypeEnum.STRING
-            }
-        ]
-    },
-    execute: async (state, directoryName: string) => {
+    name,
+    args: mkdirArgs,
+    execute: async (state, args) => {
         try {
 
-            await state.fileSystem.makeDirectory(directoryName);
+            await state.fileSystem.makeDirectory(args.directory_name);
 
             return {
                 type: CommandResultType.NONE

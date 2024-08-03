@@ -1,10 +1,15 @@
 import { Command, CommandResultType, TableType } from '@/types';
 import styles from '@/styles/Output.module.css';
 import { EXPERIENCE_TABLE, INTERNSHIP_TABLE, WHOAMI_TEXT } from '@/config';
+import { ArgumentParser } from 'js-argparse';
+
+const name = "whoami";
+
+const whoamiArgs = new ArgumentParser(name, "Display information about me");
 
 export const whoamiCommand: Command = {
-    name: 'whoami',
-    description: 'Display information about me',
+    name,
+    args: whoamiArgs,
     execute: () => {
         return [{
             content: [[WHOAMI_TEXT]],

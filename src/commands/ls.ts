@@ -1,21 +1,28 @@
-import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
+import { Command, CommandResultType } from '@/types';
+import { ArgumentParser } from 'js-argparse';
 
-type LsCommand = Command<[string]>;
+const name = "ls";
+
+type Args = {
+    directory?: string
+}
+
+type LsCommand = Command<Args>;
+
+const lsArgs = new ArgumentParser<Args>(name, "List directory contents");
+
+lsArgs.addArgument(['directory'], {
+    required: false,
+    metavar: 'DIRECTORY_PATH',
+    help: "Path to directory"
+});
 
 export const lsCommand: LsCommand = {
-    name: 'ls',
-    description: 'List directory contents',
-    args: {
-        optional: [
-            {
-                name: 'path',
-                type: CommandArgumentTypeEnum.STRING
-            }
-        ]
-    },
-    execute: async (state, path: string) => {
+    name,
+    args: lsArgs,
+    execute: async (state, args) => {
         try {
-            const files = state.fileSystem.listDirectory(path);
+            const files = state.fileSystem.listDirectory(args.directory ? args.directory : state.fileSystem.cwd());
 
             return {
                 content: files.join(' '),

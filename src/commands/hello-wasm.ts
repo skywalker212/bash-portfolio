@@ -1,9 +1,15 @@
-import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
+import { Command, CommandResultType } from '@/types';
 import { loadWasmModule } from '@/utils';
+import { ArgumentParser } from 'js-argparse';
 
 const name = 'hello-wasm';
 
-type HelloWasmCommand = Command<[number, number]>;
+type Args = {
+    n1: number,
+    n2: number
+}
+
+type HelloWasmCommand = Command<Args>;
 
 interface HelloWasmInstance extends WebAssembly.Instance {
     exports: {
@@ -11,29 +17,30 @@ interface HelloWasmInstance extends WebAssembly.Instance {
     }
 }
 
+const helloWasmArgs = new ArgumentParser<Args>(name, "Hello World in Web Assembly!");
+
+helloWasmArgs.addArgument(['n1'], {
+    type: 'number',
+    metavar: 'NUMBER_ONE',
+    help: "First number to add"
+});
+
+helloWasmArgs.addArgument(['n2'], {
+    type: 'number',
+    metavar: 'NUMBER_TWO',
+    help: "Second number to add"
+});
 
 export const helloWasmCommand: HelloWasmCommand = {
     name,
-    description: 'Hello World in Web Assembly!',
-    args: {
-        required: [
-            {
-                name: 'numberOne',
-                type: CommandArgumentTypeEnum.NUMBER
-            },
-            {
-                name: 'numberTwo',
-                type: CommandArgumentTypeEnum.NUMBER
-            }
-        ]
-    },
-    execute: async (_, num1: number, num2: number) => {
+    args: helloWasmArgs,
+    execute: async (_, args) => {
         try {
             const helloWasmInstance = await loadWasmModule<HelloWasmInstance>(name, "wasm");
             if (helloWasmInstance) {
                 const exports = helloWasmInstance.exports;
                 return {
-                    content: `Hello World! addResult: ${exports.add(num1, num2)}`,
+                    content: `Hello World! addResult: ${exports.add(args.n1, args.n2)}`,
                     type: CommandResultType.TEXT
                 };
             } else {

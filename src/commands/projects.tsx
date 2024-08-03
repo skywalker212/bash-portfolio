@@ -1,23 +1,30 @@
 import { PROJECTS } from '@/config';
-import { Command, CommandArgumentTypeEnum, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
+import { Command, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
 import styles from '@/styles/Output.module.css';
 import { titleCase } from '@/utils';
+import { ArgumentParser } from 'js-argparse';
 
-type ProjectCommand = Command<[string]>;
+const name = "projects";
+
+type Args = {
+    project_name?: string
+}
+
+type ProjectCommand = Command<Args>;
+
+const projectsArgs = new ArgumentParser<Args>(name, 'Display my notable projects');
+
+projectsArgs.addArgument(['project_name'], {
+    required: false,
+    metavar: "PROJECT_NAME",
+    help: "Name of project"
+})
 
 export const projectsCommand: ProjectCommand = {
-    name: 'projects',
-    description: 'Display my notable projects',
-    args: {
-        optional: [
-            {
-                name: 'project_name',
-                type: CommandArgumentTypeEnum.STRING
-            }
-        ]
-    },
-    execute: (_, projectName: string): CommandResult | TableCommandResult | (CommandResult | TableCommandResult)[] => {
-        if (!projectName) {
+    name,
+    args: projectsArgs,
+    execute: (_, args): CommandResult | TableCommandResult | (CommandResult | TableCommandResult)[] => {
+        if (!args.project_name) {
             return [{
                 content: [
                     ['Project', 'Technologies', 'Link'],
@@ -35,10 +42,10 @@ export const projectsCommand: ProjectCommand = {
                 type: CommandResultType.CUSTOM
             }];
         } else {
-            const project = PROJECTS[projectName];
+            const project = PROJECTS[args.project_name];
             if (!project) {
                 return {
-                    content: `Project "${projectName}" not found.`,
+                    content: `Project "${args.project_name}" not found.`,
                     type: CommandResultType.ERROR
                 };
             }

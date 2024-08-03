@@ -35,8 +35,12 @@ export class WASMFileSystem {
         }
     }
 
-    listDirectory(path?: string): string[] {
-        const files = this.fsModule.FS.readdir(path ? path : this.fsModule.FS.cwd());
+    cwd(): string {
+        return this.fsModule.FS.cwd();
+    }
+
+    listDirectory(path: string): string[] {
+        const files = this.fsModule.FS.readdir(path);
         return files;
     }
 

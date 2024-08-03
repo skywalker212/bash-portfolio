@@ -1,22 +1,28 @@
 import { HOME_DIR } from '@/config';
-import { Command, CommandArgumentTypeEnum, CommandResultType } from '@/types';
+import { Command, CommandResultType } from '@/types';
+import { ArgumentParser } from 'js-argparse';
 
-type CdCommand = Command<[string]>;
+const name = "cd";
+
+type Args = {
+    directory: string
+}
+
+type CdCommand = Command<Args>;
+
+const cdArgs = new ArgumentParser<Args>(name, "Change Directory");
+
+cdArgs.addArgument(['directory'], {
+    metavar: 'DIRECTORY',
+    help: 'Name of the directory'
+});
 
 export const cdCommand: CdCommand = {
-    name: 'cd',
-    description: 'Change Directory',
-    args: {
-        optional: [
-            {
-                name: 'directory_name',
-                type: CommandArgumentTypeEnum.STRING
-            }
-        ]
-    },
-    execute: async (state, path: string) => {
+    name,
+    args: cdArgs,
+    execute: async (state, args) => {
         try {
-            state.fileSystem.changeDirectory(path ? path : HOME_DIR)
+            state.fileSystem.changeDirectory(args.directory ? args.directory : HOME_DIR)
             return {
                 type: CommandResultType.NONE
             };

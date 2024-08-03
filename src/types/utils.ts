@@ -1,6 +1,6 @@
 export interface ParsedCommand {
     command: string;
-    args: string[];
+    args: string;
     file: string;
 }
 
