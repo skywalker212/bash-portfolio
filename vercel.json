@@ -1,0 +1,13 @@
+{
+    "headers": [
+        {
+            "source": "/(.*)\\.data",
+            "headers": [
+                {
+                    "key": "Content-Encoding",
+                    "value": "gzip"
+                }
+            ]
+        }
+    ]
+}
