@@ -1,8 +1,8 @@
 import '@/styles/globals.css';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { LayoutProps } from '@/types';
 import { Viewport } from 'next';
-import newrelic from 'newrelic';
-import Script from 'next/script';
 
 export const metadata = {
   title: 'Akash Gajjar Portfolio',
@@ -16,30 +16,15 @@ export const viewport: Viewport = {
   userScalable: false
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: LayoutProps) {
-  // @ts-expect-error new relic type error
-  if (newrelic.agent.collector.isConnected() === false) {
-    await new Promise((resolve) => {
-      // @ts-expect-error new relic type error
-      newrelic.agent.on("connected", resolve)
-    })
-  }
-
-  const browserTimingHeader = newrelic.getBrowserTimingHeader({
-    hasToRemoveScriptWrapper: true,
-    // @ts-expect-error new relic type error
-    allowTransactionlessInjection: true,
-  })
   return (
     <html lang="en">
-      <Script
-        id="nr-browser-agent"
-        dangerouslySetInnerHTML={{ __html: browserTimingHeader }}
-      />
       <body>
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
