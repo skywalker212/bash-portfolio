@@ -1,6 +1,8 @@
+import NewRelic from 'newrelic';
+
 declare global {
     interface Window {
-        fsModule: EmscriptenModuleFactory
+        newrelic: typeof NewRelic;
     }
 }
 

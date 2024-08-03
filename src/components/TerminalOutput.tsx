@@ -13,6 +13,9 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResul
     switch (type) {
         case CommandResultType.ERROR:
             outputClass += ` ${styles.error}`;
+            if (window.newrelic) {
+                window.newrelic.noticeError(new Error(content as string));
+            }
             break;
         case CommandResultType.SUCCESS:
             outputClass += ` ${styles.success}`;
