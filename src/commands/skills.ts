@@ -17,7 +17,7 @@ export const skillsCommand: Command = {
                 ['Backend', 'Node.js, Express, FastAPI'],
                 ['Databases', 'MongoDB, Elasticsearch, Redis, PostgreSQL'],
                 ['DevOps', 'Kubernetes, Jenkins, JFrog Artifactory'],
-                ['Other', 'PyTorch, Apache Kafka, GraphQL, Jaeger, Ghidra']
+                ['Other', 'WebAssembly, PyTorch, Apache Kafka, GraphQL, Jaeger, Ghidra']
             ],
             type: CommandResultType.TABLE,
             tableType: TableType.NORMAL,

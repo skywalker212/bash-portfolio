@@ -44,8 +44,13 @@ export class WASMFileSystem {
         return files;
     }
 
-    async makeDirectory(name: string): Promise<boolean> {
-        this.fsModule.FS.mkdir(name)
+    unlink(path: string): boolean {
+        this.fsModule.FS.unlink(path);
+        return true;
+    }
+
+    makeDirectory(name: string): boolean {
+        this.fsModule.FS.mkdir(name);
         return true;
     }
 

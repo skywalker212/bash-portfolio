@@ -52,6 +52,10 @@ export const helpCommand: HelpCommand = {
                     content: helpArgs.usage(false),
                     type: CommandResultType.TEXT
                 },
+                {
+                    content: "Output redirection using > is also supported",
+                    type: CommandResultType.TEXT
+                }
             ];
         }
     }

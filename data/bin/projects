@@ -4,8 +4,9 @@
 | Infosys Equinox Studio    | Node.js, Angular, MongoDB,     | https://www.infosysequinox.com/offerings/infosys-equinox-studio.html |
 |                           | Kubernetes, Kafka              |                                                                      |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
-| Bash Portfolio            | Next.js, TypeScript, Tailwind  | https://github.com/skywalker212/bash-portfolio                       |
-|                           | CSS, Zustand                   |                                                                      |
+| Bash Portfolio            | WebAssembly, Next.js,          | https://github.com/skywalker212/bash-portfolio                       |
+|                           | TypeScript, Tailwind CSS,      |                                                                      |
+|                           | Zustand                        |                                                                      |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
 | Tweeter                   | Erlang, Cowboy                 | https://github.com/skywalker212/tweeter                              |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
@@ -17,5 +18,4 @@
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
 | fitopsY                   | Python, NumPy                  | https://github.com/skywalker212/fitopsY                              |
 +---------------------------+--------------------------------+----------------------------------------------------------------------+
-
 More at: github.com/skywalker212

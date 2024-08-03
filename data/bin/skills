@@ -11,6 +11,6 @@
 |-----------------|-------------------------------------------|
 | DevOps          | Kubernetes, Jenkins, JFrog Artifactory    |
 |-----------------|-------------------------------------------|
-| Other           | PyTorch, Apache Kafka, GraphQL, Jaeger,   |
-|                 | Ghidra                                    |
+| Other           | WebAssembly, PyTorch, Apache Kafka,       |
+|                 | GraphQL, Jaeger, Ghidra                   |
 +-----------------+-------------------------------------------+

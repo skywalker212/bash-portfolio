@@ -1,11 +1,12 @@
-Command to read fileCommand to change directory Command to clear terminal screenCommand to get helpCommand to list directoryCommand to make directory+---------------------------+--------------------------------+----------------------------------------------------------------------+
+Command to read fileA talking catCommand to change directory Command to clear terminal screenCommand to get helpCommand to list directoryCommand to make directory+---------------------------+--------------------------------+----------------------------------------------------------------------+
 | Project                   | Technologies                   | Link                                                                 |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
 | Infosys Equinox Studio    | Node.js, Angular, MongoDB,     | https://www.infosysequinox.com/offerings/infosys-equinox-studio.html |
 |                           | Kubernetes, Kafka              |                                                                      |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
-| Bash Portfolio            | Next.js, TypeScript, Tailwind  | https://github.com/skywalker212/bash-portfolio                       |
-|                           | CSS, Zustand                   |                                                                      |
+| Bash Portfolio            | WebAssembly, Next.js,          | https://github.com/skywalker212/bash-portfolio                       |
+|                           | TypeScript, Tailwind CSS,      |                                                                      |
+|                           | Zustand                        |                                                                      |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
 | Tweeter                   | Erlang, Cowboy                 | https://github.com/skywalker212/tweeter                              |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
@@ -17,7 +18,6 @@ Command to read fileCommand to change directory Command to clear terminal screen
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
 | fitopsY                   | Python, NumPy                  | https://github.com/skywalker212/fitopsY                              |
 +---------------------------+--------------------------------+----------------------------------------------------------------------+
-
 More at: github.com/skywalker212+-----------------+-------------------------------------------+
 | Category        | Skills                                    |
 |-----------------|-------------------------------------------|
@@ -31,8 +31,8 @@ More at: github.com/skywalker212+-----------------+-----------------------------
 |-----------------|-------------------------------------------|
 | DevOps          | Kubernetes, Jenkins, JFrog Artifactory    |
 |-----------------|-------------------------------------------|
-| Other           | PyTorch, Apache Kafka, GraphQL, Jaeger,   |
-|                 | Ghidra                                    |
+| Other           | WebAssembly, PyTorch, Apache Kafka,       |
+|                 | GraphQL, Jaeger, Ghidra                   |
 +-----------------+-------------------------------------------+My  name  is  Akash  Gajjar.  With  a  passion for technology and a drive to make a 
 difference, I am always on the lookout for new challenges and opportunities to grow 
 as  a  professional.  I  have earned a Master's degree in Computer Science from the 
