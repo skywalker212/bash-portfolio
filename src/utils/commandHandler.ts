@@ -66,7 +66,7 @@ export const handleCommand = async (input: string, terminalStore: TerminalStore,
         }];
       }
       result.push({
-        content: command.args.usage(),
+        content: command.args.usage(false),
         type: CommandResultType.ERROR
       });
       return result;
