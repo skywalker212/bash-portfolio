@@ -19,8 +19,11 @@ class FileSystem
 {
 private:
     std::string home_dir;
+    emscripten::val callbacks;
 
-    void setup_filesystem()
+public:
+    FileSystem(const std::string &home_dir, emscripten::val callbacks)
+        : home_dir(home_dir), callbacks(callbacks)
     {
         try
         {
@@ -34,12 +37,6 @@ private:
         {
             throw std::runtime_error("Filesystem error: " + std::string(e.what()));
         }
-    }
-
-public:
-    FileSystem(const std::string &home_dir) : home_dir(home_dir)
-    {
-        setup_filesystem();
     }
 
     void writeFile(const std::string &path, const std::string &data)
@@ -76,17 +73,14 @@ public:
     {
         std::vector<std::string> files;
 
-        // Add "." and ".." to the list
         files.push_back(".");
         files.push_back("..");
 
-        // Add other directory contents
         for (const auto &entry : std::filesystem::directory_iterator(path))
         {
             files.push_back(entry.path().filename().string());
         }
 
-        // Sort the files alphabetically
         std::sort(files.begin(), files.end());
 
         return vector_string_to_js(files);
@@ -105,6 +99,10 @@ public:
     bool changeDirectory(const std::string &path)
     {
         std::filesystem::current_path(path);
+        if (callbacks["onChangeDirectory"].as<bool>())
+        {
+            callbacks["onChangeDirectory"](cwd());
+        }
         return true;
     }
 };
@@ -112,7 +110,7 @@ public:
 EMSCRIPTEN_BINDINGS(filesystem_module)
 {
     emscripten::class_<FileSystem>("FileSystem")
-        .constructor<std::string>()
+        .constructor<std::string, emscripten::val>()
         .function("writeFile", &FileSystem::writeFile)
         .function("readFile", &FileSystem::readFile)
         .function("cwd", &FileSystem::cwd)

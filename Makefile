@@ -23,6 +23,9 @@ $(MODULES):
 		-sMODULARIZE \
 		-sENVIRONMENT=web \
 		-O3 \
+		--closure 1 \
+		-flto \
+		-sEVAL_CTORS \
 		$(CONFIG)
 
 clean:
@@ -38,4 +41,7 @@ $(WASM_PUBLIC_DIR)/%/%.js: $(WASM_SRC_DIR)/%/%.cpp $(wildcard $(WASM_SRC_DIR)/%/
 		-sMODULARIZE \
 		-sENVIRONMENT=web \
 		-O3 \
+		--closure 1 \
+		-flto \
+		-sEVAL_CTORS \
 		$(CONFIG)

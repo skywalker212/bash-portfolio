@@ -8,7 +8,7 @@ export type WasmModule = WebAssembly.Instance | EmscriptenModule
 
 export interface FSInstance extends EmscriptenModule {
     FileSystem: {
-        new(home_dir: string): FileSystem;
+        new(home_dir: string, callbacks: object): FileSystem;
     };
 }
 
@@ -19,5 +19,6 @@ export interface FileSystem {
     listDirectory(path: string): string[];
     unlink(path: string): boolean;
     makeDirectory(name: string): boolean;
+    changeDirectory(path: string): boolean;
     changeDirectory(path: string): boolean;
 }

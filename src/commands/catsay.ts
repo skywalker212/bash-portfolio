@@ -17,8 +17,10 @@ interface CatsayModule extends EmscriptenModule {
 const catsayArgs = new ArgumentParser<Args>(name, "A talking cat");
 
 catsayArgs.addArgument(['text'], {
+    required: false,
     metavar: "TEXT",
     help: "What to say",
+    default: ["Meow"],
     nargs: "+"
 });
 

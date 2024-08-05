@@ -19,8 +19,12 @@ export class WASMFileSystem {
                 return prefix + path;
             }
         });
-        
-        const fs = new fsModule.FileSystem(HOME_DIR);
+        const callbacks = {
+            onChangeDirectory: (newPath: string) => {
+                terminalStore.changeDirectory(newPath);
+            }
+        };
+        const fs = new fsModule.FileSystem(HOME_DIR, callbacks);
         return new WASMFileSystem(fs, terminalStore);
     }
 
@@ -50,9 +54,6 @@ export class WASMFileSystem {
 
     changeDirectory(path: string): boolean {
         const result = this.fs.changeDirectory(path);
-        if (result) {
-            this.terminalStore.changeDirectory(this.fs.cwd());
-        }
         return result;
     }
 }
