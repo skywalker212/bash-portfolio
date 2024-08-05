@@ -47,10 +47,11 @@ export const lsCommand: LsCommand = {
                 const files = state.fileSystem.getDetailedDirectoryListing(dir, args.all);
                 if (args.long) {
                     for (const file of files) {
-                        output += `${file.permissions} ${file.owner} ${file.group} ${file.size.toString().padStart(8)} ${file.modTime} ${file.name}${file.isDirectory ? '/' : ''}\n`;
+                        output += `${file.permissions} ${file.owner} ${file.group} ${file.size.toString().padStart(8)} ${file.modTime} ${file.name}${file.isDirectory && file
+                            .name !== "." && file.name !== ".." ? '/' : ''}\n`;
                     }
                 } else {
-                    output += files.map(file => file.name + (file.isDirectory ? '/' : '')).join(' ') + '\n';
+                    output += files.map(file => file.name + (file.isDirectory && file.name !== "." && file.name !== ".." ? '/' : '')).join(' ') + '\n';
                 }
             }
 

@@ -166,27 +166,37 @@ public:
             }
 
             std::vector<FileInfo> files;
+            auto getFileInfo = [this](const std::string &filePath) -> FileInfo
+            {
+                struct stat st;
+                if (stat(filePath.c_str(), &st) != 0)
+                {
+                    throw FileSystemException("Error getting file info for: " + filePath);
+                }
+                FileInfo info;
+                info.name = std::filesystem::path(filePath).filename().string();
+                info.permissions = this->getPermissionsString(st.st_mode);
+                info.owner = this->getOwnerName(st.st_uid);
+                info.group = this->getGroupName(st.st_gid);
+                info.size = st.st_size;
+                info.modTime = this->getModificationTime(st.st_mtime);
+                info.isDirectory = S_ISDIR(st.st_mode);
+                return info;
+            };
+
+            if (showHidden)
+            {
+                files.push_back(getFileInfo(path + "/."));
+                files.push_back(getFileInfo(path + "/.."));
+            }
+
             for (const auto &entry : std::filesystem::directory_iterator(path))
             {
                 const auto &filename = entry.path().filename().string();
                 if (filename[0] == '.' && !showHidden)
                     continue;
 
-                struct stat st;
-                if (stat(entry.path().c_str(), &st) != 0)
-                {
-                    throw FileSystemException("Error getting file info for: " + entry.path().string());
-                }
-
-                FileInfo info;
-                info.name = filename;
-                info.permissions = getPermissionsString(st.st_mode);
-                info.owner = getOwnerName(st.st_uid);
-                info.group = getGroupName(st.st_gid);
-                info.size = st.st_size;
-                info.modTime = getModificationTime(st.st_mtime);
-                info.isDirectory = S_ISDIR(st.st_mode);
-                files.push_back(info);
+                files.push_back(getFileInfo(entry.path().string()));
             }
             return files;
         }
