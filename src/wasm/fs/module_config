@@ -1,2 +1,3 @@
 -preload-file data@/
 lembind
+sINVOKE_RUN=0

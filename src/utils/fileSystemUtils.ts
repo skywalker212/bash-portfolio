@@ -1,19 +1,16 @@
 import { HOME_DIR } from '@/config';
-import createModule from '@/public/wasm/fs/fs.js';
+import createModule, { FileSystem, FileInfo } from '@/public/wasm/fs/fs.js';
 import { TerminalStore } from '@/store';
-import { FileSystem, FSInstance } from '@/types';
 
 export class WASMFileSystem {
     private fs: FileSystem;
-    private terminalStore: TerminalStore;
 
-    private constructor(fs: FileSystem, terminalStore: TerminalStore) {
+    private constructor(fs: FileSystem) {
         this.fs = fs;
-        this.terminalStore = terminalStore;
     }
 
     static async initFsModule(terminalStore: TerminalStore): Promise<WASMFileSystem> {
-        const fsModule: FSInstance = await createModule({
+        const fsModule = await createModule({
             locateFile: (path: string, prefix: string) => {
                 if (path.endsWith(".wasm") || path.endsWith(".data")) return `/wasm/fs/${path}`;
                 return prefix + path;
@@ -25,7 +22,7 @@ export class WASMFileSystem {
             }
         };
         const fs = new fsModule.FileSystem(HOME_DIR, callbacks);
-        return new WASMFileSystem(fs, terminalStore);
+        return new WASMFileSystem(fs);
     }
 
     writeFile(path: string, data: string): void {
@@ -40,8 +37,16 @@ export class WASMFileSystem {
         return this.fs.cwd();
     }
 
-    listDirectory(path: string): string[] {
-        return this.fs.listDirectory(path);
+    getDetailedDirectoryListing(path: string, showHidden: boolean): FileInfo[] {
+        const result = this.fs.getDetailedDirectoryListing(path, showHidden);
+        const length = result.size();
+        const files: FileInfo[] = [];
+        for (let i = 0; i < length; i++) {
+            const file = result.get(i);
+            if (file) files.push(file);
+        }
+        result.delete();
+        return files;
     }
 
     unlink(path: string): boolean {

@@ -20,12 +20,13 @@ $(MODULES):
 	emcc $(WASM_SRC_DIR)/$@/$@.cpp -o $(WASM_PUBLIC_DIR)/$@/$@.js \
 		-sALLOW_MEMORY_GROWTH=1 \
 		-sEXPORT_NAME='$@Module' \
+		--emit-tsd $@.d.ts \
 		-sMODULARIZE \
 		-sENVIRONMENT=web \
 		-O3 \
 		--closure 1 \
 		-flto \
-		-sEVAL_CTORS \
+		-sEVAL_CTORS=2 \
 		$(CONFIG)
 
 clean:
@@ -38,10 +39,11 @@ $(WASM_PUBLIC_DIR)/%/%.js: $(WASM_SRC_DIR)/%/%.cpp $(wildcard $(WASM_SRC_DIR)/%/
 	emcc $< -o $@ \
 		-sALLOW_MEMORY_GROWTH=1 \
 		-sEXPORT_NAME='$*Module' \
+		--emit-tsd $@.d.ts \
 		-sMODULARIZE \
 		-sENVIRONMENT=web \
 		-O3 \
 		--closure 1 \
 		-flto \
-		-sEVAL_CTORS \
+		-sEVAL_CTORS=2 \
 		$(CONFIG)

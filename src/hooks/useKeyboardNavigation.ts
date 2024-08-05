@@ -49,12 +49,12 @@ export const useKeyboardNavigation = (
                     if (fileName) {
                         const dir = path.join("/") || ".";
                         try {
-                            const matchingFile = fileSystem.listDirectory(dir)
-                                .find(name => name.startsWith(fileName));
-                            if (matchingFile) {
+                            const matchingFileListing = fileSystem.getDetailedDirectoryListing(dir, true)
+                                .find(listing => listing.name.toString().startsWith(fileName));
+                            if (matchingFileListing) {
                                 const newInput = inputValue.replace(
                                     new RegExp(`${escapeRegExp(fullPath)}$`),
-                                    fullPath.replace(fileName, matchingFile)
+                                    fullPath.replace(fileName, matchingFileListing.name.toString())
                                 );
                                 setInput(newInput);
                             }
@@ -65,11 +65,11 @@ export const useKeyboardNavigation = (
                 } else if (command) {
                     const BIN_DIRECTORY = '/bin';
                     try {
-                        const matchingCommand = fileSystem.listDirectory(BIN_DIRECTORY)
-                            .find(name => name.toLowerCase().startsWith(command.toLowerCase()));
+                        const matchingCommandListing = fileSystem.getDetailedDirectoryListing(BIN_DIRECTORY, false)
+                            .find(listing => listing.name.toString().startsWith(command));
 
-                        if (matchingCommand) {
-                            setInput(matchingCommand);
+                        if (matchingCommandListing) {
+                            setInput(matchingCommandListing.name.toString());
                         }
                     } catch (error) {
                         console.error("Error listing bin directory:", error);

@@ -1,3 +1,4 @@
+import { MainModule as CatSayModule } from '@/public/wasm/catsay/catsay';
 import { Command, CommandResultType } from '@/types';
 import { loadWasmModule } from '@/utils';
 import { ArgumentParser } from 'js-argparse';
@@ -9,10 +10,6 @@ type Args = {
 }
 
 type CatsayCommand = Command<Args>;
-
-interface CatsayModule extends EmscriptenModule {
-    say: (text: string) => string
-}
 
 const catsayArgs = new ArgumentParser<Args>(name, "A talking cat");
 
@@ -30,7 +27,7 @@ export const catsayCommand: CatsayCommand = {
     execute: async (_, args) => {
         try {
 
-            const catsayModule = await loadWasmModule<CatsayModule>(name, "js");
+            const catsayModule = await loadWasmModule<CatSayModule>(name, "js");
 
             const resp = catsayModule.say(args.text.join(" "));
             return {

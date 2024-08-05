@@ -1,8 +1,7 @@
-import { WasmModule } from "@/types";
 
-const wasmModules: { [key: string]: WasmModule } = {};
+const wasmModules: { [key: string]: WebAssembly.Instance | EmscriptenModule } = {};
 
-export const loadWasmModule = async <T extends WasmModule = WasmModule>(
+export const loadWasmModule = async <T>(
   name: string,
   type: 'wasm' | 'js',
   importObject?: WebAssembly.Imports | EmscriptenModule
