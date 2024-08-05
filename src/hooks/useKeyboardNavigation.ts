@@ -1,5 +1,9 @@
-import { WASMFileSystem } from '@/utils';
+import { parseCommand, WASMFileSystem } from '@/utils';
 import { useEffect, useCallback } from 'react';
+
+function escapeRegExp(string: string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 export const useKeyboardNavigation = (
     inputRef: React.RefObject<HTMLInputElement>,
@@ -35,11 +39,40 @@ export const useKeyboardNavigation = (
             }
             case 'Tab': {
                 event.preventDefault();
-                const val = inputRef.current?.value;
-                if (val) {
-                    const matchingCommand = fileSystem.listDirectory('/bin').find(name => name.startsWith(val))
-                    if (matchingCommand) {
-                        setInput(matchingCommand);
+                const inputValue = inputRef.current?.value;
+                if (!inputValue) break;
+                const { command, args, file } = parseCommand(inputValue);
+                if (file || args) {
+                    const fullPath = file || args.split(" ").pop() || "";
+                    const path = fullPath.split("/");
+                    const fileName = path.pop();
+                    if (fileName) {
+                        const dir = path.join("/") || ".";
+                        try {
+                            const matchingFile = fileSystem.listDirectory(dir)
+                                .find(name => name.startsWith(fileName));
+                            if (matchingFile) {
+                                const newInput = inputValue.replace(
+                                    new RegExp(`${escapeRegExp(fullPath)}$`),
+                                    fullPath.replace(fileName, matchingFile)
+                                );
+                                setInput(newInput);
+                            }
+                        } catch (error) {
+                            console.error("Error listing directory:", error);
+                        }
+                    }
+                } else if (command) {
+                    const BIN_DIRECTORY = '/bin';
+                    try {
+                        const matchingCommand = fileSystem.listDirectory(BIN_DIRECTORY)
+                            .find(name => name.toLowerCase().startsWith(command.toLowerCase()));
+
+                        if (matchingCommand) {
+                            setInput(matchingCommand);
+                        }
+                    } catch (error) {
+                        console.error("Error listing bin directory:", error);
                     }
                 }
                 break;
