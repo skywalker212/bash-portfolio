@@ -4,8 +4,10 @@ import { TerminalStore } from '@/store';
 
 export class WASMFileSystem {
     private fs: FileSystem;
+    private getExceptionMessage: (e: number) => [type: string, message: string];
 
-    private constructor(fs: FileSystem) {
+    private constructor(fs: FileSystem, getExceptionMessage: (e: number) => [type: string, message: string]) {
+        this.getExceptionMessage = getExceptionMessage;
         this.fs = fs;
     }
 
@@ -21,44 +23,81 @@ export class WASMFileSystem {
                 terminalStore.changeDirectory(newPath);
             }
         };
+        
         const fs = new fsModule.FileSystem(HOME_DIR, callbacks);
-        return new WASMFileSystem(fs);
+        // @ts-expect-error fsModule doesnt include getExceptionMessage type for some reason
+        return new WASMFileSystem(fs, fsModule.getExceptionMessage);
     }
 
     writeFile(path: string, data: string): void {
-        this.fs.writeFile(path, data);
+        try {
+            this.fs.writeFile(path, data);
+        } catch (e: unknown) {
+            const [type, message] = this.getExceptionMessage(e as number);
+            throw new Error(`${type}: ${message}`);
+        }
     }
 
     readFile(path: string): string {
-        return this.fs.readFile(path);
+        try {
+            return this.fs.readFile(path);
+        } catch (e: unknown) {
+            const [type, message] = this.getExceptionMessage(e as number);
+            throw new Error(`${type}: ${message}`);
+        }
     }
 
     cwd(): string {
-        return this.fs.cwd();
+        try {
+            return this.fs.cwd();
+        } catch (e: unknown) {
+            const [type, message] = this.getExceptionMessage(e as number);
+            throw new Error(`${type}: ${message}`);
+        }
     }
 
     getDetailedDirectoryListing(path: string, showHidden: boolean): FileInfo[] {
-        const result = this.fs.getDetailedDirectoryListing(path, showHidden);
-        const length = result.size();
-        const files: FileInfo[] = [];
-        for (let i = 0; i < length; i++) {
-            const file = result.get(i);
-            if (file) files.push(file);
+        try {
+            const result = this.fs.getDetailedDirectoryListing(path, showHidden);
+            const length = result.size();
+            const files: FileInfo[] = [];
+            for (let i = 0; i < length; i++) {
+                const file = result.get(i);
+                if (file) files.push(file);
+            }
+            result.delete();
+            return files;
+        } catch (e: unknown) {
+            const [type, message] = this.getExceptionMessage(e as number);
+            throw new Error(`${type}: ${message}`);
         }
-        result.delete();
-        return files;
     }
 
     unlink(path: string): boolean {
-        return this.fs.unlink(path);
+        try {
+            return this.fs.unlink(path);
+        } catch (e: unknown) {
+            const [type, message] = this.getExceptionMessage(e as number);
+            throw new Error(`${type}: ${message}`);
+        }
     }
 
     makeDirectory(name: string): boolean {
-        return this.fs.makeDirectory(name);
+        try {
+            return this.fs.makeDirectory(name);
+        } catch (e: unknown) {
+            const [type, message] = this.getExceptionMessage(e as number);
+            throw new Error(`${type}: ${message}`);
+        }
     }
 
     changeDirectory(path: string): boolean {
-        const result = this.fs.changeDirectory(path);
-        return result;
+        try {
+            const result = this.fs.changeDirectory(path);
+            return result;
+        } catch (e: unknown) {
+            const [type, message] = this.getExceptionMessage(e as number);
+            throw new Error(`${type}: ${message}`);
+        }
     }
 }

@@ -1,3 +1,5 @@
 -preload-file data@/
 lembind
 sINVOKE_RUN=0
+fwasm-exceptions
+sEXPORT_EXCEPTION_HANDLING_HELPERS
