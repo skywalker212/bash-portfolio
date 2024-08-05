@@ -45,13 +45,16 @@ export interface FileSystem {
 }
 
 export type FileInfo = {
-  name: EmbindString,
   permissions: EmbindString,
+  linkCount: number,
   owner: EmbindString,
   group: EmbindString,
-  size: number,
+  size: bigint,
   modTime: EmbindString,
-  isDirectory: boolean
+  name: EmbindString,
+  isDirectory: boolean,
+  isSymlink: boolean,
+  linkTarget: EmbindString
 };
 
 interface EmbindModule {

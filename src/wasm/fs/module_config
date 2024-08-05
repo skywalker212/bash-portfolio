@@ -2,4 +2,5 @@
 lembind
 sINVOKE_RUN=0
 fwasm-exceptions
+sWASM_BIGINT
 sEXPORT_EXCEPTION_HANDLING_HELPERS

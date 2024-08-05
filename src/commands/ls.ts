@@ -40,18 +40,55 @@ export const lsCommand: LsCommand = {
             const directories = args.directory && args.directory.length > 0 ? args.directory : [state.fileSystem.cwd()];
             let output = "";
 
+            const formatSize = (size: bigint) => {
+                const units = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
+                let unitIndex = 0;
+                const divisor = BigInt(1024);
+                while (size >= divisor && unitIndex < units.length - 1) {
+                    size = size / divisor;
+                    unitIndex++;
+                }
+                return unitIndex === 0 ? size.toString() : Number(size).toFixed(1) + units[unitIndex];
+            }
+
             for (const dir of directories) {
                 if (directories.length > 1) {
                     output += `${dir}:\n`;
                 }
                 const files = state.fileSystem.getDetailedDirectoryListing(dir, args.all);
+
                 if (args.long) {
+                    const linkCountWidth = Math.max(...files.map(f => f.linkCount.toString().length));
+                    const ownerWidth = Math.max(...files.map(f => f.owner.toString().length));
+                    const groupWidth = Math.max(...files.map(f => f.group.toString().length));
+                    const sizeWidth = Math.max(...files.map(f => formatSize(f.size).length));
+
                     for (const file of files) {
-                        output += `${file.permissions} ${file.owner} ${file.group} ${file.size.toString().padStart(8)} ${file.modTime} ${file.name}${file.isDirectory && file
-                            .name !== "." && file.name !== ".." ? '/' : ''}\n`;
+                        const formattedSize = formatSize(file.size);
+                        let line = `${file.permissions} `;
+                        line += `${file.linkCount.toString().padStart(linkCountWidth)} `;
+                        line += `${file.owner.toString().padEnd(ownerWidth)} `;
+                        line += `${file.group.toString().padEnd(groupWidth)} `;
+                        line += `${formattedSize.padStart(sizeWidth)} `;
+                        line += `${file.modTime} `;
+                        line += file.name;
+
+                        if (file.isSymlink) {
+                            line += ` -> ${file.linkTarget}`;
+                        } else if (file.isDirectory && file.name !== "." && file.name !== "..") {
+                            line += '/';
+                        }
+
+                        output += line + '\n';
                     }
                 } else {
-                    output += files.map(file => file.name + (file.isDirectory && file.name !== "." && file.name !== ".." ? '/' : '')).join(' ') + '\n';
+                    output += files.map(file => {
+                        let name = file.name;
+                        if (file.isDirectory && file.name !== "." && file.name !== "..") {
+                            name += '/';
+                        }
+                        return name;
+                    }).join('  ') + '\n';
                 }
             }
 

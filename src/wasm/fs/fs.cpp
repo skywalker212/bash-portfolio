@@ -14,13 +14,16 @@
 
 struct FileInfo
 {
-    std::string name;
     std::string permissions;
+    int linkCount = 1;
     std::string owner;
     std::string group;
-    int size;
+    long long size;
     std::string modTime;
+    std::string name;
     bool isDirectory;
+    bool isSymlink;
+    std::string linkTarget;
 };
 
 class FileSystemException : public std::runtime_error
@@ -67,7 +70,7 @@ private:
     {
         char buffer[20];
         struct tm *timeinfo = localtime(&mtime);
-        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+        strftime(buffer, sizeof(buffer), "%b %e %H:%M", timeinfo);
         return std::string(buffer);
     }
 
@@ -166,28 +169,36 @@ public:
             }
 
             std::vector<FileInfo> files;
-            auto getFileInfo = [this](const std::string &filePath) -> FileInfo
+            auto getFileInfo = [this](const std::filesystem::path &entryPath) -> FileInfo
             {
                 struct stat st;
-                if (stat(filePath.c_str(), &st) != 0)
+                if (lstat(entryPath.c_str(), &st) != 0)
                 {
-                    throw FileSystemException("Error getting file info for: " + filePath);
+                    throw FileSystemException("Error getting file info for: " + entryPath.string());
                 }
                 FileInfo info;
-                info.name = std::filesystem::path(filePath).filename().string();
                 info.permissions = this->getPermissionsString(st.st_mode);
+                info.linkCount = st.st_nlink;
                 info.owner = this->getOwnerName(st.st_uid);
                 info.group = this->getGroupName(st.st_gid);
                 info.size = st.st_size;
                 info.modTime = this->getModificationTime(st.st_mtime);
+                info.name = entryPath.filename().string();
                 info.isDirectory = S_ISDIR(st.st_mode);
+                info.isSymlink = S_ISLNK(st.st_mode);
+
+                if (info.isSymlink)
+                {
+                    info.linkTarget = std::filesystem::read_symlink(entryPath).string();
+                }
+
                 return info;
             };
 
             if (showHidden)
             {
-                files.push_back(getFileInfo(path + "/."));
-                files.push_back(getFileInfo(path + "/.."));
+                files.push_back(getFileInfo(std::filesystem::path(path) / "."));
+                files.push_back(getFileInfo(std::filesystem::path(path) / ".."));
             }
 
             for (const auto &entry : std::filesystem::directory_iterator(path))
@@ -196,8 +207,15 @@ public:
                 if (filename[0] == '.' && !showHidden)
                     continue;
 
-                files.push_back(getFileInfo(entry.path().string()));
+                files.push_back(getFileInfo(entry.path()));
             }
+
+            std::sort(files.begin(), files.end(), [](const FileInfo &a, const FileInfo &b)
+                      {
+            if (a.isDirectory != b.isDirectory)
+                return a.isDirectory > b.isDirectory;
+            return a.name < b.name; });
+
             return files;
         }
         catch (const std::filesystem::filesystem_error &e)
@@ -263,13 +281,16 @@ public:
 EMSCRIPTEN_BINDINGS(filesystem_module)
 {
     emscripten::value_object<FileInfo>("FileInfo")
-        .field("name", &FileInfo::name)
         .field("permissions", &FileInfo::permissions)
+        .field("linkCount", &FileInfo::linkCount)
         .field("owner", &FileInfo::owner)
         .field("group", &FileInfo::group)
         .field("size", &FileInfo::size)
         .field("modTime", &FileInfo::modTime)
-        .field("isDirectory", &FileInfo::isDirectory);
+        .field("name", &FileInfo::name)
+        .field("isDirectory", &FileInfo::isDirectory)
+        .field("isSymlink", &FileInfo::isSymlink)
+        .field("linkTarget", &FileInfo::linkTarget);
 
     emscripten::register_vector<FileInfo>("FileInfoVector");
 
