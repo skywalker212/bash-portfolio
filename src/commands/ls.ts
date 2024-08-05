@@ -40,12 +40,11 @@ export const lsCommand: LsCommand = {
             const directories = args.directory && args.directory.length > 0 ? args.directory : [state.fileSystem.cwd()];
             let output = "";
 
-            const formatSize = (size: bigint) => {
+            const formatSize = (size: number) => {
                 const units = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
                 let unitIndex = 0;
-                const divisor = BigInt(1024);
-                while (size >= divisor && unitIndex < units.length - 1) {
-                    size = size / divisor;
+                while (size >= 1024 && unitIndex < units.length - 1) {
+                    size /= 1024;
                     unitIndex++;
                 }
                 return unitIndex === 0 ? size.toString() : Number(size).toFixed(1) + units[unitIndex];

@@ -18,7 +18,7 @@ struct FileInfo
     int linkCount = 1;
     std::string owner;
     std::string group;
-    long long size;
+    int size;
     std::string modTime;
     std::string name;
     bool isDirectory;

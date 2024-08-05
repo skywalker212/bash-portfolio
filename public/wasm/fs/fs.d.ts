@@ -49,7 +49,7 @@ export type FileInfo = {
   linkCount: number,
   owner: EmbindString,
   group: EmbindString,
-  size: bigint,
+  size: number,
   modTime: EmbindString,
   name: EmbindString,
   isDirectory: boolean,
