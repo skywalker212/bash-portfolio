@@ -1,3 +1,2 @@
-sEXPORTED_RUNTIME_METHODS=["FS"]
 -preload-file data@/
 lembind

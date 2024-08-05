@@ -14,7 +14,9 @@ const cdArgs = new ArgumentParser<Args>(name, "Change Directory");
 
 cdArgs.addArgument(['directory'], {
     metavar: 'DIRECTORY',
-    help: 'Name of the directory'
+    required: false,
+    help: 'Name of the directory',
+    default: HOME_DIR
 });
 
 export const cdCommand: CdCommand = {
@@ -22,7 +24,7 @@ export const cdCommand: CdCommand = {
     args: cdArgs,
     execute: async (state, args) => {
         try {
-            state.fileSystem.changeDirectory(args.directory ? args.directory : HOME_DIR)
+            state.fileSystem.changeDirectory(args.directory);
             return {
                 type: CommandResultType.NONE
             };

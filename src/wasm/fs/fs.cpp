@@ -1,32 +1,123 @@
-#include <emscripten/emscripten.h>
 #include <emscripten/bind.h>
 #include <string>
+#include <vector>
 #include <filesystem>
+#include <fstream>
 #include <stdexcept>
 
-using namespace emscripten;
-
-bool setup_filesystem(std::string home_dir) {
-    try {
-        std::filesystem::remove_all("/home/web_user");
-        std::filesystem::create_directories(home_dir);
-        std::filesystem::create_symlink("/bin/projects", home_dir + "/projects");
-        std::filesystem::create_symlink("/bin/skills", home_dir + "/skills");
-        std::filesystem::current_path(home_dir);
-        return true;
-    } catch (const std::filesystem::filesystem_error& e) {
-        EM_ASM({
-            throw new Error('Filesystem error:', UTF8ToString($0));
-        }, e.what());
-        return false;
-    } catch (const std::exception& e) {
-        EM_ASM({
-            throw new Error('Error:', UTF8ToString($0));
-        }, e.what());
-        return false;
+emscripten::val vector_string_to_js(const std::vector<std::string> &vec)
+{
+    emscripten::val result = emscripten::val::array();
+    for (const auto &s : vec)
+    {
+        result.call<void>("push", emscripten::val(s));
     }
+    return result;
 }
 
-EMSCRIPTEN_BINDINGS(module) {
-    emscripten::function("setup_filesystem", &setup_filesystem);
+class FileSystem
+{
+private:
+    std::string home_dir;
+
+    void setup_filesystem()
+    {
+        try
+        {
+            std::filesystem::remove_all("/home/web_user");
+            std::filesystem::create_directories(home_dir);
+            std::filesystem::create_symlink("/bin/projects", home_dir + "/projects");
+            std::filesystem::create_symlink("/bin/skills", home_dir + "/skills");
+            std::filesystem::current_path(home_dir);
+        }
+        catch (const std::filesystem::filesystem_error &e)
+        {
+            throw std::runtime_error("Filesystem error: " + std::string(e.what()));
+        }
+    }
+
+public:
+    FileSystem(const std::string &home_dir) : home_dir(home_dir)
+    {
+        setup_filesystem();
+    }
+
+    void writeFile(const std::string &path, const std::string &data)
+    {
+        std::ofstream file(path, std::ios::app);
+        if (!file)
+        {
+            throw std::runtime_error("Unable to open file for writing");
+        }
+        file << data;
+    }
+
+    std::string readFile(const std::string &path)
+    {
+        if (!std::filesystem::is_regular_file(path))
+        {
+            throw std::runtime_error("Not a file");
+        }
+        std::ifstream file(path);
+        if (!file)
+        {
+            throw std::runtime_error("Unable to open file for reading");
+        }
+        return std::string((std::istreambuf_iterator<char>(file)),
+                           std::istreambuf_iterator<char>());
+    }
+
+    std::string cwd()
+    {
+        return std::filesystem::current_path().string();
+    }
+
+    emscripten::val listDirectory(const std::string &path)
+    {
+        std::vector<std::string> files;
+
+        // Add "." and ".." to the list
+        files.push_back(".");
+        files.push_back("..");
+
+        // Add other directory contents
+        for (const auto &entry : std::filesystem::directory_iterator(path))
+        {
+            files.push_back(entry.path().filename().string());
+        }
+
+        // Sort the files alphabetically
+        std::sort(files.begin(), files.end());
+
+        return vector_string_to_js(files);
+    }
+
+    bool unlink(const std::string &path)
+    {
+        return std::filesystem::remove(path);
+    }
+
+    bool makeDirectory(const std::string &name)
+    {
+        return std::filesystem::create_directory(name);
+    }
+
+    bool changeDirectory(const std::string &path)
+    {
+        std::filesystem::current_path(path);
+        return true;
+    }
+};
+
+EMSCRIPTEN_BINDINGS(filesystem_module)
+{
+    emscripten::class_<FileSystem>("FileSystem")
+        .constructor<std::string>()
+        .function("writeFile", &FileSystem::writeFile)
+        .function("readFile", &FileSystem::readFile)
+        .function("cwd", &FileSystem::cwd)
+        .function("listDirectory", &FileSystem::listDirectory)
+        .function("unlink", &FileSystem::unlink)
+        .function("makeDirectory", &FileSystem::makeDirectory)
+        .function("changeDirectory", &FileSystem::changeDirectory);
 }
