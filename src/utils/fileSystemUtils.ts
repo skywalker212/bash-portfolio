@@ -1,3 +1,4 @@
+import { HOME_DIR } from '@/config';
 import createModule from '@/public/wasm/fs/fs.js';
 import { TerminalStore } from '@/store';
 import { FSInstance } from '@/types';
@@ -12,13 +13,13 @@ export class WASMFileSystem {
     }
 
     static async initFsModule(terminalStore: TerminalStore) {
-        const fsModule = await createModule({
+        const fsModule: FSInstance = await createModule({
             locateFile: (path: string, prefix: string) => {
                 if (path.endsWith(".wasm") || path.endsWith(".data")) return `/wasm/fs/${path}`;
                 return prefix + path;
             }
         });
-        fsModule._setup_filesystem();
+        fsModule.setup_filesystem(HOME_DIR);
         return new WASMFileSystem(fsModule, terminalStore);
     }
 
