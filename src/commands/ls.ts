@@ -2,6 +2,7 @@ import { Command, CommandResultType } from '@/types';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "ls";
+const description = "List directory contents";
 
 type Args = {
     all: boolean;
@@ -11,7 +12,7 @@ type Args = {
 
 type LsCommand = Command<Args>;
 
-const lsArgs = new ArgumentParser<Args>(name, "List directory contents");
+const lsArgs = new ArgumentParser<Args>(name, description);
 
 lsArgs.addArgument(['-a', '--all'], {
     type: "boolean",
@@ -35,6 +36,7 @@ lsArgs.addArgument(['directory'], {
 export const lsCommand: LsCommand = {
     name,
     args: lsArgs,
+    description,
     execute: async (state, args) => {
         try {
             const directories = args.directory && args.directory.length > 0 ? args.directory : [state.fileSystem.cwd()];

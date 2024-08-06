@@ -4,6 +4,7 @@ import { loadWasmModule } from '@/utils';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "catsay";
+const description = "A talking cat";
 
 type Args = {
     text: string[]
@@ -11,7 +12,7 @@ type Args = {
 
 type CatsayCommand = Command<Args>;
 
-const catsayArgs = new ArgumentParser<Args>(name, "A talking cat");
+const catsayArgs = new ArgumentParser<Args>(name, description);
 
 catsayArgs.addArgument(['text'], {
     required: false,
@@ -24,6 +25,7 @@ catsayArgs.addArgument(['text'], {
 export const catsayCommand: CatsayCommand = {
     name,
     args: catsayArgs,
+    description,
     execute: async (_, args) => {
         try {
 

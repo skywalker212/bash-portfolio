@@ -2,6 +2,7 @@ import { Command, CommandResultType } from '@/types';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "mkdir";
+const description = "Make new Directory";
 
 type Args = {
     directory_name: string 
@@ -9,7 +10,7 @@ type Args = {
 
 type MkdirCommand = Command<Args>;
 
-const mkdirArgs = new ArgumentParser<Args>(name, "Make new Directory");
+const mkdirArgs = new ArgumentParser<Args>(name, description);
 
 mkdirArgs.addArgument(['directory_name'], {
     metavar: "DIRECTORY_NAME",
@@ -19,6 +20,7 @@ mkdirArgs.addArgument(['directory_name'], {
 export const mkdirCommand: MkdirCommand = {
     name,
     args: mkdirArgs,
+    description,
     execute: async (state, args) => {
         try {
 

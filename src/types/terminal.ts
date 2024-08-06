@@ -56,5 +56,6 @@ export interface TableCommandResult extends CommandResult {
 export interface Command<T extends Record<string, unknown> = Record<string, unknown>> {
     name: string;
     args: ArgumentParser,
+    description: string,
     execute: (state: {terminalStore: TerminalStore, fileSystem: WASMFileSystem}, args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }

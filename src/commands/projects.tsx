@@ -5,6 +5,7 @@ import { titleCase } from '@/utils';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "projects";
+const description = 'Display my notable projects';
 
 type Args = {
     project_name?: string
@@ -12,7 +13,7 @@ type Args = {
 
 type ProjectCommand = Command<Args>;
 
-const projectsArgs = new ArgumentParser<Args>(name, 'Display my notable projects');
+const projectsArgs = new ArgumentParser<Args>(name, description);
 
 projectsArgs.addArgument(['project_name'], {
     required: false,
@@ -23,6 +24,7 @@ projectsArgs.addArgument(['project_name'], {
 export const projectsCommand: ProjectCommand = {
     name,
     args: projectsArgs,
+    description,
     execute: (_, args): CommandResult | TableCommandResult | (CommandResult | TableCommandResult)[] => {
         if (!args.project_name) {
             return [{

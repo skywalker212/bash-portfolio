@@ -3,6 +3,7 @@ import { loadWasmModule } from '@/utils';
 import { ArgumentParser } from 'js-argparse';
 
 const name = 'hello-wasm';
+const description = "Hello World in Web Assembly!"
 
 type Args = {
     n1: number,
@@ -17,7 +18,7 @@ interface HelloWasmInstance extends WebAssembly.Instance {
     }
 }
 
-const helloWasmArgs = new ArgumentParser<Args>(name, "Hello World in Web Assembly!");
+const helloWasmArgs = new ArgumentParser<Args>(name, description);
 
 helloWasmArgs.addArgument(['n1'], {
     type: 'number',
@@ -34,6 +35,7 @@ helloWasmArgs.addArgument(['n2'], {
 export const helloWasmCommand: HelloWasmCommand = {
     name,
     args: helloWasmArgs,
+    description,
     execute: async (_, args) => {
         try {
             const helloWasmInstance = await loadWasmModule<HelloWasmInstance>(name, "wasm");

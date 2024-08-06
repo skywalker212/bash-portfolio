@@ -4,12 +4,14 @@ import { EXPERIENCE_TABLE, INTERNSHIP_TABLE, WHOAMI_TEXT } from '@/config';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "whoami";
+const description = "Display information about me";
 
-const whoamiArgs = new ArgumentParser(name, "Display information about me");
+const whoamiArgs = new ArgumentParser(name, description);
 
 export const whoamiCommand: Command = {
     name,
     args: whoamiArgs,
+    description,
     execute: () => {
         return [{
             content: [[WHOAMI_TEXT]],

@@ -2,6 +2,7 @@ import { Command, CommandResultType } from '@/types';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "rm";
+const description = "Remove directory entries";
 
 type Args = {
     file: string 
@@ -9,7 +10,7 @@ type Args = {
 
 type RmCommand = Command<Args>;
 
-const rmArgs = new ArgumentParser<Args>(name, "Remove directory entries");
+const rmArgs = new ArgumentParser<Args>(name, description);
 
 rmArgs.addArgument(['file'], {
     metavar: "FILE_NAME",
@@ -19,6 +20,7 @@ rmArgs.addArgument(['file'], {
 export const rmCommand: RmCommand = {
     name,
     args: rmArgs,
+    description,
     execute: async (state, args) => {
         try {
 

@@ -1,8 +1,9 @@
-import { Command, CommandResult, CommandResultType, TableCommandResult } from '@/types';
+import { Command, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
 import { commands } from './index';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "help";
+const description = "List all available commands";
 
 type Args = {
     command_name?: string
@@ -10,7 +11,7 @@ type Args = {
 
 type HelpCommand = Command<Args>;
 
-const helpArgs = new ArgumentParser<Args>(name, "List all available commands");
+const helpArgs = new ArgumentParser<Args>(name, description);
 
 helpArgs.addArgument(["command_name"], {
     required: false,
@@ -21,6 +22,7 @@ helpArgs.addArgument(["command_name"], {
 export const helpCommand: HelpCommand = {
     name,
     args: helpArgs,
+    description,
     execute: (_, args): CommandResult | CommandResult[] | TableCommandResult => {
         if (args.command_name) {
             const command = commands.find(cmd => args.command_name === cmd.name);
@@ -41,13 +43,14 @@ export const helpCommand: HelpCommand = {
         } else {
             return [
                 {
-                    content: <b>Available Commands</b>,
-                    type: CommandResultType.CUSTOM
-                },
-                {
-                    content: commands.map(cmd => cmd.name).join(" "),
-                    type: CommandResultType.TEXT
-                },
+                    content: [
+                        ['Command', 'Description'],
+                        ...commands.map(cmd => [cmd.name, cmd.description])
+                    ],
+                    type: CommandResultType.TABLE,
+                    tableType: TableType.BORDERLESS,
+                    columns: [{ width: 10 }, { width: 50 }]
+                } as TableCommandResult,
                 {
                     content: helpArgs.usage(false),
                     type: CommandResultType.TEXT
