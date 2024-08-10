@@ -10,6 +10,8 @@ Command to read fileA talking catCommand to change directory Command to clear te
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
 | Tweeter                   | Erlang, Cowboy                 | https://github.com/skywalker212/tweeter                              |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
+| JS-Argparse               | TypeScript                     | https://www.npmjs.com/package/js-argparse                            |
+|---------------------------|--------------------------------|----------------------------------------------------------------------|
 | Shadowfax                 | Java, ASM, JUnit               | https://github.com/skywalker212/shadowfax                            |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
 | HPA Classification        | Python, Tensorflow             | https://github.com/skywalker212/hpa-classification                   |

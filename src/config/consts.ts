@@ -32,6 +32,12 @@ export const PROJECTS: { [id: string]: Project } = {
         technologies: ["Erlang", "Cowboy"],
         link: "https://github.com/skywalker212/tweeter"
     },
+    "js-argparse": {
+        name: "JS-Argparse",
+        description: "A lightweight, client-side JavaScript argparse library",
+        technologies: ['TypeScript'],
+        link: "https://www.npmjs.com/package/js-argparse"
+    },
     "shadowfax": {
         name: "Shadowfax",
         description: "A programming language compiler",
