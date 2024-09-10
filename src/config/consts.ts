@@ -10,6 +10,7 @@ export const EXPERIENCE_TABLE = [
 
 export const INTERNSHIP_TABLE = [
     ['Company', 'Period', 'Position'],
+    ['Sumble', 'August 2024 - Present', 'Software Engineer Intern'],
     ['DAIICT', 'Jan 2019 – May 2019', 'Machine Learning Research Intern']
 ];
 
