@@ -1,7 +1,5 @@
 import { Project } from "@/types";
 
-export const WHOAMI_TEXT = "Hey, I'm Akash, Software Engineer at Sumble";
-
 export const EXPERIENCE_TABLE = [
     ['Company', 'Period', 'Position'],
     ['Sumble', 'August 2024 - Present', 'Software Engineer'],

@@ -1,6 +1,6 @@
 import { Command, CommandResultType, TableType } from '@/types';
 import styles from '@/styles/Output.module.css';
-import { EXPERIENCE_TABLE, INTERNSHIP_TABLE, WHOAMI_TEXT } from '@/config';
+import { EXPERIENCE_TABLE, INTERNSHIP_TABLE } from '@/config';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "whoami";
@@ -13,11 +13,14 @@ export const whoamiCommand: Command = {
     args: whoamiArgs,
     description,
     execute: () => {
-        return [{
-            content: [[WHOAMI_TEXT]],
-            type: CommandResultType.TABLE,
-            tableType: TableType.TEXT,
-            columns: [{width: 83, alignment: 'justify', wrapWord: true}]
+        return [
+        {
+            content: (
+                <div>
+                    <p>Hey, I&apos;m Akash, Software Engineer at <a href="https://sumble.com" target="_blank" rel="noopener noreferrer" className={styles.terminalLink}>Sumble</a></p>
+                </div>
+            ),
+            type: CommandResultType.CUSTOM
         },
         {
             content: <b>EXPERIENCE</b>,
