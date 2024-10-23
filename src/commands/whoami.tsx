@@ -42,7 +42,6 @@ export const whoamiCommand: Command = {
         {
             content: (
                 <div>
-                    <p><b>Resume:</b> <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >{window.location.origin}/resume.pdf</a></p>
                     <p><b>Email:</b> <a href="mailto:me@akash.is" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >me@akash.is</a></p>
                     <p><b>LinkedIn:</b> <a href="https://www.linkedin.com/in/akashagajjar" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >linkedin.com/in/akashagajjar</a> </p>
                     <p><b>GitHub:</b> <a href="https://github.com/skywalker212" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >github.com/skywalker212</a></p>
