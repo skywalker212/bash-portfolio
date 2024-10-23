@@ -1,9 +1,6 @@
 Command to read fileA talking catCommand to change directory Command to clear terminal screenCommand to get helpCommand to list directoryCommand to make directory+---------------------------+--------------------------------+----------------------------------------------------------------------+
 | Project                   | Technologies                   | Link                                                                 |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
-| Infosys Equinox Studio    | Node.js, Angular, MongoDB,     | https://www.infosysequinox.com/offerings/infosys-equinox-studio.html |
-|                           | Kubernetes, Kafka              |                                                                      |
-|---------------------------|--------------------------------|----------------------------------------------------------------------|
 | Bash Portfolio            | WebAssembly, Next.js,          | https://github.com/skywalker212/bash-portfolio                       |
 |                           | TypeScript, Tailwind CSS,      |                                                                      |
 |                           | Zustand                        |                                                                      |
@@ -65,7 +62,6 @@ INTERNSHIPS
 |                 |                                | Intern                       |
 +-----------------+--------------------------------+------------------------------+
 
-Resume: https://akash.is/resume.pdf
 Email: me@akash.is
 LinkedIn: https://linkedin.com/in/akashagajjar 
 GitHub: https://github.com/skywalker212

@@ -4,9 +4,9 @@ export const WHOAMI_TEXT = "Hey, I'm Akash, Software Engineer at Sumble";
 
 export const EXPERIENCE_TABLE = [
     ['Company', 'Period', 'Position'],
+    ['Sumble', 'August 2024 - Present', 'Software Engineer'],
     ['Infosys Limited', 'October 2021 – July 2022', 'Power Programmer Level II'],
-    ['Infosys Limited', 'June 2019 – September 2021', 'Power Programmer Level I'],
-    ['Sumble', 'August 2024 - Present', 'Software Engineer']
+    ['Infosys Limited', 'June 2019 – September 2021', 'Power Programmer Level I']
 ];
 
 export const INTERNSHIP_TABLE = [
@@ -15,12 +15,6 @@ export const INTERNSHIP_TABLE = [
 ];
 
 export const PROJECTS: { [id: string]: Project } = {
-    "equinox-studio": {
-        name: "Infosys Equinox Studio",
-        description: "Low-code digital commerce front-end builder",
-        technologies: ["Node.js", "Angular", "MongoDB", "Kubernetes", "Kafka"],
-        link: "https://www.infosysequinox.com/offerings/infosys-equinox-studio.html"
-    },
     "bash-portfolio": {
         name: 'Bash Portfolio',
         description: 'A bash-style portfolio website built with Next.js and TypeScript',
