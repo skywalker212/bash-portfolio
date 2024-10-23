@@ -1,7 +1,5 @@
 import { Project } from "@/types";
 
-export const WHOAMI_TEXT = "Hey, I'm Akash, Software Engineer at Sumble";
-
 export const EXPERIENCE_TABLE = [
     ['Company', 'Period', 'Position'],
     ['Sumble', 'August 2024 - Present', 'Software Engineer'],
@@ -15,12 +13,6 @@ export const INTERNSHIP_TABLE = [
 ];
 
 export const PROJECTS: { [id: string]: Project } = {
-    "bash-portfolio": {
-        name: 'Bash Portfolio',
-        description: 'A bash-style portfolio website built with Next.js and TypeScript',
-        technologies: ['WebAssembly', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Zustand'],
-        link: 'https://github.com/skywalker212/bash-portfolio'
-    },
     "tweeter": {
         name: "Tweeter",
         description: "A light-weight twitter clone written in Erlang",
