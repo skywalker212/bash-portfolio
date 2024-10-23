@@ -4,9 +4,9 @@ export const WHOAMI_TEXT = "Hey, I'm Akash, Software Engineer at Sumble";
 
 export const EXPERIENCE_TABLE = [
     ['Company', 'Period', 'Position'],
+    ['Sumble', 'August 2024 - Present', 'Software Engineer'],
     ['Infosys Limited', 'October 2021 – July 2022', 'Power Programmer Level II'],
-    ['Infosys Limited', 'June 2019 – September 2021', 'Power Programmer Level I'],
-    ['Sumble', 'August 2024 - Present', 'Software Engineer']
+    ['Infosys Limited', 'June 2019 – September 2021', 'Power Programmer Level I']
 ];
 
 export const INTERNSHIP_TABLE = [
