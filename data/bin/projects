@@ -1,9 +1,6 @@
 +---------------------------+--------------------------------+----------------------------------------------------------------------+
 | Project                   | Technologies                   | Link                                                                 |
 |---------------------------|--------------------------------|----------------------------------------------------------------------|
-| Infosys Equinox Studio    | Node.js, Angular, MongoDB,     | https://www.infosysequinox.com/offerings/infosys-equinox-studio.html |
-|                           | Kubernetes, Kafka              |                                                                      |
-|---------------------------|--------------------------------|----------------------------------------------------------------------|
 | Bash Portfolio            | WebAssembly, Next.js,          | https://github.com/skywalker212/bash-portfolio                       |
 |                           | TypeScript, Tailwind CSS,      |                                                                      |
 |                           | Zustand                        |                                                                      |

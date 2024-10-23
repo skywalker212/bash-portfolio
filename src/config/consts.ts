@@ -15,12 +15,6 @@ export const INTERNSHIP_TABLE = [
 ];
 
 export const PROJECTS: { [id: string]: Project } = {
-    "equinox-studio": {
-        name: "Infosys Equinox Studio",
-        description: "Low-code digital commerce front-end builder",
-        technologies: ["Node.js", "Angular", "MongoDB", "Kubernetes", "Kafka"],
-        link: "https://www.infosysequinox.com/offerings/infosys-equinox-studio.html"
-    },
     "bash-portfolio": {
         name: 'Bash Portfolio',
         description: 'A bash-style portfolio website built with Next.js and TypeScript',
