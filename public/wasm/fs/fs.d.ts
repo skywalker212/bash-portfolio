@@ -24,16 +24,22 @@ interface WasmModule {
 }
 
 type EmbindString = ArrayBuffer|Uint8Array|Uint8ClampedArray|Int8Array|string;
-export interface FileInfoVector {
+export interface ClassHandle {
+  isAliasOf(other: ClassHandle): boolean;
+  delete(): void;
+  deleteLater(): this;
+  isDeleted(): boolean;
+  clone(): this;
+}
+export interface FileInfoVector extends ClassHandle {
   size(): number;
   get(_0: number): FileInfo | undefined;
   push_back(_0: FileInfo): void;
   resize(_0: number, _1: FileInfo): void;
   set(_0: number, _1: FileInfo): boolean;
-  delete(): void;
 }
 
-export interface FileSystem {
+export interface FileSystem extends ClassHandle {
   writeFile(_0: EmbindString, _1: EmbindString): void;
   readFile(_0: EmbindString): string;
   cwd(): string;
@@ -41,7 +47,6 @@ export interface FileSystem {
   unlink(_0: EmbindString): boolean;
   makeDirectory(_0: EmbindString): boolean;
   changeDirectory(_0: EmbindString): boolean;
-  delete(): void;
 }
 
 export type FileInfo = {
@@ -58,8 +63,12 @@ export type FileInfo = {
 };
 
 interface EmbindModule {
-  FileInfoVector: {new(): FileInfoVector};
-  FileSystem: {new(_0: EmbindString, _1: any): FileSystem};
+  FileInfoVector: {
+    new(): FileInfoVector;
+  };
+  FileSystem: {
+    new(_0: EmbindString, _1: any): FileSystem;
+  };
 }
 
 export type MainModule = WasmModule & typeof RuntimeExports & EmbindModule;

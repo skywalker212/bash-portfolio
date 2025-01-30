@@ -13,6 +13,12 @@ export const INTERNSHIP_TABLE = [
 ];
 
 export const PROJECTS: { [id: string]: Project } = {
+    "bash-portfolio": {
+        name: 'Bash Portfolio',
+        description: 'A bash-style portfolio website built with Next.js and TypeScript',
+        technologies: ['WebAssembly', 'Next.js'],
+        link: 'https://github.com/skywalker212/bash-portfolio'
+    },
     "tweeter": {
         name: "Tweeter",
         description: "A light-weight twitter clone written in Erlang",
