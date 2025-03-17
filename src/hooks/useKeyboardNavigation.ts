@@ -6,7 +6,7 @@ function escapeRegExp(string: string) {
 }
 
 export const useKeyboardNavigation = (
-    inputRef: React.RefObject<HTMLInputElement>,
+    inputRef: React.RefObject<HTMLInputElement | null>,
     fileSystem: WASMFileSystem,
     getPreviousCommand: () => string | null,
     getNextCommand: () => string | null,
