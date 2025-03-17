@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 .output {
     @apply mb-2 whitespace-pre break-words;
 }
