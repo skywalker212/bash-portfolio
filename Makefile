@@ -19,14 +19,17 @@ $(MODULES):
 	$(eval CONFIG := $(call read_config,$@))
 	emcc $(WASM_SRC_DIR)/$@/$@.cpp -o $(WASM_PUBLIC_DIR)/$@/$@.js \
 		-sALLOW_MEMORY_GROWTH=1 \
+		-sINITIAL_MEMORY=1MB \
 		-sEXPORT_NAME='$@Module' \
 		--emit-tsd $@.d.ts \
 		-sMODULARIZE \
 		-sENVIRONMENT=web \
-		-O3 \
+		-Oz \
 		--closure 1 \
 		-flto \
 		-sEVAL_CTORS=2 \
+		-sFILESYSTEM=0 \
+		-sNO_EXIT_RUNTIME=1 \
 		$(CONFIG)
 
 clean:
@@ -38,12 +41,15 @@ $(WASM_PUBLIC_DIR)/%/%.js: $(WASM_SRC_DIR)/%/%.cpp $(wildcard $(WASM_SRC_DIR)/%/
 	$(eval CONFIG := $(call read_config,$*))
 	emcc $< -o $@ \
 		-sALLOW_MEMORY_GROWTH=1 \
+		-sINITIAL_MEMORY=1MB \
 		-sEXPORT_NAME='$*Module' \
 		--emit-tsd $@.d.ts \
 		-sMODULARIZE \
 		-sENVIRONMENT=web \
-		-O3 \
+		-Oz \
 		--closure 1 \
 		-flto \
 		-sEVAL_CTORS=2 \
+		-sFILESYSTEM=0 \
+		-sNO_EXIT_RUNTIME=1 \
 		$(CONFIG)
