@@ -11,6 +11,7 @@
     "clean": "make clean"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.29.0",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "js-argparse": "^0.3.4",

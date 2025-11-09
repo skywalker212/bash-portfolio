@@ -7,6 +7,7 @@ export interface TerminalStore extends TerminalState {
   setHistoryIndex: (index: number) => void
   setOutputStream: (stream: TerminalOutputStream, streamInfo?: FileOutputStream) => void
   changeDirectory: (newDirectory: string) => void
+  setReplMode: (mode: string | null, data?: unknown) => void
 }
 
 export const useTerminalStore = create<TerminalStore>((set) => ({
@@ -16,6 +17,8 @@ export const useTerminalStore = create<TerminalStore>((set) => ({
   outputStream: TerminalOutputStream.STDOUT,
   currentDirectory: terminalConfig.initialDirectory,
   historyIndex: 0,
+  replMode: null,
+  replData: null,
   addCommandToHistory: (command) => set((state) => ({
     commandHistory: [...state.commandHistory, command],
     historyIndex: state.commandHistory.length + 1
@@ -28,6 +31,10 @@ export const useTerminalStore = create<TerminalStore>((set) => ({
     ...streamInfo ? { streamInfo } : {}
   })),
   changeDirectory: (newDirectory) => set({ currentDirectory: newDirectory }),
+  setReplMode: (mode, data) => set(() => ({
+    replMode: mode,
+    replData: data
+  })),
 }));
 
 export const getOutputStream = () => {

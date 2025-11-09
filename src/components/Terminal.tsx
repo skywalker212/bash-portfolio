@@ -13,7 +13,7 @@ export const FileSystemContext = createContext<WASMFileSystem | null>(null)
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
     const terminalStore = useTerminalStore();
-    const { currentDirectory, addCommandToHistory } = terminalStore;
+    const { currentDirectory, addCommandToHistory, replMode } = terminalStore;
     const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender, terminalStore);
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
@@ -28,12 +28,12 @@ const Terminal: React.FC = () => {
             clearTerminal();
         } else if (fileSystem) {
             const result = await executeCommand(trimmedInput, fileSystem);
-            const inputResult = { content: `${getPrompt(currentDirectory)}${input}`, type: CommandResultType.INPUT };
+            const inputResult = { content: `${getPrompt(currentDirectory, replMode)}${input}`, type: CommandResultType.INPUT };
             setOutput(prev => [...prev, inputResult, ...result]);
         }
         setInput('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [input, fileSystem, currentDirectory, addCommandToHistory, clearTerminal, executeCommand, setOutput]);
+    }, [input, fileSystem, currentDirectory, replMode, addCommandToHistory, clearTerminal, executeCommand, setOutput]);
 
     useKeyboardNavigation(inputRef, fileSystem as WASMFileSystem, getPreviousCommand, getNextCommand, setInput, clearTerminal, handleSubmit);
 
@@ -81,7 +81,7 @@ const Terminal: React.FC = () => {
                     ref={inputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    prompt={getPrompt(currentDirectory)}
+                    prompt={getPrompt(currentDirectory, replMode)}
                 />}
             </FileSystemContext.Provider>
         </div>

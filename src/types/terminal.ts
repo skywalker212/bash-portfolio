@@ -21,6 +21,8 @@ export interface TerminalState {
     currentDirectory: string;
     commandHistory: string[];
     historyIndex: number;
+    replMode: string | null;
+    replData: unknown;
 }
 
 export type CommandHandler = (command: string) => string;
