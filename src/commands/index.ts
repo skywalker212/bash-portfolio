@@ -10,6 +10,7 @@ import { mkdirCommand } from './mkdir';
 import { catCommand } from './cat';
 import { rmCommand } from './rm';
 import { catsayCommand } from './catsay';
+import { duckdbCommand } from './duckdb';
 
 export const commands = [
     helpCommand,
@@ -17,6 +18,7 @@ export const commands = [
     skillsCommand,
     projectsCommand,
     catsayCommand,
+    duckdbCommand,
     clearCommand,
     lsCommand,
     cdCommand,

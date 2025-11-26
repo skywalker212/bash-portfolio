@@ -6,6 +6,26 @@ import { WASMFileSystem } from './fileSystemUtils';
 import { ArgumentParserError, ArgumentTypeError, InvalidChoiceError, InvalidNargsError, MissingRequiredArgumentError, UnknownArgumentError } from 'js-argparse';
 
 export const handleCommand = async (input: string, terminalStore: TerminalStore, fileSystem: WASMFileSystem): Promise<CommandResult[]> => {
+  // Check if we're in REPL mode
+  if (terminalStore.replMode) {
+    // Route input to the REPL command
+    const replCommand = commands.find(cmd => cmd.name === terminalStore.replMode);
+    if (replCommand) {
+      try {
+        // In REPL mode, treat the entire input as a single argument to the REPL command
+        const parsedArgs = replCommand.args.parseArgs(input);
+        const result = await replCommand.execute({ terminalStore, fileSystem }, parsedArgs);
+        return Array.isArray(result) ? result : [result];
+      } catch (error: unknown) {
+        console.error(`Error in REPL mode:`, error);
+        return [{
+          content: `REPL Error: ${(error as Error).message}`,
+          type: CommandResultType.ERROR
+        }];
+      }
+    }
+  }
+
   const { command: commandName, args, file } = parseCommand(input);
   if (file) {
     terminalStore.setOutputStream(TerminalOutputStream.FILE, { name: file });

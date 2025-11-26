@@ -2,9 +2,10 @@ import { ParsedCommand } from '@/types';
 import { terminalConfig } from '@/config';
 import { HOME_DIR } from '@/config/terminalConfig';
 
-export const getPrompt = (currentDirectory: string): string => {
+export const getPrompt = (currentDirectory: string, replMode?: string | null): string => {
   const homeDirectoryRegex = new RegExp(`^${HOME_DIR}`);
-  return `${terminalConfig.user}@${terminalConfig.host}:${currentDirectory.replace(homeDirectoryRegex,'~')}$ `;
+  const basePrompt = `${terminalConfig.user}@${terminalConfig.host}:${currentDirectory.replace(homeDirectoryRegex, '~')}`;
+  return replMode ? `${replMode}> ` : `${basePrompt}$ `;
 };
 
 export const parseCommand = (input: string): ParsedCommand => {
