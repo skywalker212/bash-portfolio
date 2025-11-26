@@ -21,6 +21,8 @@ export interface TerminalState {
     currentDirectory: string;
     commandHistory: string[];
     historyIndex: number;
+    duckdbCommandHistory: string[];
+    duckdbHistoryIndex: number;
     replMode: string | null;
     replData: unknown;
 }
@@ -41,6 +43,7 @@ export enum CommandResultType {
 export interface CommandResult {
     content?: string[][] | ReactNode;
     type: CommandResultType;
+    metadata?: Record<string, unknown>;
 }
 
 export enum TableType {

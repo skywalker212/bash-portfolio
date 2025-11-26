@@ -13,7 +13,7 @@ export const FileSystemContext = createContext<WASMFileSystem | null>(null)
 const Terminal: React.FC = () => {
     const [input, setInput] = useState('');
     const terminalStore = useTerminalStore();
-    const { currentDirectory, addCommandToHistory, replMode } = terminalStore;
+    const { currentDirectory, addCommandToHistory, addDuckdbCommandToHistory, replMode } = terminalStore;
     const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender, terminalStore);
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
@@ -23,7 +23,13 @@ const Terminal: React.FC = () => {
         const trimmedInput = input.trim();
         if (!trimmedInput) return;
 
-        addCommandToHistory(trimmedInput);
+        // Add to appropriate history based on REPL mode
+        if (replMode === 'duckdb') {
+            addDuckdbCommandToHistory(trimmedInput);
+        } else {
+            addCommandToHistory(trimmedInput);
+        }
+
         if (trimmedInput === 'clear') {
             clearTerminal();
         } else if (fileSystem) {
@@ -33,7 +39,7 @@ const Terminal: React.FC = () => {
         }
         setInput('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [input, fileSystem, currentDirectory, replMode, addCommandToHistory, clearTerminal, executeCommand, setOutput]);
+    }, [input, fileSystem, currentDirectory, replMode, addCommandToHistory, addDuckdbCommandToHistory, clearTerminal, executeCommand, setOutput]);
 
     useKeyboardNavigation(inputRef, fileSystem as WASMFileSystem, getPreviousCommand, getNextCommand, setInput, clearTerminal, handleSubmit);
 

@@ -1,12 +1,19 @@
-import { Command, CommandResultType, TableCommandResult, TableType } from '@/types';
+import { Command, CommandResultType } from '@/types';
 import { ArgumentParser } from 'js-argparse';
 import * as duckdb from '@duckdb/duckdb-wasm';
+import { createInMemoryDuckDBConnection, createPersistentDuckDBConnection, closeConnection } from '@/lib/duckdb/connection';
+import { executeSqlStatement } from '@/lib/duckdb/queryExecutor';
+import { DuckDBReplState, DEFAULT_DB_NAME, MULTILINE_PROMPT } from '@/lib/duckdb/types';
+import { isMetaCommand, executeMetaCommand } from '@/lib/duckdb/metaCommands';
+import { isCompleteSqlStatement, appendToMultilineBuffer } from '@/lib/duckdb/sqlParser';
 
 const name = "duckdb";
 const description = "In-memory SQL database using DuckDB";
 
 type Args = {
-    sql: string[]
+    sql: string[];
+    persistent?: boolean;
+    database?: string;
 }
 
 type DuckDBCommand = Command<Args>;
@@ -21,46 +28,34 @@ duckdbArgs.addArgument(['sql'], {
     default: []
 });
 
-async function createFreshDuckDB(): Promise<duckdb.AsyncDuckDBConnection> {
-    const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+duckdbArgs.addArgument(['-p', '--persistent'], {
+    type: "boolean",
+    default: false,
+    help: "Use persistent database (stored in IndexedDB)"
+});
 
-    const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
+duckdbArgs.addArgument(['-d', '--database'], {
+    help: "Database name (for persistent mode)",
+    default: DEFAULT_DB_NAME
+});
 
-    const worker_url = URL.createObjectURL(
-        new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' })
-    );
-
-    const worker = new Worker(worker_url);
-    const logger = new duckdb.ConsoleLogger();
-
-    const db = new duckdb.AsyncDuckDB(logger, worker);
-    await db.instantiate(bundle.mainModule);
-
-    return await db.connect();
-}
-
-async function executeQuery(conn: duckdb.AsyncDuckDBConnection, sql: string): Promise<string[][]> {
-    const result = await conn.query(sql);
-
-    // Convert Arrow table to 2D array
-    const rows: string[][] = [];
-
-    // Add header row
-    const headers = result.schema.fields.map(field => field.name);
-    rows.push(headers);
-
-    // Add data rows
-    for (let i = 0; i < result.numRows; i++) {
-        const row: string[] = [];
-        for (let j = 0; j < result.numCols; j++) {
-            const column = result.getChildAt(j);
-            const value = column?.get(i);
-            row.push(value !== null && value !== undefined ? String(value) : 'NULL');
-        }
-        rows.push(row);
-    }
-
-    return rows;
+function createInitialReplState(
+    db: duckdb.AsyncDuckDB,
+    connection: duckdb.AsyncDuckDBConnection,
+    isPersistent: boolean,
+    dbName: string
+): DuckDBReplState {
+    return {
+        connection,
+        db,
+        sessionId: crypto.randomUUID(),
+        dbName,
+        isPersistent,
+        queryHistory: [],
+        outputFormat: 'table',
+        multilineBuffer: '',
+        loadedFiles: []
+    };
 }
 
 const helpMessage = `DuckDB In-Memory SQL Database
@@ -89,101 +84,91 @@ export const duckdbCommand: DuckDBCommand = {
     name,
     args: duckdbArgs,
     description,
-    execute: async ({ terminalStore }, args) => {
+    execute: async ({ terminalStore, fileSystem }, args) => {
         try {
             const sqlInput = args.sql.join(" ").trim();
-
-            // Check if we're in REPL mode
             const isInRepl = terminalStore.replMode === 'duckdb';
 
             if (isInRepl) {
-                // We're in REPL mode - handle REPL commands
-                const conn = terminalStore.replData as duckdb.AsyncDuckDBConnection;
+                const state = terminalStore.replData as DuckDBReplState;
 
-                // Exit REPL
-                if (sqlInput === '.exit') {
-                    terminalStore.setReplMode(null);
-                    return {
-                        content: "Exited DuckDB REPL",
-                        type: CommandResultType.INFO
-                    };
+                if (isMetaCommand(sqlInput)) {
+                    const result = await executeMetaCommand(sqlInput, state, { terminalStore, fileSystem });
+
+                    if (result.metadata?.shouldExit) {
+                        await closeConnection(state.connection);
+                        terminalStore.setReplMode(null);
+                        return {
+                            content: "Exited DuckDB REPL",
+                            type: CommandResultType.INFO
+                        };
+                    }
+
+                    return result;
                 }
 
-                // Help in REPL
-                if (sqlInput === '.help' || !sqlInput) {
+                if (!sqlInput) {
                     return {
                         content: helpMessage,
                         type: CommandResultType.TEXT
                     };
                 }
 
-                // Execute SQL in REPL
-                const isSelectQuery = /^\s*(SELECT|SHOW|DESCRIBE|EXPLAIN|PRAGMA)/i.test(sqlInput);
+                state.multilineBuffer = appendToMultilineBuffer(state.multilineBuffer, sqlInput);
 
-                if (isSelectQuery) {
-                    const resultData = await executeQuery(conn, sqlInput);
-
-                    if (resultData.length <= 1) {
-                        return {
-                            content: "Query executed successfully (0 rows returned)",
-                            type: CommandResultType.SUCCESS
-                        };
-                    }
-
-                    const result: TableCommandResult = {
-                        content: resultData,
-                        type: CommandResultType.TABLE,
-                        tableType: TableType.NORMAL
-                    };
-                    return result;
-                } else {
-                    await conn.query(sqlInput);
+                if (!isCompleteSqlStatement(state.multilineBuffer)) {
                     return {
-                        content: "Query executed successfully",
-                        type: CommandResultType.SUCCESS
-                    };
-                }
-            } else {
-                // Not in REPL mode
-
-                // No arguments - enter REPL mode
-                if (!sqlInput) {
-                    const conn = await createFreshDuckDB();
-                    terminalStore.setReplMode('duckdb', conn);
-                    return {
-                        content: "Entered DuckDB REPL. Type .exit to quit, .help for help.",
+                        content: MULTILINE_PROMPT,
                         type: CommandResultType.INFO
                     };
                 }
 
-                // Execute single SQL query with fresh database
-                const conn = await createFreshDuckDB();
-                const isSelectQuery = /^\s*(SELECT|SHOW|DESCRIBE|EXPLAIN|PRAGMA)/i.test(sqlInput);
+                const completeStatement = state.multilineBuffer;
+                state.multilineBuffer = '';
 
-                if (isSelectQuery) {
-                    const resultData = await executeQuery(conn, sqlInput);
+                const result = await executeSqlStatement(state.connection, completeStatement, state.outputFormat);
 
-                    if (resultData.length <= 1) {
-                        return {
-                            content: "Query executed successfully (0 rows returned)",
-                            type: CommandResultType.SUCCESS
-                        };
-                    }
-
-                    const result: TableCommandResult = {
-                        content: resultData,
-                        type: CommandResultType.TABLE,
-                        tableType: TableType.NORMAL
-                    };
-                    return result;
-                } else {
-                    await conn.query(sqlInput);
-                    return {
-                        content: "Query executed successfully",
-                        type: CommandResultType.SUCCESS
-                    };
+                if (result.type !== CommandResultType.ERROR) {
+                    state.queryHistory.push(completeStatement);
                 }
+
+                return result;
             }
+
+            if (!sqlInput) {
+                let db: duckdb.AsyncDuckDB;
+                let connection: duckdb.AsyncDuckDBConnection;
+                let wasRestored = false;
+
+                if (args.persistent) {
+                    const result = await createPersistentDuckDBConnection(args.database!);
+                    db = result.db;
+                    connection = result.connection;
+                    wasRestored = result.wasRestored;
+                } else {
+                    const result = await createInMemoryDuckDBConnection();
+                    db = result.db;
+                    connection = result.connection;
+                }
+
+                const state = createInitialReplState(db, connection, args.persistent || false, args.database!);
+                terminalStore.setReplMode('duckdb', state);
+
+                const modeMsg = args.persistent
+                    ? ` (persistent: ${args.database}${wasRestored ? ', restored from save' : ''})`
+                    : ' (in-memory)';
+
+                return {
+                    content: `Entered DuckDB REPL${modeMsg}. Type .exit to quit, .help for help.`,
+                    type: CommandResultType.INFO
+                };
+            }
+
+            const { connection } = await createInMemoryDuckDBConnection();
+            const result = await executeSqlStatement(connection, sqlInput, 'table');
+            await closeConnection(connection);
+
+            return result;
 
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : String(error);
