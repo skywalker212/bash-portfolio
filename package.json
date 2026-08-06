@@ -14,7 +14,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "js-argparse": "^0.3.4",
-    "next": "16.2.12",
+    "next": "16.3.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-innertext": "^1.1.5",
@@ -31,7 +31,7 @@
     "@types/react-dom": "19.0.4",
     "eslint": "9.22.0",
     "eslint-config-next": "15.2.2",
-    "postcss": "^8.5.18",
+    "postcss": "^8.5.23",
     "tailwindcss": "^4.0.14",
     "typescript": "5.8.2",
     "typescript-eslint": "^8.26.1"
