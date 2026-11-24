@@ -37,24 +37,32 @@ const directoryChecks = `
 const setup = `
 set -e
 umask 000
-mkdir -p "$1/bin" "$1/dev/shm/tmp" "$1/proc/self/fd" "$1/tmp" "$1$5"
-mknod -m 666 "$1/dev/null" c 1 3
-mknod -m 555 "$1/dev/random" c 1 8
-mknod -m 555 "$1/dev/urandom" c 1 9
-mknod -m 666 "$1/dev/tty" c 5 0
-mknod -m 666 "$1/dev/tty1" c 4 1
-ln -s /dev/tty "$1/dev/stdin"
-ln -s /dev/tty "$1/dev/stdout"
-ln -s /dev/tty1 "$1/dev/stderr"
-mkdir -p "$1\${3%/*}"
-cp "$2" "$1$3"
-cp "$4/bin/"* "$1/bin/"
-cp -R "$4/commands" "$4/help" "$1\${3%/*}/"
-ln -s busybox "$1\${3%/*}/cat"
-ln -s busybox "$1\${3%/*}/awk"
-chmod 777 "$1/bin/"*
-ln -s /bin/projects "$1$5/projects"
-ln -s /bin/skills "$1$5/skills"
+root=$1
+busybox=$2
+tools=$root$3
+seed=$4
+home=$root$5
+
+mkdir -p "$root/bin" "$root/dev/shm/tmp" "$root/proc/self/fd" "$root/tmp" "$tools" "$home"
+mknod -m 666 "$root/dev/null" c 1 3
+mknod -m 555 "$root/dev/random" c 1 8
+mknod -m 555 "$root/dev/urandom" c 1 9
+mknod -m 666 "$root/dev/tty" c 5 0
+mknod -m 666 "$root/dev/tty1" c 4 1
+ln -s /dev/tty "$root/dev/stdin"
+ln -s /dev/tty "$root/dev/stdout"
+ln -s /dev/tty1 "$root/dev/stderr"
+ln -s /bin/projects "$home/projects"
+ln -s /bin/skills "$home/skills"
+
+cp "$seed/bin/"* "$root/bin/"
+chmod 777 "$root/bin/"*
+cp "$busybox" "$tools/busybox"
+cp -R "$seed/commands" "$seed/help" "$tools/"
+ln -s busybox "$tools/cat"
+ln -s busybox "$tools/awk"
+mount --bind "$tools" "$tools"
+mount -o remount,bind,ro "$tools"
 `;
 
 const list = String.raw`
@@ -67,7 +75,7 @@ fi
 
 for name do
     [ -e "$name" ] || [ -L "$name" ] || continue
-    [ "$PWD/$name" != '/dev/.portfolio-tools' ] || continue
+    [ "$PWD/$name" != '${TOOL_DIR}' ] || continue
     info=$("$BOX" stat -c '%A %h %u %g %s %Y' -- "$name") || exit 1
     printf '%s\0%s\0' "$name" "$info"
     if [ -L "$name" ]; then
@@ -100,7 +108,7 @@ export class LinuxFileSystem {
         const kernel = await createKernel({ worker: true, cpus: 1, memoryMiB: 128, net: undefined, signal });
         try {
             const seed = await kernel.mount(SEED, { bin, commands, help }, { readOnly: true });
-            const result = await kernel.exec(BUSYBOX, ['sh', '-c', setup, 'sh', ROOT, BUSYBOX, TOOLS, SEED, HOME_DIR], { signal });
+            const result = await kernel.exec(BUSYBOX, ['sh', '-c', setup, 'sh', ROOT, BUSYBOX, TOOL_DIR, SEED, HOME_DIR], { signal });
             if (result.exitCode !== 0) throw new Error(result.stderr || 'Unable to prepare the guest filesystem.');
             await seed.unmount();
             return new LinuxFileSystem(kernel);
@@ -138,8 +146,14 @@ export class LinuxFileSystem {
     }
 
     async writeFile(path: string, data: string) {
-        const result = await this.run('"$BOX" cat >> "$1"', [path], data);
-        this.check(result, 'Cannot open the file for writing. Please check if you have the necessary permissions.');
+        const result = await this.run(`
+            "$BOX" cat >> "$1" && exit 0
+            [ -e "$1" ] || exit 10
+            exit 1
+        `, [path], data);
+        this.check(result, 'Cannot open the file for writing. Please check if you have the necessary permissions.', {
+            10: NO_SUCH_FILE,
+        });
     }
 
     async readFile(path: string) {
