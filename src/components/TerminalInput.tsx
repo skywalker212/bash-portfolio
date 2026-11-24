@@ -1,9 +1,15 @@
-import React, { forwardRef, useId } from 'react';
+import { forwardRef, useId, type ChangeEventHandler, type KeyboardEventHandler } from 'react';
 import styles from '@/styles/TerminalInput.module.css';
-import { TerminalInputProps } from '@/types';
+
+interface TerminalInputProps {
+  value: string;
+  prompt: string;
+  onChange: ChangeEventHandler<HTMLInputElement>;
+  onKeyDown: KeyboardEventHandler<HTMLInputElement>;
+}
 
 const TerminalInput = forwardRef<HTMLInputElement, TerminalInputProps>(
-  ({ value, onChange, prompt }, ref) => {
+  ({ value, onChange, onKeyDown, prompt }, ref) => {
     const inputId = useId();
     return (
       <div className={styles.inputWrapper}>
@@ -14,6 +20,7 @@ const TerminalInput = forwardRef<HTMLInputElement, TerminalInputProps>(
           type="text"
           value={value}
           onChange={onChange}
+          onKeyDown={onKeyDown}
           className={styles.input}
           autoFocus
         />

@@ -1,4 +1,5 @@
-import { Command, CommandResultType } from '@/types';
+import { CommandResultType } from '@/types/terminal';
+import { defineCommand } from './command';
 import { ArgumentParser } from 'js-argparse';
 
 const name = 'cat';
@@ -8,8 +9,6 @@ type Args = {
     file: string
 }
 
-type CatCommand = Command<Args>;
-
 const catArgs = new ArgumentParser<Args>(name, description);
 
 catArgs.addArgument(['file'], {
@@ -17,13 +16,13 @@ catArgs.addArgument(['file'], {
     help: "Path to file"
 });
 
-export const catCommand: CatCommand = {
+export const catCommand = defineCommand({
     name,
     args:catArgs,
     description,
-    execute: async (state, args) => {
+    execute: async (fileSystem, args) => {
         try {
-            const fileContents = state.fileSystem.readFile(args.file);
+            const fileContents = await fileSystem.readFile(args.file);
             return {
                 content: fileContents,
                 type: CommandResultType.TEXT
@@ -35,4 +34,4 @@ export const catCommand: CatCommand = {
             };
         }
     }
-};
+});

@@ -1,6 +1,5 @@
-import { MainModule as CatSayModule } from '@/public/wasm/catsay/catsay';
-import { Command, CommandResultType } from '@/types';
-import { loadWasmModule } from '@/utils';
+import { CommandResultType } from '@/types/terminal';
+import { defineCommand } from './command';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "catsay";
@@ -9,8 +8,6 @@ const description = "A talking cat";
 type Args = {
     text: string[]
 }
-
-type CatsayCommand = Command<Args>;
 
 const catsayArgs = new ArgumentParser<Args>(name, description);
 
@@ -22,18 +19,19 @@ catsayArgs.addArgument(['text'], {
     nargs: "+"
 });
 
-export const catsayCommand: CatsayCommand = {
+export const catsayCommand = defineCommand({
     name,
     args: catsayArgs,
     description,
-    execute: async (_, args) => {
+    execute: async (fileSystem, args) => {
         try {
-
-            const catsayModule = await loadWasmModule<CatSayModule>(name, "js");
-
-            const resp = catsayModule.say(args.text.join(" "));
+            const { stdout, exitCode } = await fileSystem.runPortfolioCommand(name, [args.text.join(" ")]);
+            if (exitCode === 1) {
+                // Preserve the displayed error for inputs that overflow the original bubble.
+                throw new Error('Aborted(). Build with -sASSERTIONS for more info.');
+            }
             return {
-                content: resp,
+                content: stdout,
                 type: CommandResultType.TEXT
             };
         } catch (error: unknown) {
@@ -43,4 +41,4 @@ export const catsayCommand: CatsayCommand = {
             };
         }
     }
-};
+});

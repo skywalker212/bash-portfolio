@@ -1,7 +1,6 @@
-import { PROJECTS } from '@/config';
-import { Command, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
+import { CommandResult, CommandResultType, TableType } from '@/types/terminal';
+import { defineCommand } from './command';
 import styles from '@/styles/Output.module.css';
-import { titleCase } from '@/utils';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "projects";
@@ -11,8 +10,6 @@ type Args = {
     project_name?: string
 }
 
-type ProjectCommand = Command<Args>;
-
 const projectsArgs = new ArgumentParser<Args>(name, description);
 
 projectsArgs.addArgument(['project_name'], {
@@ -21,20 +18,18 @@ projectsArgs.addArgument(['project_name'], {
     help: "Name of project"
 })
 
-export const projectsCommand: ProjectCommand = {
+export const projectsCommand = defineCommand({
     name,
     args: projectsArgs,
     description,
-    execute: (_, args): CommandResult | TableCommandResult | (CommandResult | TableCommandResult)[] => {
+    execute: async (fileSystem, args): Promise<CommandResult | CommandResult[]> => {
+        const { stdout, exitCode } = await fileSystem.runPortfolioCommand('projects', args.project_name ? [args.project_name] : []);
+        const projects = stdout.trimEnd().split('\n').map(row => row.split('\t'));
         if (!args.project_name) {
             return [{
                 content: [
                     ['Project', 'Technologies', 'Link'],
-                    ...Object.values(PROJECTS).map(project => [
-                        project.name,
-                        project.technologies.join(', '),
-                        project.link
-                    ])
+                    ...projects.map(([, name, , technologies, link]) => [name, technologies, link])
                 ],
                 type: CommandResultType.TABLE,
                 tableType: TableType.NORMAL,
@@ -44,21 +39,18 @@ export const projectsCommand: ProjectCommand = {
                 type: CommandResultType.CUSTOM
             }];
         } else {
-            const project = PROJECTS[args.project_name];
-            if (!project) {
+            if (exitCode === 1) {
                 return {
                     content: `Project "${args.project_name}" not found.`,
                     type: CommandResultType.ERROR
                 };
             }
+            const [, name, description, technologies, link] = projects[0];
             return {
-                content: Object.entries(project).map(([key, val]) => [
-                    titleCase(key),
-                    Array.isArray(val) ? val.join(', ') : String(val)
-                ]),
+                content: [['Name', name], ['Description', description], ['Technologies', technologies], ['Link', link]],
                 type: CommandResultType.TABLE,
                 columns: [{ width: 15 }, { width: 55 }]
             };
         }
     }
-};
+});

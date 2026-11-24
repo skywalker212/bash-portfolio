@@ -1,0 +1,10 @@
+#!/bin/sh
+
+cat <<'SKILLS'
+Languages	Python, TypeScript, Java, Erlang
+Frontend	Next.js, Angular, React
+Backend	Node.js, Express, FastAPI
+Databases	MongoDB, Elasticsearch, Redis, PostgreSQL
+DevOps	Kubernetes, Jenkins, JFrog Artifactory
+Other	WebAssembly, PyTorch, Apache Kafka, GraphQL, Jaeger, Ghidra
+SKILLS

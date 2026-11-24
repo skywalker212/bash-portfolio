@@ -3,12 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npm run build-wasm && next dev",
+    "dev": "next dev",
     "build": "next build",
-    "build-wasm": "make",
     "start": "next start",
-    "lint": "next lint",
-    "clean": "make clean"
+    "lint": "next lint"
   },
   "dependencies": {
     "@vercel/analytics": "^1.5.0",
@@ -19,12 +17,11 @@
     "react-dom": "19.0.0",
     "react-innertext": "^1.1.5",
     "table": "^6.9.0",
-    "zustand": "^5.0.3"
+    "unkernel": "0.2.0-261124-c08e977"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
     "@tailwindcss/postcss": "^4.0.14",
-    "@types/emscripten": "^1.40.0",
     "@types/figlet": "^1.7.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",

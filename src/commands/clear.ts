@@ -1,15 +1,15 @@
-import { Command } from '@/types';
 import { ArgumentParser } from 'js-argparse';
+import { defineCommand } from './command';
 
-const name = "clear";
-const description = "Clear the terminal screen";
+const name = 'clear';
+const description = 'Clear the terminal screen';
 
-type ClearCommand = Omit<Command, 'execute'>;
-
-const clearArgs = new ArgumentParser(name, description);
-
-export const clearCommand: ClearCommand = {
+export const clearCommand = defineCommand({
     name,
     description,
-    args: clearArgs
-};
+    args: new ArgumentParser(name, description),
+    execute() {
+        // The terminal handles bare clear. Keep the established error for redirected clear.
+        throw new Error('command.execute is not a function');
+    },
+});

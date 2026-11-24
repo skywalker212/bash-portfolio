@@ -1,4 +1,5 @@
-import { Command, CommandResultType } from '@/types';
+import { CommandResultType } from '@/types/terminal';
+import { defineCommand } from './command';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "rm";
@@ -8,8 +9,6 @@ type Args = {
     file: string 
 }
 
-type RmCommand = Command<Args>;
-
 const rmArgs = new ArgumentParser<Args>(name, description);
 
 rmArgs.addArgument(['file'], {
@@ -17,14 +16,14 @@ rmArgs.addArgument(['file'], {
     help: "Name of file to remove"
 });
 
-export const rmCommand: RmCommand = {
+export const rmCommand = defineCommand({
     name,
     args: rmArgs,
     description,
-    execute: async (state, args) => {
+    execute: async (fileSystem, args) => {
         try {
 
-            await state.fileSystem.unlink(args.file);
+            await fileSystem.unlink(args.file);
 
             return {
                 type: CommandResultType.NONE
@@ -36,4 +35,4 @@ export const rmCommand: RmCommand = {
             };
         }
     }
-};
+});

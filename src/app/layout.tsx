@@ -1,7 +1,7 @@
 import '@/styles/globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import { LayoutProps } from '@/types';
+import type { ReactNode } from 'react';
 import { Viewport } from 'next';
 
 export const metadata = {
@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: LayoutProps) {
+}: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>

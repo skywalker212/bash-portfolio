@@ -1,5 +1,5 @@
-import { Command } from '@/types';
-import { helpCommand } from './help';
+import type { Command } from './command';
+import { buildHelpFiles, helpCommand } from './help';
 import { whoamiCommand } from './whoami';
 import { skillsCommand } from './skills';
 import { projectsCommand } from './projects';
@@ -11,7 +11,7 @@ import { catCommand } from './cat';
 import { rmCommand } from './rm';
 import { catsayCommand } from './catsay';
 
-export const commands = [
+export const commands: readonly Command[] = [
     helpCommand,
     whoamiCommand,
     skillsCommand,
@@ -23,4 +23,6 @@ export const commands = [
     mkdirCommand,
     rmCommand,
     catCommand
-] as Command[];
+];
+
+export const commandHelpFiles = buildHelpFiles(commands);
