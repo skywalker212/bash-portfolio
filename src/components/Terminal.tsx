@@ -5,12 +5,12 @@ import TerminalInput from './TerminalInput';
 import { useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
 import { CommandResultType } from '@/types';
-import { getPrompt, LinuxFileSystem } from '@/utils';
+import { getPrompt, LinuxFileSystem, type PortfolioFiles } from '@/utils';
 import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
 import { initialRender } from '@/config';
 import Output from './Output';
 
-const Terminal = ({ files }: { files: Record<string, string> }) => {
+const Terminal = ({ files }: { files: PortfolioFiles }) => {
     const [input, setInput] = useState('');
     const terminalStore = useTerminalStore();
     const { currentDirectory, addCommandToHistory, changeDirectory } = terminalStore;

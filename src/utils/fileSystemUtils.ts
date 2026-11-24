@@ -17,7 +17,13 @@ interface FileInfo {
 const ROOT = '/run/portfolio';
 const SEED = '/run/portfolio-seed';
 const BUSYBOX = '/bin/busybox';
-const TOOLS = '/dev/.portfolio-tools/busybox';
+const TOOL_DIR = '/dev/.portfolio-tools';
+const TOOLS = `${TOOL_DIR}/busybox`;
+
+export interface PortfolioFiles {
+    bin: Record<string, string>;
+    commands: Record<string, string>;
+}
 const NO_SUCH_DIRECTORY = 'The specified directory does not exist. Please check the path and try again.';
 const NOT_A_DIRECTORY = 'The specified path is not a directory. Please provide a valid directory path.';
 const NO_SUCH_FILE = 'The file does not exist. Please check the file path and try again.';
@@ -42,7 +48,10 @@ ln -s /dev/tty "$1/dev/stdout"
 ln -s /dev/tty1 "$1/dev/stderr"
 mkdir -p "$1\${3%/*}"
 cp "$2" "$1$3"
-cp "$4"/* "$1/bin/"
+cp "$4/bin/"* "$1/bin/"
+cp -R "$4/commands" "$1\${3%/*}/"
+ln -s busybox "$1\${3%/*}/cat"
+ln -s busybox "$1\${3%/*}/awk"
 chmod 777 "$1/bin/"*
 ln -s /bin/projects "$1$5/projects"
 ln -s /bin/skills "$1$5/skills"
@@ -82,7 +91,7 @@ export class LinuxFileSystem {
 
     private constructor(private readonly kernel: KernelHandle) {}
 
-    static async start(files: Record<string, string>, signal: AbortSignal) {
+    static async start({ bin, commands }: PortfolioFiles, signal: AbortSignal) {
         const { createKernel, checkSupport } = await import('unkernel/web');
         if (!(await checkSupport()).ok) {
             throw new Error('This browser does not support the WebAssembly features needed to run Linux.');
@@ -90,7 +99,7 @@ export class LinuxFileSystem {
         signal.throwIfAborted();
         const kernel = await createKernel({ worker: true, cpus: 1, memoryMiB: 128, net: undefined, signal });
         try {
-            const seed = await kernel.mount(SEED, files, { readOnly: true });
+            const seed = await kernel.mount(SEED, { bin, commands }, { readOnly: true });
             const result = await kernel.exec(BUSYBOX, ['sh', '-c', setup, 'sh', ROOT, BUSYBOX, TOOLS, SEED, HOME_DIR], { signal });
             if (result.exitCode !== 0) throw new Error(result.stderr || 'Unable to prepare the guest filesystem.');
             await seed.unmount();
@@ -107,13 +116,21 @@ export class LinuxFileSystem {
             'chroot', ROOT, TOOLS, 'sh', '-c',
             'cd -- "$1" || exit 1; shift; umask 000; ' + script,
             'sh', this.directory, ...args,
-        ], { env: { BOX: TOOLS }, input });
+        ], { env: { BOX: TOOLS, PATH: TOOL_DIR }, input });
     }
 
     private check(result: { exitCode: number | null }, message: string, errors: Record<number, string> = {}) {
         if (result.exitCode !== 0) {
             throw new Error(ERROR_PREFIX + (errors[result.exitCode ?? -1] ?? message));
         }
+    }
+
+    async runPortfolioCommand(command: string, args: string[] = []) {
+        const result = await this.run('"$BOX" sh "$@"', [`${TOOL_DIR}/commands/${command}.sh`, ...args]);
+        if (result.exitCode === null || result.exitCode > 1 || result.stderr) {
+            throw new Error(result.stderr.trim() || `The ${command} command failed.`);
+        }
+        return result;
     }
 
     cwd() {
