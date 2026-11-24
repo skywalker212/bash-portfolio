@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ "${1:-}" = --help ]; then
+if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then
     printf 'Usage: catsay [TEXT ...]\n'
     exit
 fi
@@ -58,22 +58,16 @@ BEGIN {
         lines[count] = line
     }
 
-    if (count == 0)
-        bubble_width = 20
-    else {
+    bubble_width = 20
+    if (count > 0 && length(lines[1]) + 4 > bubble_width)
         bubble_width = length(lines[1]) + 4
-        if (bubble_width < 20)
-            bubble_width = 20
-        if (bubble_width > max_width)
-            bubble_width = max_width
-    }
-
     bubble_height = count < max_height ? count : max_height
-
-    for (i = 1; i <= bubble_height; i++) {
-        if (bubble_width - length(lines[i]) - 3 < 0)
-            exit 1
+    for (i = 2; i <= bubble_height; i++) {
+        if (length(lines[i]) + 3 > bubble_width)
+            bubble_width = length(lines[i]) + 3
     }
+    if (bubble_width > max_width)
+        bubble_width = max_width
 
     printf " %s\n", repeat("_", bubble_width)
 

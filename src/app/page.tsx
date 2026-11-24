@@ -1,21 +1,23 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import Terminal from '@/components/Terminal';
+import type { GuestFiles } from '@/linux/session';
 
-async function readFiles(directory: string) {
-  const path = join(process.cwd(), 'data', directory);
-  const files = await Promise.all((await readdir(path)).map(async name =>
-    [name, await readFile(join(path, name), 'utf8')] as const
-  ));
+async function readGuestFiles(path: string): Promise<GuestFiles> {
+  const entries = await readdir(path, { withFileTypes: true });
+  const files = await Promise.all(entries.map(async entry => {
+    const file = join(path, entry.name);
+    return [entry.name, entry.isDirectory() ? await readGuestFiles(file) : await readFile(file, 'utf8')] as const;
+  }));
   return Object.fromEntries(files);
 }
 
 export default async function Home() {
-  const [bin, commands, runtime] = await Promise.all([readFiles('bin'), readFiles('commands'), readFiles('runtime')]);
+  const files = await readGuestFiles(join(process.cwd(), 'data/linux'));
 
   return (
     <main className="min-h-screen bg-black">
-      <Terminal files={{ bin, commands, runtime }} />
+      <Terminal files={files} banner={typeof files.banner === 'string' ? files.banner : ''} />
     </main>
   );
 }

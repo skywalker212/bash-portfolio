@@ -29,14 +29,27 @@ function rule(    line, col) {
     print line "+"
 }
 
-function pad(text, width,    result) {
-    result = text
-    while (length(result) < width)
-        result = result " "
-    return result
+# The data uses single-column UTF-8 characters. Skip continuation bytes.
+function text_width(text,    copy) {
+    copy = text
+    return length(text) - gsub(/[\200-\277]/, "", copy)
 }
 
-function wrap(text, width, lines,    words, count, current, word, i) {
+function prefix_bytes(text, columns,    byte, count) {
+    for (byte = 1; byte <= length(text); byte++) {
+        if (substr(text, byte, 1) !~ /[\200-\277]/ && ++count > columns)
+            return byte - 1
+    }
+    return length(text)
+}
+
+function pad(text, width,    missing) {
+    for (missing = width - text_width(text); missing > 0; missing--)
+        text = text " "
+    return text
+}
+
+function wrap(text, width, lines,    words, count, current, word, i, bytes) {
     gsub(/[[:space:]]+/, " ", text)
     sub(/^ /, "", text)
     sub(/ $/, "", text)
@@ -50,19 +63,20 @@ function wrap(text, width, lines,    words, count, current, word, i) {
     nwords = split(text, words, " ")
     for (i = 1; i <= nwords; i++) {
         word = words[i]
-        while (length(word) > width) {
+        while (text_width(word) > width) {
             if (current != "") {
                 lines[++count] = current
                 current = ""
             }
-            lines[++count] = substr(word, 1, width)
-            word = substr(word, width + 1)
+            bytes = prefix_bytes(word, width)
+            lines[++count] = substr(word, 1, bytes)
+            word = substr(word, bytes + 1)
         }
         if (word == "")
             continue
         if (current == "")
             current = word
-        else if (length(current) + 1 + length(word) <= width)
+        else if (text_width(current) + 1 + text_width(word) <= width)
             current = current " " word
         else {
             lines[++count] = current

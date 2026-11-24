@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+export LC_ALL=C
 
 portfolio=$(dirname "$0")/..
 source=$portfolio/share/projects.tsv

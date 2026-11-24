@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+export LC_ALL=C
 
 if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then
     printf 'Usage: skills\n'
