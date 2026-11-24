@@ -1,0 +1,43 @@
+#!/bin/sh
+
+if [ "$#" -eq 0 ]; then
+    cat <<'HELP'
+Command     Description
+help        List available commands
+about       Display information about me
+whoami      Print the current Linux user
+skills      List my technical skills
+projects    Display my notable projects
+catsay      A talking cat
+clear       Clear the terminal screen
+ls          List directory contents
+cd          Change directory
+mkdir       Make a directory
+rm          Remove directory entries
+cat         Read a file
+
+Type help COMMAND for details. Pipes and redirection work as usual.
+HELP
+    exit
+fi
+
+if [ "$#" -ne 1 ]; then
+    printf 'Usage: help [COMMAND]\n' >&2
+    exit 2
+fi
+
+case "$1" in
+    --help|-h|help)
+        printf 'Usage: help [COMMAND]\n'
+        ;;
+    cd)
+        printf 'Usage: cd [DIRECTORY]\nChange directory, defaulting to the home directory.\n'
+        ;;
+    *)
+        if command -v "$1" >/dev/null 2>&1; then
+            exec "$1" --help
+        fi
+        printf 'Command "%s" not found.\n' "$1" >&2
+        exit 1
+        ;;
+esac

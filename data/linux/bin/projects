@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+
+portfolio=$(dirname "$0")/..
+source=$portfolio/share/projects.tsv
+table=$portfolio/lib/table.awk
+
+case "$#" in
+    0)
+        {
+            printf 'Project\tTechnologies\tLink\n'
+            cut -f2,4,5 "$source"
+        } | awk -v widths=25,30,68 -f "$table"
+        printf 'More at: https://github.com/skywalker212\n'
+        ;;
+    1)
+        case "$1" in
+            --help|-h)
+                printf 'Usage: projects [PROJECT_NAME]\n'
+                ;;
+            *)
+                details=$(
+                    PROJECT_NAME=$1 awk -F '\t' '
+                        $1 == ENVIRON["PROJECT_NAME"] {
+                            printf "Name\t%s\nDescription\t%s\nTechnologies\t%s\nLink\t%s\n", $2, $3, $4, $5
+                            found = 1
+                            exit
+                        }
+                        END { if (!found) exit 1 }
+                    ' "$source"
+                ) || { printf 'Project "%s" not found.\n' "$1" >&2; exit 1; }
+                printf '%s\n' "$details" | awk -v widths=15,55 -f "$table"
+                ;;
+        esac
+        ;;
+    *)
+        printf 'Usage: projects [PROJECT_NAME]\n' >&2
+        exit 2
+        ;;
+esac

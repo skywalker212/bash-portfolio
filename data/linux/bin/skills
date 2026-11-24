@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+if [ "${1:-}" = --help ] || [ "${1:-}" = -h ]; then
+    printf 'Usage: skills\n'
+    exit
+fi
+
+portfolio=$(dirname "$0")/..
+{
+    printf 'Category\tSkills\n'
+    cat "$portfolio/share/skills.tsv"
+} | awk -v widths=15,41 -f "$portfolio/lib/table.awk"
