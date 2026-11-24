@@ -10,16 +10,13 @@ export const skillsCommand: Command = {
     name,
     args: skillsArgs,
     description,
-    execute: (): TableCommandResult => {
+    execute: async ({ fileSystem }): Promise<TableCommandResult> => {
+        const { stdout } = await fileSystem.runPortfolioCommand('skills');
+        const skills = stdout.trimEnd().split('\n').map(row => row.split('\t'));
         return {
             content: [
                 ['Category', 'Skills'],
-                ['Languages', 'Python, TypeScript, Java, Erlang'],
-                ['Frontend', 'Next.js, Angular, React'],
-                ['Backend', 'Node.js, Express, FastAPI'],
-                ['Databases', 'MongoDB, Elasticsearch, Redis, PostgreSQL'],
-                ['DevOps', 'Kubernetes, Jenkins, JFrog Artifactory'],
-                ['Other', 'WebAssembly, PyTorch, Apache Kafka, GraphQL, Jaeger, Ghidra']
+                ...skills
             ],
             type: CommandResultType.TABLE,
             tableType: TableType.NORMAL,
