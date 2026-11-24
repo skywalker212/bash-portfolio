@@ -49,7 +49,7 @@ ln -s /dev/tty1 "$1/dev/stderr"
 mkdir -p "$1\${3%/*}"
 cp "$2" "$1$3"
 cp "$4/bin/"* "$1/bin/"
-cp -R "$4/commands" "$1\${3%/*}/"
+cp -R "$4/commands" "$4/help" "$1\${3%/*}/"
 ln -s busybox "$1\${3%/*}/cat"
 ln -s busybox "$1\${3%/*}/awk"
 chmod 777 "$1/bin/"*
@@ -91,7 +91,7 @@ export class LinuxFileSystem {
 
     private constructor(private readonly kernel: KernelHandle) {}
 
-    static async start({ bin, commands }: PortfolioFiles, signal: AbortSignal) {
+    static async start({ bin, commands }: PortfolioFiles, help: Record<string, string>, signal: AbortSignal) {
         const { createKernel, checkSupport } = await import('unkernel/web');
         if (!(await checkSupport()).ok) {
             throw new Error('This browser does not support the WebAssembly features needed to run Linux.');
@@ -99,7 +99,7 @@ export class LinuxFileSystem {
         signal.throwIfAborted();
         const kernel = await createKernel({ worker: true, cpus: 1, memoryMiB: 128, net: undefined, signal });
         try {
-            const seed = await kernel.mount(SEED, { bin, commands }, { readOnly: true });
+            const seed = await kernel.mount(SEED, { bin, commands, help }, { readOnly: true });
             const result = await kernel.exec(BUSYBOX, ['sh', '-c', setup, 'sh', ROOT, BUSYBOX, TOOLS, SEED, HOME_DIR], { signal });
             if (result.exitCode !== 0) throw new Error(result.stderr || 'Unable to prepare the guest filesystem.');
             await seed.unmount();
