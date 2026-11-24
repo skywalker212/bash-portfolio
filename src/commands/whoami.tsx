@@ -1,6 +1,5 @@
 import { Command, CommandResultType, TableType } from '@/types';
 import styles from '@/styles/Output.module.css';
-import { EXPERIENCE_TABLE, INTERNSHIP_TABLE } from '@/config';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "whoami";
@@ -8,16 +7,30 @@ const description = "Display information about me";
 
 const whoamiArgs = new ArgumentParser(name, description);
 
+interface Profile {
+    intro: string;
+    company: [text: string, href: string];
+    experience: string[][];
+    internships: string[][];
+    contacts: [label: string, text: string, href: string, suffix?: string][];
+}
+
+const link = (text: string, href: string) => (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={styles.terminalLink}>{text}</a>
+);
+
 export const whoamiCommand: Command = {
     name,
     args: whoamiArgs,
     description,
-    execute: () => {
+    execute: async ({ fileSystem }) => {
+        const { stdout } = await fileSystem.runPortfolioCommand('whoami');
+        const { intro, company, experience, internships, contacts } = JSON.parse(stdout) as Profile;
         return [
         {
             content: (
                 <div>
-                    <p>Hey, I&apos;m Akash, Software Engineer at <a href="https://sumble.com" target="_blank" rel="noopener noreferrer" className={styles.terminalLink}>Sumble</a></p>
+                    <p>{intro}{link(...company)}</p>
                 </div>
             ),
             type: CommandResultType.CUSTOM
@@ -27,7 +40,7 @@ export const whoamiCommand: Command = {
             type: CommandResultType.CUSTOM
         },
         {
-            content: EXPERIENCE_TABLE,
+            content: experience,
             type: CommandResultType.TABLE,
             tableType: TableType.NORMAL,
             columns: [{width: 15}, {width: 30}, {width: 28}]
@@ -37,7 +50,7 @@ export const whoamiCommand: Command = {
             type: CommandResultType.CUSTOM
         },
         {
-            content: INTERNSHIP_TABLE,
+            content: internships,
             type: CommandResultType.TABLE,
             tableType: TableType.NORMAL,
             columns: [{width: 15}, {width: 30}, {width: 28, wrapWord: true}]
@@ -45,10 +58,9 @@ export const whoamiCommand: Command = {
         {
             content: (
                 <div>
-                    <p><b>Email:</b> <a href="mailto:me@akash.is" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >me@akash.is</a></p>
-                    <p><b>LinkedIn:</b> <a href="https://www.linkedin.com/in/akashagajjar" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >linkedin.com/in/akashagajjar</a> </p>
-                    <p><b>GitHub:</b> <a href="https://github.com/skywalker212" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >github.com/skywalker212</a></p>
-                    <p><b>Blog:</b> <a href="https://blog.akash.is" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >blog.akash.is</a></p>
+                    {contacts.map(([label, text, href, suffix]) => (
+                        <p key={label}><b>{label}:</b> {link(text, href)}{suffix}</p>
+                    ))}
                 </div>
             ),
             type: CommandResultType.CUSTOM
