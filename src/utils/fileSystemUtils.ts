@@ -1,18 +1,5 @@
-import { HOME_DIR } from '@/config';
+import type { FileInfo, TerminalFileSystem } from '@/types/fileSystem';
 import type { KernelHandle } from 'unkernel/web';
-
-interface FileInfo {
-    permissions: string;
-    linkCount: number;
-    owner: string;
-    group: string;
-    size: number;
-    modTime: string;
-    name: string;
-    isDirectory: boolean;
-    isSymlink: boolean;
-    linkTarget: string;
-}
 
 const ROOT = '/run/portfolio';
 const SEED = '/run/portfolio-seed';
@@ -23,67 +10,15 @@ const TOOLS = `${TOOL_DIR}/busybox`;
 export interface PortfolioFiles {
     bin: Record<string, string>;
     commands: Record<string, string>;
+    runtime: Record<string, string>;
 }
-const NO_SUCH_DIRECTORY = 'The specified directory does not exist. Please check the path and try again.';
-const NOT_A_DIRECTORY = 'The specified path is not a directory. Please provide a valid directory path.';
 const NO_SUCH_FILE = 'The file does not exist. Please check the file path and try again.';
-const ERROR_PREFIX = 'FileSystemException: ';
+const DIRECTORY_ERRORS = {
+    10: 'The specified directory does not exist. Please check the path and try again.',
+    11: 'The specified path is not a directory. Please provide a valid directory path.',
+};
 
-const directoryChecks = `
-[ -e "$1" ] || exit 10
-[ -d "$1" ] || exit 11
-`;
-
-const setup = `
-set -e
-umask 000
-root=$1
-busybox=$2
-tools=$root$3
-seed=$4
-home=$root$5
-
-mkdir -p "$root/bin" "$root/dev/shm/tmp" "$root/proc/self/fd" "$root/tmp" "$tools" "$home"
-mknod -m 666 "$root/dev/null" c 1 3
-mknod -m 555 "$root/dev/random" c 1 8
-mknod -m 555 "$root/dev/urandom" c 1 9
-mknod -m 666 "$root/dev/tty" c 5 0
-mknod -m 666 "$root/dev/tty1" c 4 1
-ln -s /dev/tty "$root/dev/stdin"
-ln -s /dev/tty "$root/dev/stdout"
-ln -s /dev/tty1 "$root/dev/stderr"
-ln -s /bin/projects "$home/projects"
-ln -s /bin/skills "$home/skills"
-
-cp "$seed/bin/"* "$root/bin/"
-chmod 777 "$root/bin/"*
-cp "$busybox" "$tools/busybox"
-cp -R "$seed/commands" "$seed/help" "$tools/"
-ln -s busybox "$tools/cat"
-ln -s busybox "$tools/awk"
-mount --bind "$tools" "$tools"
-mount -o remount,bind,ro "$tools"
-`;
-
-const list = String.raw`
-cd -- "$1" || exit 1
-if [ "$2" = 1 ]; then
-    set -- . .. .[!.]* ..?* *
-else
-    set -- *
-fi
-
-for name do
-    [ -e "$name" ] || [ -L "$name" ] || continue
-    [ "$PWD/$name" != '${TOOL_DIR}' ] || continue
-    info=$("$BOX" stat -c '%A %h %u %g %s %Y' -- "$name") || exit 1
-    printf '%s\0%s\0' "$name" "$info"
-    if [ -L "$name" ]; then
-        "$BOX" readlink -n -- "$name" || exit 1
-    fi
-    printf '\0'
-done
-`;
+type FileOperation = 'command' | 'append' | 'read' | 'list' | 'unlink' | 'mkdir' | 'chdir';
 
 const monthName = new Intl.DateTimeFormat('en', { month: 'short' });
 const formatTime = (epochSeconds: string) => {
@@ -94,12 +29,14 @@ const formatTime = (epochSeconds: string) => {
     return `${monthName.format(date)} ${day} ${hours}:${minutes}`;
 };
 
-export class LinuxFileSystem {
-    private directory = HOME_DIR;
+export class LinuxFileSystem implements TerminalFileSystem {
+    private constructor(private readonly kernel: KernelHandle, private directory: string) {}
 
-    private constructor(private readonly kernel: KernelHandle) {}
-
-    static async start({ bin, commands }: PortfolioFiles, help: Record<string, string>, signal: AbortSignal) {
+    static async start(
+        files: PortfolioFiles & { help: Record<string, string> },
+        home: string,
+        signal: AbortSignal,
+    ) {
         const { createKernel, checkSupport } = await import('unkernel/web');
         if (!(await checkSupport()).ok) {
             throw new Error('This browser does not support the WebAssembly features needed to run Linux.');
@@ -107,38 +44,35 @@ export class LinuxFileSystem {
         signal.throwIfAborted();
         const kernel = await createKernel({ worker: true, cpus: 1, memoryMiB: 128, net: undefined, signal });
         try {
-            const seed = await kernel.mount(SEED, { bin, commands, help }, { readOnly: true });
-            const result = await kernel.exec(BUSYBOX, ['sh', '-c', setup, 'sh', ROOT, BUSYBOX, TOOL_DIR, SEED, HOME_DIR], { signal });
+            const seed = await kernel.mount(SEED, { ...files }, { readOnly: true });
+            const result = await kernel.exec(BUSYBOX, ['sh', `${SEED}/runtime/setup.sh`, ROOT, BUSYBOX, TOOL_DIR, SEED, home], { signal });
             if (result.exitCode !== 0) throw new Error(result.stderr || 'Unable to prepare the guest filesystem.');
             await seed.unmount();
-            return new LinuxFileSystem(kernel);
+            return new LinuxFileSystem(kernel, home);
         } catch (error) {
             await kernel.stop();
             throw error;
         }
     }
 
-    private run(script: string, args: string[], input?: string) {
-        // Use a private Linux root for the portfolio and pass paths as arguments.
+    private run(operation: FileOperation, args: string[], input?: string) {
         return this.kernel.exec(BUSYBOX, [
-            'chroot', ROOT, TOOLS, 'sh', '-c',
-            'cd -- "$1" || exit 1; shift; umask 000; ' + script,
-            'sh', this.directory, ...args,
-        ], { env: { BOX: TOOLS, PATH: TOOL_DIR }, input });
+            'chroot', ROOT, TOOLS, 'sh', `${TOOL_DIR}/filesystem.sh`, this.directory, operation, ...args,
+        ], { env: { PATH: TOOL_DIR }, input });
     }
 
     private check(result: { exitCode: number | null }, message: string, errors: Record<number, string> = {}) {
         if (result.exitCode !== 0) {
-            throw new Error(ERROR_PREFIX + (errors[result.exitCode ?? -1] ?? message));
+            throw new Error('FileSystemException: ' + (errors[result.exitCode ?? -1] ?? message));
         }
     }
 
     async runPortfolioCommand(command: string, args: string[] = []) {
-        const result = await this.run('"$BOX" sh "$@"', [`${TOOL_DIR}/commands/${command}.sh`, ...args]);
+        const result = await this.run('command', [command, ...args]);
         if (result.exitCode === null || result.exitCode > 1 || result.stderr) {
             throw new Error(result.stderr.trim() || `The ${command} command failed.`);
         }
-        return result;
+        return { stdout: result.stdout, exitCode: result.exitCode };
     }
 
     cwd() {
@@ -146,22 +80,14 @@ export class LinuxFileSystem {
     }
 
     async writeFile(path: string, data: string) {
-        const result = await this.run(`
-            "$BOX" cat >> "$1" && exit 0
-            [ -e "$1" ] || exit 10
-            exit 1
-        `, [path], data);
+        const result = await this.run('append', [path], data);
         this.check(result, 'Cannot open the file for writing. Please check if you have the necessary permissions.', {
             10: NO_SUCH_FILE,
         });
     }
 
     async readFile(path: string) {
-        const result = await this.run(`
-            [ -e "$1" ] || exit 10
-            [ -f "$1" ] || exit 11
-            "$BOX" cat -- "$1"
-        `, [path]);
+        const result = await this.run('read', [path]);
         this.check(result, 'Cannot open the file for reading. Please check if you have the necessary permissions.', {
             10: NO_SUCH_FILE,
             11: 'The specified path is not a regular file. Please provide a valid file path.',
@@ -170,11 +96,8 @@ export class LinuxFileSystem {
     }
 
     async getDetailedDirectoryListing(path: string, showHidden: boolean): Promise<FileInfo[]> {
-        const result = await this.run(directoryChecks + list, [path, showHidden ? '1' : '0']);
-        this.check(result, 'Unable to list the contents of the directory. Please check if you have the necessary permissions.', {
-            10: NO_SUCH_DIRECTORY,
-            11: NOT_A_DIRECTORY,
-        });
+        const result = await this.run('list', [path, showHidden ? '1' : '0']);
+        this.check(result, 'Unable to list the contents of the directory. Please check if you have the necessary permissions.', DIRECTORY_ERRORS);
         const fields = result.stdout.split('\0');
         const files: FileInfo[] = [];
         for (let i = 0; i < fields.length - 1; i += 3) {
@@ -201,30 +124,20 @@ export class LinuxFileSystem {
     }
 
     async unlink(path: string) {
-        const result = await this.run(`
-            [ -e "$1" ] || exit 10
-            if [ -d "$1" ] && ! [ -L "$1" ]; then
-                "$BOX" rmdir -- "$1"
-            else
-                "$BOX" rm -- "$1"
-            fi
-        `, [path]);
+        const result = await this.run('unlink', [path]);
         this.check(result, 'Unable to delete the file or directory. Please check if you have the necessary permissions.', {
             10: 'The file or directory does not exist. Please check the path and try again.',
         });
     }
 
     async makeDirectory(name: string) {
-        const result = await this.run('[ -d "$1" ] || "$BOX" mkdir -- "$1"', [name]);
+        const result = await this.run('mkdir', [name]);
         this.check(result, 'Unable to create the directory. Please check if you have the necessary permissions or if a file with the same name already exists.');
     }
 
     async changeDirectory(path: string) {
-        const result = await this.run(directoryChecks + 'cd -- "$1" && pwd -P', [path]);
-        this.check(result, 'Unable to change the directory. Please check if you have the necessary permissions.', {
-            10: NO_SUCH_DIRECTORY,
-            11: NOT_A_DIRECTORY,
-        });
+        const result = await this.run('chdir', [path]);
+        this.check(result, 'Unable to change the directory. Please check if you have the necessary permissions.', DIRECTORY_ERRORS);
         this.directory = result.stdout.slice(0, -1);
     }
 }

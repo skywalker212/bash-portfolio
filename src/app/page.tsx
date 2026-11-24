@@ -11,11 +11,11 @@ async function readFiles(directory: string) {
 }
 
 export default async function Home() {
-  const [bin, commands] = await Promise.all([readFiles('bin'), readFiles('commands')]);
+  const [bin, commands, runtime] = await Promise.all([readFiles('bin'), readFiles('commands'), readFiles('runtime')]);
 
   return (
     <main className="min-h-screen bg-black">
-      <Terminal files={{ bin, commands }} />
+      <Terminal files={{ bin, commands, runtime }} />
     </main>
   );
 }

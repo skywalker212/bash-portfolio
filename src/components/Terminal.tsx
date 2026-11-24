@@ -7,7 +7,7 @@ import styles from '@/styles/Terminal.module.css';
 import { CommandResultType } from '@/types';
 import { getPrompt, LinuxFileSystem, type PortfolioFiles } from '@/utils';
 import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
-import { initialRender } from '@/config';
+import { HOME_DIR, initialRender } from '@/config';
 import { buildHelpFiles } from '@/commands/help';
 import Output from './Output';
 
@@ -53,7 +53,7 @@ const Terminal = ({ files }: { files: PortfolioFiles }) => {
 
     useEffect(() => {
         const controller = new AbortController();
-        LinuxFileSystem.start(files, buildHelpFiles(), controller.signal).then(fs => {
+        LinuxFileSystem.start({ ...files, help: buildHelpFiles() }, HOME_DIR, controller.signal).then(fs => {
             if (!controller.signal.aborted) {
                 changeDirectory(fs.cwd());
                 setFileSystem(fs);
