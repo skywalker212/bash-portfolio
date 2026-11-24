@@ -16,14 +16,6 @@
     @apply text-red-500;
 }
 
-.success {
-    @apply text-green-500;
-}
-
-.info {
-    @apply text-blue-500;
-}
-
 .terminalLink {
     @apply underline;
 }

@@ -17,8 +17,7 @@
     "react-dom": "19.0.0",
     "react-innertext": "^1.1.5",
     "table": "^6.9.0",
-    "unkernel": "0.2.0-261124-c08e977",
-    "zustand": "^5.0.3"
+    "unkernel": "0.2.0-261124-c08e977"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

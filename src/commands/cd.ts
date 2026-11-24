@@ -1,4 +1,4 @@
-import { HOME_DIR } from '@/config';
+import { HOME_DIR } from '@/config/terminalConfig';
 import { CommandResultType } from '@/types/terminal';
 import { defineCommand } from './command';
 import { ArgumentParser } from 'js-argparse';
