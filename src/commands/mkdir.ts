@@ -1,4 +1,5 @@
-import { Command, CommandResultType } from '@/types';
+import { CommandResultType } from '@/types/terminal';
+import { defineCommand } from './command';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "mkdir";
@@ -8,8 +9,6 @@ type Args = {
     directory_name: string 
 }
 
-type MkdirCommand = Command<Args>;
-
 const mkdirArgs = new ArgumentParser<Args>(name, description);
 
 mkdirArgs.addArgument(['directory_name'], {
@@ -17,14 +16,14 @@ mkdirArgs.addArgument(['directory_name'], {
     help: "Name of new directory"
 });
 
-export const mkdirCommand: MkdirCommand = {
+export const mkdirCommand = defineCommand({
     name,
     args: mkdirArgs,
     description,
-    execute: async (state, args) => {
+    execute: async (fileSystem, args) => {
         try {
 
-            await state.fileSystem.makeDirectory(args.directory_name);
+            await fileSystem.makeDirectory(args.directory_name);
 
             return {
                 type: CommandResultType.NONE
@@ -36,4 +35,4 @@ export const mkdirCommand: MkdirCommand = {
             };
         }
     }
-};
+});

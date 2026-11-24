@@ -1,4 +1,4 @@
-import { TableCommandResult, TableType } from '@/types';
+import { TableCommandResult, TableType } from '@/types/terminal';
 import { table, getBorderCharacters } from 'table';
 
 export function formatTable({ content, tableType, columns }: TableCommandResult) {
@@ -25,16 +25,6 @@ export function formatTable({ content, tableType, columns }: TableCommandResult)
                 columns: columns,
             }
             break;
-        case TableType.TEXT:
-            tableConfig = {
-                border: getBorderCharacters('void'),
-                columnDefault: {
-                    paddingLeft: 0,
-                },
-                drawHorizontalLine: () => false,
-                columns: columns
-            }
-            break;
         default:
             tableConfig = {
                 border: getBorderCharacters('ramac'),
@@ -42,5 +32,5 @@ export function formatTable({ content, tableType, columns }: TableCommandResult)
             }
             break;
     }
-    return table(content as string[][], tableConfig);
+    return table(content, tableConfig);
 }

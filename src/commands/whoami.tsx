@@ -1,4 +1,5 @@
-import { Command, CommandResultType, TableType } from '@/types';
+import { CommandResultType, TableType } from '@/types/terminal';
+import { defineCommand } from './command';
 import styles from '@/styles/Output.module.css';
 import { ArgumentParser } from 'js-argparse';
 
@@ -19,11 +20,11 @@ const link = (text: string, href: string) => (
     <a href={href} target="_blank" rel="noopener noreferrer" className={styles.terminalLink}>{text}</a>
 );
 
-export const whoamiCommand: Command = {
+export const whoamiCommand = defineCommand({
     name,
     args: whoamiArgs,
     description,
-    execute: async ({ fileSystem }) => {
+    execute: async (fileSystem) => {
         const { stdout } = await fileSystem.runPortfolioCommand('whoami');
         const { intro, company, experience, internships, contacts } = JSON.parse(stdout) as Profile;
         return [
@@ -67,4 +68,4 @@ export const whoamiCommand: Command = {
         }
         ];
     }
-};
+});

@@ -1,5 +1,5 @@
-import { Command, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
-import { commands } from './index';
+import { CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types/terminal';
+import { defineCommand, type Command } from './command';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "help";
@@ -22,7 +22,7 @@ helpArgs.addArgument(["command_name"], {
     help: "Name of command"
 });
 
-export function buildHelpFiles(): Record<string, string> {
+export function buildHelpFiles(commands: readonly Command[]): Record<string, string> {
     const list: HelpList = {
         commands: commands.map(command => [command.name, command.description]),
         usage: helpArgs.usage(false),
@@ -30,15 +30,15 @@ export function buildHelpFiles(): Record<string, string> {
     };
     return Object.fromEntries([
         ['.list', JSON.stringify(list)],
-        ...commands.map(command => [command.name, command.args.usage()]),
+        ...commands.map(command => [command.name, command.usage()]),
     ]);
 }
 
-export const helpCommand: Command<Args> = {
+export const helpCommand = defineCommand({
     name,
     args: helpArgs,
     description,
-    execute: async ({ fileSystem }, args): Promise<CommandResult | CommandResult[]> => {
+    execute: async (fileSystem, args): Promise<CommandResult | CommandResult[]> => {
         const { stdout, exitCode } = await fileSystem.runPortfolioCommand('help', args.command_name ? [args.command_name] : []);
         if (exitCode === 1) {
             return {
@@ -62,4 +62,4 @@ export const helpCommand: Command<Args> = {
             { content: list.redirection, type: CommandResultType.TEXT },
         ];
     }
-};
+});

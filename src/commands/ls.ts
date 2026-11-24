@@ -1,4 +1,5 @@
-import { Command, CommandResultType } from '@/types';
+import { CommandResultType } from '@/types/terminal';
+import { defineCommand } from './command';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "ls";
@@ -9,8 +10,6 @@ type Args = {
     long: boolean;
     directory?: string[];
 }
-
-type LsCommand = Command<Args>;
 
 const lsArgs = new ArgumentParser<Args>(name, description);
 
@@ -33,13 +32,13 @@ lsArgs.addArgument(['directory'], {
     help: "Directory to list (defaults to current directory if not specified)"
 });
 
-export const lsCommand: LsCommand = {
+export const lsCommand = defineCommand({
     name,
     args: lsArgs,
     description,
-    execute: async (state, args) => {
+    execute: async (fileSystem, args) => {
         try {
-            const directories = args.directory && args.directory.length > 0 ? args.directory : [state.fileSystem.cwd()];
+            const directories = args.directory && args.directory.length > 0 ? args.directory : [fileSystem.cwd()];
             let output = "";
 
             const formatSize = (size: number) => {
@@ -56,7 +55,7 @@ export const lsCommand: LsCommand = {
                 if (directories.length > 1) {
                     output += `${dir}:\n`;
                 }
-                const files = await state.fileSystem.getDetailedDirectoryListing(dir, args.all);
+                const files = await fileSystem.getDetailedDirectoryListing(dir, args.all);
 
                 if (args.long) {
                     const linkCountWidth = Math.max(...files.map(f => f.linkCount.toString().length));
@@ -104,4 +103,4 @@ export const lsCommand: LsCommand = {
             };
         }
     }
-};
+});

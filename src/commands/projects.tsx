@@ -1,4 +1,5 @@
-import { Command, CommandResult, CommandResultType, TableCommandResult, TableType } from '@/types';
+import { CommandResult, CommandResultType, TableType } from '@/types/terminal';
+import { defineCommand } from './command';
 import styles from '@/styles/Output.module.css';
 import { ArgumentParser } from 'js-argparse';
 
@@ -9,8 +10,6 @@ type Args = {
     project_name?: string
 }
 
-type ProjectCommand = Command<Args>;
-
 const projectsArgs = new ArgumentParser<Args>(name, description);
 
 projectsArgs.addArgument(['project_name'], {
@@ -19,11 +18,11 @@ projectsArgs.addArgument(['project_name'], {
     help: "Name of project"
 })
 
-export const projectsCommand: ProjectCommand = {
+export const projectsCommand = defineCommand({
     name,
     args: projectsArgs,
     description,
-    execute: async ({ fileSystem }, args): Promise<CommandResult | CommandResult[]> => {
+    execute: async (fileSystem, args): Promise<CommandResult | CommandResult[]> => {
         const { stdout, exitCode } = await fileSystem.runPortfolioCommand('projects', args.project_name ? [args.project_name] : []);
         const projects = stdout.trimEnd().split('\n').map(row => row.split('\t'));
         if (!args.project_name) {
@@ -35,7 +34,7 @@ export const projectsCommand: ProjectCommand = {
                 type: CommandResultType.TABLE,
                 tableType: TableType.NORMAL,
                 columns: [{ width: 25 }, { width: 30, wrapWord: true }, { width: 68 }]
-            } as TableCommandResult, {
+            }, {
                 content: <p>More at: <a href="https://github.com/skywalker212" target="_blank" rel="noopener noreferrer" className={styles.terminalLink} >github.com/skywalker212</a></p>,
                 type: CommandResultType.CUSTOM
             }];
@@ -51,7 +50,7 @@ export const projectsCommand: ProjectCommand = {
                 content: [['Name', name], ['Description', description], ['Technologies', technologies], ['Link', link]],
                 type: CommandResultType.TABLE,
                 columns: [{ width: 15 }, { width: 55 }]
-            } as TableCommandResult;
+            };
         }
     }
-};
+});

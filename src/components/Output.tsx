@@ -1,64 +1,40 @@
-import React, { useMemo } from 'react';
+import { memo } from 'react';
 import styles from '@/styles/Output.module.css';
-import dynamic from "next/dynamic";
-import { CommandResult, CommandResultType, TableCommandResult } from '@/types';
+import { CommandResultType, type CommandResult } from '@/types/terminal';
+import { formatTable } from '@/utils/formatTable';
 
-interface OutputProps {
-  outputs: CommandResult[];
+function linkify(text: string) {
+    return text.split(/(https?:\/\/[^\s]+)/g).map((part, index) => index % 2 === 0 ? part : (
+        <a key={index} href={part} className={styles.terminalLink} target="_blank" rel="noopener noreferrer">
+            {part}
+        </a>
+    ));
 }
 
-const MemoizedTableOutput = React.memo(dynamic(() => import('./TableOutput')));
-const MemoizedTerminalOutput = React.memo(dynamic(() => import('./TerminalOutput')));
-
-export const injectLinkToText = (text: string) => {
-    const linkRegex = /(https?:\/\/[^\s]+)/g;
-    const parts = text.split(linkRegex);
-
-    return parts.map((part, index) => {
-        if (part.match(linkRegex)) {
+const OutputRow = memo(function OutputRow({ result }: { result: CommandResult }) {
+    switch (result.type) {
+        case CommandResultType.NONE:
+            return null;
+        case CommandResultType.INPUT: {
+            const [prompt, ...command] = result.content.split(' ');
             return (
-                <a
-                    key={index}
-                    href={part}
-                    className={styles.terminalLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {part}
-                </a>
+                <div className={`${styles.output} ${styles.input}`}>
+                    <span className={styles.prompt}>{prompt}</span>
+                    <span>{command.join(' ')}</span>
+                </div>
             );
         }
-        return part;
-    });
-};
+        case CommandResultType.TABLE:
+            return <div className={styles.output}>{linkify(formatTable(result))}</div>;
+        case CommandResultType.TEXT:
+            return <div className={styles.output}>{linkify(result.content)}</div>;
+        case CommandResultType.ERROR:
+            return <div className={`${styles.output} ${styles.error}`}>{result.content}</div>;
+        case CommandResultType.CUSTOM:
+            return <div className={styles.output}>{result.content}</div>;
+    }
+});
 
-const Output: React.FC<OutputProps> = ({ outputs }) => {
-  const renderedOutputs = useMemo(() => {
-    return outputs.map((item, index) => {
-      if (item.type === CommandResultType.TABLE) {
-        const tableResult = item as TableCommandResult;
-        return (
-          <MemoizedTableOutput
-            key={`${index}-${tableResult.content}`}
-            content={tableResult.content}
-            type={tableResult.type}
-            tableType={tableResult.tableType}
-            columns={tableResult.columns}
-          />
-        );
-      } else {
-        return (
-          <MemoizedTerminalOutput
-            key={`${index}-${item.content}`}
-            content={item.content}
-            type={item.type}
-          />
-        );
-      }
-    });
-  }, [outputs]);
-
-  return <>{renderedOutputs}</>;
-};
-
-export default React.memo(Output);
+export default memo(function Output({ outputs }: { outputs: CommandResult[] }) {
+    return outputs.map((result, index) => <OutputRow key={index} result={result} />);
+});

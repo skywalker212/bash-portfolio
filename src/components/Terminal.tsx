@@ -4,18 +4,18 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TerminalInput from './TerminalInput';
 import { useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
-import { CommandResultType } from '@/types';
+import { CommandResultType, type CommandResult } from '@/types/terminal';
 import { getPrompt, LinuxFileSystem, type PortfolioFiles } from '@/utils';
 import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
 import { HOME_DIR, initialRender } from '@/config';
-import { buildHelpFiles } from '@/commands/help';
+import { commandHelpFiles } from '@/commands';
 import Output from './Output';
 
 const Terminal = ({ files }: { files: PortfolioFiles }) => {
     const [input, setInput] = useState('');
     const terminalStore = useTerminalStore();
     const { currentDirectory, addCommandToHistory, changeDirectory } = terminalStore;
-    const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender, terminalStore);
+    const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender);
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
     const [fileSystem, setFileSystem] = useState<LinuxFileSystem | null>(null);
@@ -38,7 +38,7 @@ const Terminal = ({ files }: { files: PortfolioFiles }) => {
 
         pending.current = pending.current.then(async () => {
             const directory = fileSystem.cwd();
-            const inputResult = { content: `${getPrompt(directory)}${input}`, type: CommandResultType.INPUT };
+            const inputResult: CommandResult = { content: `${getPrompt(directory)}${input}`, type: CommandResultType.INPUT };
             try {
                 const result = await executeCommand(trimmedInput, fileSystem);
                 if (fileSystem.cwd() !== directory) changeDirectory(fileSystem.cwd());
@@ -53,7 +53,7 @@ const Terminal = ({ files }: { files: PortfolioFiles }) => {
 
     useEffect(() => {
         const controller = new AbortController();
-        LinuxFileSystem.start({ ...files, help: buildHelpFiles() }, HOME_DIR, controller.signal).then(fs => {
+        LinuxFileSystem.start({ ...files, help: commandHelpFiles }, HOME_DIR, controller.signal).then(fs => {
             if (!controller.signal.aborted) {
                 changeDirectory(fs.cwd());
                 setFileSystem(fs);

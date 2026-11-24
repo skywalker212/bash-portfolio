@@ -1,5 +1,6 @@
 import { HOME_DIR } from '@/config';
-import { Command, CommandResultType } from '@/types';
+import { CommandResultType } from '@/types/terminal';
+import { defineCommand } from './command';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "cd";
@@ -8,8 +9,6 @@ const description = "Change Directory";
 type Args = {
     directory: string
 }
-
-type CdCommand = Command<Args>;
 
 const cdArgs = new ArgumentParser<Args>(name, description);
 
@@ -20,13 +19,13 @@ cdArgs.addArgument(['directory'], {
     default: HOME_DIR
 });
 
-export const cdCommand: CdCommand = {
+export const cdCommand = defineCommand({
     name,
     args: cdArgs,
     description,
-    execute: async (state, args) => {
+    execute: async (fileSystem, args) => {
         try {
-            await state.fileSystem.changeDirectory(args.directory);
+            await fileSystem.changeDirectory(args.directory);
             return {
                 type: CommandResultType.NONE
             };
@@ -37,4 +36,4 @@ export const cdCommand: CdCommand = {
             };
         }
     }
-};
+});

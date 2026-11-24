@@ -1,8 +1,12 @@
 import { create } from 'zustand'
-import { TerminalState } from '@/types'
 import { terminalConfig } from '@/config'
 
-export interface TerminalStore extends TerminalState {
+export interface TerminalStore {
+  user: string
+  host: string
+  currentDirectory: string
+  commandHistory: string[]
+  historyIndex: number
   addCommandToHistory: (command: string) => void
   setHistoryIndex: (index: number) => void
   changeDirectory: (newDirectory: string) => void

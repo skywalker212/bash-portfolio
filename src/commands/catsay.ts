@@ -1,4 +1,5 @@
-import { Command, CommandResultType } from '@/types';
+import { CommandResultType } from '@/types/terminal';
+import { defineCommand } from './command';
 import { ArgumentParser } from 'js-argparse';
 
 const name = "catsay";
@@ -7,8 +8,6 @@ const description = "A talking cat";
 type Args = {
     text: string[]
 }
-
-type CatsayCommand = Command<Args>;
 
 const catsayArgs = new ArgumentParser<Args>(name, description);
 
@@ -20,11 +19,11 @@ catsayArgs.addArgument(['text'], {
     nargs: "+"
 });
 
-export const catsayCommand: CatsayCommand = {
+export const catsayCommand = defineCommand({
     name,
     args: catsayArgs,
     description,
-    execute: async ({ fileSystem }, args) => {
+    execute: async (fileSystem, args) => {
         try {
             const { stdout, exitCode } = await fileSystem.runPortfolioCommand(name, [args.text.join(" ")]);
             if (exitCode === 1) {
@@ -42,4 +41,4 @@ export const catsayCommand: CatsayCommand = {
             };
         }
     }
-};
+});

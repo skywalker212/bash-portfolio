@@ -1,97 +1,56 @@
-import { TerminalStore } from '@/store';
-import { commands } from '../commands';
+import { commands } from '@/commands';
 import { parseCommand } from './terminalUtils';
-import { CommandResult, CommandResultType, ParsedCommand, TableCommandResult } from '@/types';
-import { LinuxFileSystem } from './fileSystemUtils';
+import { CommandResultType, type CommandResult } from '@/types/terminal';
+import type { TerminalFileSystem } from '@/types/fileSystem';
 import { formatTable } from './formatTable';
 import htmlInnerText from 'react-innertext';
 import { ArgumentParserError, ArgumentTypeError, InvalidChoiceError, InvalidNargsError, MissingRequiredArgumentError, UnknownArgumentError } from 'js-argparse';
 
-export const handleCommand = async (input: string, terminalStore: TerminalStore, fileSystem: LinuxFileSystem): Promise<CommandResult[]> => {
-  const parsed = parseCommand(input);
-  const results = await executeCommand(parsed, terminalStore, fileSystem);
-  if (!parsed.file) return results;
+const argumentErrors = [
+    [ArgumentTypeError, 'Invalid argument type'],
+    [UnknownArgumentError, 'Unknown argument'],
+    [MissingRequiredArgumentError, 'Missing required argument'],
+    [InvalidChoiceError, 'Invalid choice'],
+    [InvalidNargsError, 'Invalid number of arguments'],
+    [ArgumentParserError, 'Argument parsing error'],
+] as const;
 
-  const text = results.map(result => result.type === CommandResultType.TABLE
-    ? formatTable(result as TableCommandResult)
-    : htmlInnerText(result.content)
-  ).join('');
+function errorResult(content: string): CommandResult {
+    return { type: CommandResultType.ERROR, content };
+}
 
-  try {
-    await fileSystem.writeFile(parsed.file, text);
-    return [];
-  } catch (error) {
-    return [{ content: (error as Error).message, type: CommandResultType.ERROR }];
-  }
-};
+export async function handleCommand(input: string, fileSystem: TerminalFileSystem): Promise<CommandResult[]> {
+    const { command, args, file } = parseCommand(input);
+    const results = await executeCommand(command, args, fileSystem);
+    if (!file) return results;
 
-const executeCommand = async (
-  { command: commandName, args }: ParsedCommand,
-  terminalStore: TerminalStore,
-  fileSystem: LinuxFileSystem,
-): Promise<CommandResult[]> => {
-  const command = commands.find(cmd => cmd.name === commandName);
+    const text = results.map(result => {
+        if (result.type === CommandResultType.TABLE) return formatTable(result);
+        if (result.type === CommandResultType.NONE) return '';
+        return htmlInnerText(result.content);
+    }).join('');
 
-  if (command) {
     try {
-      const parsedArgs = command.args.parseArgs(args);
-      const result = await command.execute({ terminalStore, fileSystem }, parsedArgs);
-      return Array.isArray(result) ? result : [result];
-    } catch (error: unknown) {
-      const result: CommandResult[] = []
-      if (error instanceof ArgumentTypeError) {
-        console.error('Invalid argument type:', error.message);
-        result.push({
-          content: `Invalid argument type: ${(error as Error).message}`,
-          type: CommandResultType.ERROR
-        });
-      } else if (error instanceof UnknownArgumentError) {
-        console.error('Unknown argument:', error.message);
-        result.push({
-          content: `Unknown argument: ${(error as Error).message}`,
-          type: CommandResultType.ERROR
-        });
-      } else if (error instanceof MissingRequiredArgumentError) {
-        console.error('Missing required argument:', error.message);
-        result.push({
-          content: `Missing required argument: ${(error as Error).message}`,
-          type: CommandResultType.ERROR
-        });
-      } else if (error instanceof InvalidChoiceError) {
-        console.error('Invalid choice:', error.message);
-        result.push({
-          content: `Invalid choice: ${(error as Error).message}`,
-          type: CommandResultType.ERROR
-        });
-      } else if (error instanceof InvalidNargsError) {
-        console.error('Invalid number of arguments:', error.message);
-        result.push({
-          content: `Invalid number of arguments: ${(error as Error).message}`,
-          type: CommandResultType.ERROR
-        });
-      } else if (error instanceof ArgumentParserError) {
-        console.error('Argument parsing error:', error.message);
-        result.push({
-          content: `Argument parsing error: ${(error as Error).message}`,
-          type: CommandResultType.ERROR
-        });
-      } else {
-        console.error(`Error executing command ${commandName}:`, error);
-        return [{
-          content: `Error executing command ${commandName}: ${(error as Error).message}`,
-          type: CommandResultType.ERROR
-        }];
-      }
-      result.push({
-        content: command.args.usage(false),
-        type: CommandResultType.ERROR
-      });
-      return result;
+        await fileSystem.writeFile(file, text);
+        return [];
+    } catch (error) {
+        return [errorResult((error as Error).message)];
     }
-  } else {
-    return [{
-      content: `Command not found: ${commandName}. Type 'help' for a list of available commands.`,
-      type: CommandResultType.ERROR
-    }];
-  }
-};
+}
+
+async function executeCommand(name: string, args: string, fileSystem: TerminalFileSystem): Promise<CommandResult[]> {
+    const command = commands.find(entry => entry.name === name);
+    if (!command) return [errorResult(`Command not found: ${name}. Type 'help' for a list of available commands.`)];
+
+    try {
+        const result = await command.run(fileSystem, args);
+        return Array.isArray(result) ? result : [result];
+    } catch (error) {
+        const argumentError = argumentErrors.find(([Type]) => error instanceof Type);
+        const prefix = argumentError?.[1] ?? `Error executing command ${name}`;
+        const message = (error as Error).message;
+        console.error(`${prefix}:`, message);
+        const result = errorResult(`${prefix}: ${message}`);
+        return argumentError ? [result, errorResult(command.usage(false))] : [result];
+    }
+}
