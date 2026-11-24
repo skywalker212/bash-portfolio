@@ -1,70 +1,71 @@
-import React, { useState, useEffect, useRef, useCallback, createContext } from 'react';
+'use client';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TerminalInput from './TerminalInput';
 import { useKeyboardNavigation, useTerminal, useAutoFocus } from '@/hooks';
 import styles from '@/styles/Terminal.module.css';
 import { CommandResultType } from '@/types';
-import { getPrompt, WASMFileSystem } from '@/utils';
+import { getPrompt, LinuxFileSystem } from '@/utils';
 import { useTerminalStore, getPreviousCommand, getNextCommand } from '@/store';
 import { initialRender } from '@/config';
 import Output from './Output';
 
-export const FileSystemContext = createContext<WASMFileSystem | null>(null)
-
-const Terminal: React.FC = () => {
+const Terminal = ({ files }: { files: Record<string, string> }) => {
     const [input, setInput] = useState('');
     const terminalStore = useTerminalStore();
-    const { currentDirectory, addCommandToHistory } = terminalStore;
+    const { currentDirectory, addCommandToHistory, changeDirectory } = terminalStore;
     const { output, setOutput, executeCommand, clearTerminal } = useTerminal(initialRender, terminalStore);
     const inputRef = useAutoFocus();
     const terminalRef = useRef<HTMLDivElement>(null);
-    const [fileSystem, setFileSystem] = useState<WASMFileSystem | null>(null);
+    const [fileSystem, setFileSystem] = useState<LinuxFileSystem | null>(null);
+    const pending = useRef(Promise.resolve());
 
-    const handleSubmit = useCallback(async () => {
+    const queueClear = useCallback(() => {
+        pending.current = pending.current.then(clearTerminal);
+    }, [clearTerminal]);
+
+    const handleSubmit = useCallback(() => {
         const trimmedInput = input.trim();
-        if (!trimmedInput) return;
+        if (!trimmedInput || !fileSystem) return;
 
         addCommandToHistory(trimmedInput);
-        if (trimmedInput === 'clear') {
-            clearTerminal();
-        } else if (fileSystem) {
-            const result = await executeCommand(trimmedInput, fileSystem);
-            const inputResult = { content: `${getPrompt(currentDirectory)}${input}`, type: CommandResultType.INPUT };
-            setOutput(prev => [...prev, inputResult, ...result]);
-        }
         setInput('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [input, fileSystem, currentDirectory, addCommandToHistory, clearTerminal, executeCommand, setOutput]);
+        if (trimmedInput === 'clear') {
+            queueClear();
+            return;
+        }
 
-    useKeyboardNavigation(inputRef, fileSystem as WASMFileSystem, getPreviousCommand, getNextCommand, setInput, clearTerminal, handleSubmit);
+        pending.current = pending.current.then(async () => {
+            const directory = fileSystem.cwd();
+            const inputResult = { content: `${getPrompt(directory)}${input}`, type: CommandResultType.INPUT };
+            try {
+                const result = await executeCommand(trimmedInput, fileSystem);
+                if (fileSystem.cwd() !== directory) changeDirectory(fileSystem.cwd());
+                setOutput(previous => [...previous, inputResult, ...result]);
+            } catch (error) {
+                setOutput(previous => [...previous, inputResult, { content: (error as Error).message, type: CommandResultType.ERROR }]);
+            }
+        });
+    }, [input, fileSystem, addCommandToHistory, queueClear, executeCommand, changeDirectory, setOutput]);
+
+    useKeyboardNavigation(inputRef, fileSystem, getPreviousCommand, getNextCommand, setInput, queueClear, handleSubmit);
 
     useEffect(() => {
-
-        const initFileSystem = async () => {
-            try {
-                const fs = await WASMFileSystem.initFsModule(terminalStore);
+        const controller = new AbortController();
+        LinuxFileSystem.start(files, controller.signal).then(fs => {
+            if (!controller.signal.aborted) {
+                changeDirectory(fs.cwd());
                 setFileSystem(fs);
-            } catch (error) {
-                console.error('Failed to initialize file system:', error);
-                setOutput(prev => [...prev, { content: 'Failed to initialize file system. Please try again.', type: CommandResultType.ERROR }]);
             }
-        };
-
-        if (!fileSystem) {
-            initFileSystem();
-        }
-
-        const current = terminalRef.current;
-        const handleTerminalClick = () => {
-            inputRef.current?.focus();
-        };
-
-        current?.addEventListener('click', handleTerminalClick);
-
-        return () => {
-            current?.removeEventListener('click', handleTerminalClick);
-        };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        }).catch(error => {
+            if (!controller.signal.aborted) {
+                console.error('Failed to initialize file system:', error);
+                const content = error instanceof Error ? error.message : 'Failed to initialize file system. Please try again.';
+                setOutput(previous => [...previous, { content, type: CommandResultType.ERROR }]);
+            }
+        });
+        return () => controller.abort();
+    }, [files, changeDirectory, setOutput]);
 
     useEffect(() => {
         const current = terminalRef.current;
@@ -74,16 +75,14 @@ const Terminal: React.FC = () => {
     }, [output]);
 
     return (
-        <div ref={terminalRef} className={styles.terminal}>
-            <FileSystemContext.Provider value={fileSystem}>
-                <Output outputs={output} />
-                {fileSystem && <TerminalInput
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    prompt={getPrompt(currentDirectory)}
-                />}
-            </FileSystemContext.Provider>
+        <div ref={terminalRef} className={styles.terminal} onClick={() => inputRef.current?.focus()}>
+            <Output outputs={output} />
+            {fileSystem && <TerminalInput
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                prompt={getPrompt(currentDirectory)}
+            />}
         </div>
     );
 };

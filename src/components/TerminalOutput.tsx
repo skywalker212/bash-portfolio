@@ -1,13 +1,9 @@
-import React, { useContext } from 'react';
-import { CommandResult, CommandResultType, TerminalOutputStream } from '@/types';
+import React from 'react';
+import { CommandResult, CommandResultType } from '@/types';
 import styles from '@/styles/Output.module.css';
-import { getOutputStream } from '@/store/terminalStore';
-import htmlInnerText from 'react-innertext';
-import { FileSystemContext } from './Terminal';
 import { injectLinkToText } from './Output';
 
 const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResult) => {
-    const fileSystem = useContext(FileSystemContext);
     let outputClass = styles.output;
 
     switch (type) {
@@ -41,17 +37,7 @@ const TerminalOutput: React.FC<CommandResult> = ({ content, type }: CommandResul
         output = <div className={outputClass}>{type === CommandResultType.TEXT ? injectLinkToText(content as string) : content}</div>;
     }
 
-    const { outputStream, streamInfo } = getOutputStream();
-    if (type !== CommandResultType.INPUT && outputStream === TerminalOutputStream.FILE) {
-        const text = htmlInnerText(output);
-        if (fileSystem && streamInfo) {
-            fileSystem.writeFile(streamInfo.name, text);
-        }
-        return;
-    } else {
-        return output;
-    }
-
+    return output;
 };
 
 export default TerminalOutput;

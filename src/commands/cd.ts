@@ -26,7 +26,7 @@ export const cdCommand: CdCommand = {
     description,
     execute: async (state, args) => {
         try {
-            state.fileSystem.changeDirectory(args.directory);
+            await state.fileSystem.changeDirectory(args.directory);
             return {
                 type: CommandResultType.NONE
             };

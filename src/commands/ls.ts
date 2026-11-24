@@ -56,7 +56,7 @@ export const lsCommand: LsCommand = {
                 if (directories.length > 1) {
                     output += `${dir}:\n`;
                 }
-                const files = state.fileSystem.getDetailedDirectoryListing(dir, args.all);
+                const files = await state.fileSystem.getDetailedDirectoryListing(dir, args.all);
 
                 if (args.long) {
                     const linkCountWidth = Math.max(...files.map(f => f.linkCount.toString().length));

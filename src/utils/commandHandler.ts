@@ -1,18 +1,35 @@
 import { TerminalStore } from '@/store';
 import { commands } from '../commands';
 import { parseCommand } from './terminalUtils';
-import { CommandResult, CommandResultType, TerminalOutputStream } from '@/types';
-import { WASMFileSystem } from './fileSystemUtils';
+import { CommandResult, CommandResultType, ParsedCommand, TableCommandResult } from '@/types';
+import { LinuxFileSystem } from './fileSystemUtils';
+import { formatTable } from './formatTable';
+import htmlInnerText from 'react-innertext';
 import { ArgumentParserError, ArgumentTypeError, InvalidChoiceError, InvalidNargsError, MissingRequiredArgumentError, UnknownArgumentError } from 'js-argparse';
 
-export const handleCommand = async (input: string, terminalStore: TerminalStore, fileSystem: WASMFileSystem): Promise<CommandResult[]> => {
-  const { command: commandName, args, file } = parseCommand(input);
-  if (file) {
-    terminalStore.setOutputStream(TerminalOutputStream.FILE, { name: file });
-  } else {
-    terminalStore.setOutputStream(TerminalOutputStream.STDOUT);
-  }
+export const handleCommand = async (input: string, terminalStore: TerminalStore, fileSystem: LinuxFileSystem): Promise<CommandResult[]> => {
+  const parsed = parseCommand(input);
+  const results = await executeCommand(parsed, terminalStore, fileSystem);
+  if (!parsed.file) return results;
 
+  const text = results.map(result => result.type === CommandResultType.TABLE
+    ? formatTable(result as TableCommandResult)
+    : htmlInnerText(result.content)
+  ).join('');
+
+  try {
+    await fileSystem.writeFile(parsed.file, text);
+    return [];
+  } catch (error) {
+    return [{ content: (error as Error).message, type: CommandResultType.ERROR }];
+  }
+};
+
+const executeCommand = async (
+  { command: commandName, args }: ParsedCommand,
+  terminalStore: TerminalStore,
+  fileSystem: LinuxFileSystem,
+): Promise<CommandResult[]> => {
   const command = commands.find(cmd => cmd.name === commandName);
 
   if (command) {

@@ -1,4 +1,4 @@
-import { parseCommand, WASMFileSystem } from '@/utils';
+import { parseCommand, LinuxFileSystem } from '@/utils';
 import { useEffect, useCallback } from 'react';
 
 function escapeRegExp(string: string) {
@@ -7,14 +7,14 @@ function escapeRegExp(string: string) {
 
 export const useKeyboardNavigation = (
     inputRef: React.RefObject<HTMLInputElement | null>,
-    fileSystem: WASMFileSystem,
+    fileSystem: LinuxFileSystem | null,
     getPreviousCommand: () => string | null,
     getNextCommand: () => string | null,
     setInput: (value: string) => void,
     clearTerminal: () => void,
     handleSubmit: () => void
 ) => {
-    const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    const handleKeyDown = useCallback(async (event: KeyboardEvent) => {
         switch (event.key) {
             case 'Enter': {
                 event.preventDefault();
@@ -40,7 +40,7 @@ export const useKeyboardNavigation = (
             case 'Tab': {
                 event.preventDefault();
                 const inputValue = inputRef.current?.value;
-                if (!inputValue) break;
+                if (!inputValue || !fileSystem) break;
                 const { command, args, file } = parseCommand(inputValue);
                 if (file || args) {
                     const fullPath = file || args.split(" ").pop() || "";
@@ -49,9 +49,9 @@ export const useKeyboardNavigation = (
                     if (fileName) {
                         const dir = path.join("/") || ".";
                         try {
-                            const matchingFileListing = fileSystem.getDetailedDirectoryListing(dir, true)
+                            const matchingFileListing = (await fileSystem.getDetailedDirectoryListing(dir, true))
                                 .find(listing => listing.name.toString().startsWith(fileName));
-                            if (matchingFileListing) {
+                            if (matchingFileListing && inputRef.current?.value === inputValue) {
                                 const newInput = inputValue.replace(
                                     new RegExp(`${escapeRegExp(fullPath)}$`),
                                     fullPath.replace(fileName, matchingFileListing.name.toString())
@@ -65,10 +65,10 @@ export const useKeyboardNavigation = (
                 } else if (command) {
                     const BIN_DIRECTORY = '/bin';
                     try {
-                        const matchingCommandListing = fileSystem.getDetailedDirectoryListing(BIN_DIRECTORY, false)
+                        const matchingCommandListing = (await fileSystem.getDetailedDirectoryListing(BIN_DIRECTORY, false))
                             .find(listing => listing.name.toString().startsWith(command));
 
-                        if (matchingCommandListing) {
+                        if (matchingCommandListing && inputRef.current?.value === inputValue) {
                             setInput(matchingCommandListing.name.toString());
                         }
                     } catch (error) {
@@ -91,14 +91,14 @@ export const useKeyboardNavigation = (
 
     useEffect(() => {
         const currentInputRef = inputRef.current;
-        if (currentInputRef) {
+        if (fileSystem && currentInputRef) {
             currentInputRef.addEventListener('keydown', handleKeyDown);
         }
 
         return () => {
-            if (currentInputRef) {
+            if (fileSystem && currentInputRef) {
                 currentInputRef.removeEventListener('keydown', handleKeyDown);
             }
         };
-    }, [inputRef, handleKeyDown]);
+    }, [fileSystem, inputRef, handleKeyDown]);
 };

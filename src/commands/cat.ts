@@ -23,7 +23,7 @@ export const catCommand: CatCommand = {
     description,
     execute: async (state, args) => {
         try {
-            const fileContents = state.fileSystem.readFile(args.file);
+            const fileContents = await state.fileSystem.readFile(args.file);
             return {
                 content: fileContents,
                 type: CommandResultType.TEXT

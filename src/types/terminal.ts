@@ -1,23 +1,12 @@
 import { TerminalStore } from "@/store";
-import { WASMFileSystem } from "@/utils";
+import { LinuxFileSystem } from "@/utils";
 import { ArgumentParser } from "js-argparse";
 import { ReactNode } from "react";
 import { Alignment } from "table";
 
-export enum TerminalOutputStream {
-    STDOUT = 'stdout',
-    FILE = 'file'
-}
-
-export interface FileOutputStream {
-    name: string
-}
-
 export interface TerminalState {
     user: string;
     host: string;
-    outputStream: TerminalOutputStream,
-    streamInfo?: FileOutputStream,
     currentDirectory: string;
     commandHistory: string[];
     historyIndex: number;
@@ -57,5 +46,5 @@ export interface Command<T extends Record<string, unknown> = Record<string, unkn
     name: string;
     args: ArgumentParser,
     description: string,
-    execute: (state: {terminalStore: TerminalStore, fileSystem: WASMFileSystem}, args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
+    execute: (state: {terminalStore: TerminalStore, fileSystem: LinuxFileSystem}, args: T) => Promise<CommandResult | CommandResult[]> | CommandResult | CommandResult[];
 }
