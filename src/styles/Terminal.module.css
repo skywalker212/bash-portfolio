@@ -21,9 +21,10 @@
     background-color: var(--terminal-bg);
 }
 
-.banner {
+.motd {
     margin: 0 0 0.5rem;
     font: inherit;
+    white-space: pre-wrap;
 }
 
 .error {

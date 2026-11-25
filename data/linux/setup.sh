@@ -13,11 +13,6 @@ mkdir -p /home "$portfolio"
 adduser -D -h "$home" -s /bin/sh "$user"
 test -d "$home"
 cp -R "$seed/bin" "$seed/lib" "$seed/share" "$portfolio/"
-cp "$seed/profile.sh" "$seed/banner" "$portfolio/"
+cp "$seed/profile.sh" "$portfolio/"
+cp "$seed/motd" /etc/motd
 chmod 755 "$portfolio/bin/"*
-
-# Put a readable copy of the command output in the home directory links.
-"$portfolio/bin/projects" > "$portfolio/share/projects"
-"$portfolio/bin/skills" > "$portfolio/share/skills"
-ln -s "$portfolio/share/projects" "$home/projects"
-ln -s "$portfolio/share/skills" "$home/skills"

@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open [the local portfolio](http://localhost:3000) and type `help`. The shell runs as `skywalker212` on the Linux guest `akash.is`. Use `about` for the portfolio profile, `projects` for the project list, and `skills` for technical skills.
+Open [the local portfolio](http://localhost:3000) and type `about` for experience and links to LinkedIn and GitHub. The shell runs as `skywalker212` on the Linux guest `akash.is`.
 
 The homepage connects xterm.js to the guest's PTY. Guest setup, shell startup, and portfolio programs live in [data/linux](data/linux). Each session starts with a fresh filesystem and guest networking disabled.
 

@@ -30,7 +30,7 @@ function renderBytes(terminal: Xterm, bytes: Uint8Array, signal: AbortSignal) {
     });
 }
 
-export default function Terminal({ files, banner }: { files: GuestFiles; banner: string }) {
+export default function Terminal({ files, motd }: { files: GuestFiles; motd: string }) {
     const surface = useRef<HTMLDivElement>(null);
     const [status, setStatus] = useState<Status>({ phase: 'booting' });
     const [generation, setGeneration] = useState(0);
@@ -145,10 +145,8 @@ export default function Terminal({ files, banner }: { files: GuestFiles; banner:
             <div className={styles.surface} ref={surface} />
             {(status.phase === 'booting' || status.phase === 'failed') && (
                 <div className={styles.preview}>
-                    <pre className={styles.banner}>{banner}</pre>
-                    {status.phase === 'failed'
-                        ? <p className={styles.error} role="alert">{status.message}</p>
-                        : <p>Type &apos;help&apos; for available commands.</p>}
+                    <pre className={styles.motd}>{motd}</pre>
+                    {status.phase === 'failed' && <p className={styles.error} role="alert">{status.message}</p>}
                 </div>
             )}
             {(status.phase === 'exited' || status.phase === 'failed') && (

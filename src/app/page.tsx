@@ -17,7 +17,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-black">
-      <Terminal files={files} banner={typeof files.banner === 'string' ? files.banner : ''} />
+      <Terminal files={files} motd={typeof files.motd === 'string' ? files.motd : ''} />
     </main>
   );
 }
