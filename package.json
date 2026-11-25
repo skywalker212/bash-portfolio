@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build-guest": "node scripts/build-linux.mjs",
+    "predev": "npm run build-guest",
     "dev": "next dev",
+    "prebuild": "npm run build-guest",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

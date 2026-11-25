@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { Terminal as Xterm } from '@xterm/xterm';
-import { startLinuxSession, type GuestFiles } from '@/linux/session';
+import { startLinuxSession } from '@/linux/session';
 import styles from '@/styles/Terminal.module.css';
 
 type Status =
@@ -30,7 +30,7 @@ function renderBytes(terminal: Xterm, bytes: Uint8Array, signal: AbortSignal) {
     });
 }
 
-export default function Terminal({ files, motd }: { files: GuestFiles; motd: string }) {
+export default function Terminal({ motd }: { motd: string }) {
     const surface = useRef<HTMLDivElement>(null);
     const [status, setStatus] = useState<Status>({ phase: 'booting' });
     const [generation, setGeneration] = useState(0);
@@ -96,7 +96,7 @@ export default function Terminal({ files, motd }: { files: GuestFiles; motd: str
             observer.observe(container);
             resize();
 
-            const session = await startLinuxSession(files, { cols: xterm.cols, rows: xterm.rows }, signal);
+            const session = await startLinuxSession({ cols: xterm.cols, rows: xterm.rows }, signal);
             const { pty } = session;
             try {
                 signal.throwIfAborted();
@@ -133,7 +133,7 @@ export default function Terminal({ files, motd }: { files: GuestFiles; motd: str
             observer?.disconnect();
             terminal?.dispose();
         };
-    }, [files, generation]);
+    }, [generation]);
 
     function restart() {
         setStatus({ phase: 'booting' });
