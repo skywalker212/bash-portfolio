@@ -17,6 +17,7 @@
 /build
 /public/portfolio.wasm
 /public/portfolio.wasm.*
+/public/third-party.txt
 
 # misc
 .DS_Store

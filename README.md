@@ -23,8 +23,6 @@ If both storage APIs are unavailable, the terminal marks the home as temporary. 
 
 The bundled [home disk template](data/linux/home.kwsparse.gz) keeps the build independent of local disk tools. To regenerate it with e2fsprogs installed, run `node scripts/build-home-image.mjs` with `mke2fs` on your path.
 
-The site uses [unkernel v0.2.0-261124-c08e977](https://github.com/pithings/unkernel/tree/v0.2.0-261124-c08e977) with its bundled BusyBox system. [Release notices](https://github.com/pithings/unkernel/releases/download/v0.2.0-261124-c08e977/THIRD-PARTY.md)
-
 ## Add a guest command
 
 Put a static Linux ARM64 executable in [data/linux/bin](data/linux/bin) and name the file after the command. A gzip-compressed executable can use a `.gz` suffix, which the build removes when it installs the program. Scripts with a shebang also work if the guest has their interpreter. The guest adds this directory to its shell path.
@@ -32,3 +30,15 @@ Put a static Linux ARM64 executable in [data/linux/bin](data/linux/bin) and name
 Use [data/linux/libexec](data/linux/libexec) for executables that a command calls by absolute path. The `catsay` wrapper uses this layout to pass text to the [upstream v2.0.0 binary](https://github.com/LiTLiTschi/catsay/releases/tag/v2.0.0). Its [license notices](data/linux/share/catsay-NOTICES) ship with the guest. The upstream Linux ARM64 release archive has SHA-256 `73ed549ba17c90ab9931c714f74f76af83e90c6bb2eafbce9dbdaef6f173e1a6`.
 
 Run `npm run build-guest` and reload the terminal to try a new command.
+
+## Credits
+
+- **unkernel**, by Pooya Parsa and contributors, makes it possible to boot Linux in the browser and connect the guest's terminal to this site. [unkernel project](https://github.com/pithings/unkernel) · [Pinned source and build instructions](https://github.com/pithings/unkernel/tree/v0.2.0-261124-c08e977)
+- **Linux** provides the kernel and ext4. unkernel's WebAssembly architecture builds on Joel Severin's **linux-wasm** work. [Linux](https://www.kernel.org/) · [linux-wasm](https://github.com/joelseverin/linux-wasm)
+- **BusyBox** provides the Linux guest's shell, login, and command-line tools. unkernel bundles the static build packaged by **Alpine Linux**. [BusyBox](https://busybox.net/) · [Alpine package](https://pkgs.alpinelinux.org/package/v3.24/main/aarch64/busybox-static)
+- **xterm.js** provides the browser terminal, including its Fit and Web Links add-ons. [xterm.js project](https://xtermjs.org/)
+- **catsay**, by Liu (LiTLiTschi), provides the native talking cat and includes the **Go** runtime. [catsay release](https://github.com/LiTLiTschi/catsay/releases/tag/v2.0.0) · [Go project](https://go.dev/)
+- **e2fsprogs** creates the ext4 home disk template. [e2fsprogs project](https://e2fsprogs.sourceforge.net/)
+- **Next.js**, **React**, and **Tailwind CSS** provide the web app and its styles. [Next.js](https://nextjs.org/) · [React](https://react.dev/) · [Tailwind CSS](https://tailwindcss.com/)
+
+The site build includes the upstream license and copyright notices at `/third-party.txt`. [unkernel release notices](https://github.com/pithings/unkernel/releases/download/v0.2.0-261124-c08e977/THIRD-PARTY.md) · [catsay and Go notices](data/linux/share/catsay-NOTICES)

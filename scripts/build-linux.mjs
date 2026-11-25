@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { readGuestPrograms } from './guest-programs.mjs';
+import { writeThirdPartyNotices } from './build-notices.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const guest = join(root, 'data/linux');
@@ -161,6 +162,7 @@ const image = Buffer.concat([wasm.subarray(0, 8), ...parts.map(part => {
 })]);
 const temporary = `${output}.${process.pid}`;
 await mkdir(dirname(output), { recursive: true });
+await writeThirdPartyNotices(join(dirname(output), 'third-party.txt'));
 try {
     await writeFile(temporary, image);
     await rename(temporary, output);
