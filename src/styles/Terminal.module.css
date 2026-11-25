@@ -1,17 +1,68 @@
-@reference "tailwindcss";
-
 .terminal {
-    @apply w-full h-screen overflow-y-auto p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text)] font-mono;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    padding: 1rem;
+    background-color: var(--terminal-bg);
+    color: var(--terminal-text);
+    font: clamp(10px, 2.6vw, 14px) / 1.5 Inconsolata, monospace;
 }
 
-.output {
-    @apply mb-2 whitespace-pre-wrap break-words;
+.surface {
+    width: 100%;
+    height: 100%;
 }
 
-.prompt {
-    @apply text-[var(--terminal-prompt)] mr-2;
+.preview {
+    position: absolute;
+    inset: 1rem;
+    overflow: hidden;
+    background-color: var(--terminal-bg);
 }
 
-.input {
-    @apply bg-transparent outline-none w-full;
+.motd {
+    margin: 0 0 0.5rem;
+    font: inherit;
+    white-space: pre-wrap;
+}
+
+.error {
+    color: #ff6b6b;
+}
+
+.fallback {
+    overflow-y: auto;
+    padding-bottom: 3rem;
+}
+
+.fallback h1,
+.fallback h2 {
+    margin: 1em 0 0.35em;
+    font-weight: bold;
+}
+
+.fallback li {
+    margin-bottom: 0.5em;
+}
+
+.fallback a {
+    color: var(--terminal-prompt);
+    text-decoration: underline;
+}
+
+.restart {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.35em 0.5em;
+    background-color: var(--terminal-bg);
+    color: var(--terminal-prompt);
+    border: 1px solid currentColor;
+    cursor: pointer;
+}
+
+@media (max-width: 640px) {
+    .terminal { padding: 0.5rem; }
+    .preview { inset: 0.5rem; }
 }

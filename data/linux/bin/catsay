@@ -1,0 +1,14 @@
+#!/bin/sh
+
+case "${1:-}" in
+    -h|--help)
+        printf 'Usage: catsay [TEXT ...]\n'
+        exit
+        ;;
+esac
+
+if [ "$#" -eq 0 ]; then
+    set -- Meow
+fi
+
+exec /opt/portfolio/libexec/catsay --string "$*"

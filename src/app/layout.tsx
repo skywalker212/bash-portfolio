@@ -1,3 +1,4 @@
+import '@xterm/xterm/css/xterm.css';
 import '@/styles/globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';

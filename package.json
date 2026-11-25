@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build-guest": "node scripts/build-linux.mjs",
+    "predev": "npm run build-guest",
     "dev": "next dev",
+    "prebuild": "npm run build-guest",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -11,18 +14,17 @@
   "dependencies": {
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
-    "js-argparse": "^0.3.4",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/addon-web-links": "0.12.0",
+    "@xterm/xterm": "6.0.0",
     "next": "16.4.6",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-innertext": "^1.1.5",
-    "table": "^6.9.0",
     "unkernel": "0.2.0-261124-c08e977"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
     "@tailwindcss/postcss": "^4.0.14",
-    "@types/figlet": "^1.7.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
