@@ -13,6 +13,6 @@ mkdir -p /home "$portfolio"
 adduser -D -h "$home" -s /bin/sh "$user"
 test -d "$home"
 cp -R "$seed/bin" "$seed/lib" "$seed/share" "$portfolio/"
-cp "$seed/profile.sh" "$portfolio/"
+cp "$seed/profile.sh" /etc/profile
 cp "$seed/motd" /etc/motd
 chmod 755 "$portfolio/bin/"*

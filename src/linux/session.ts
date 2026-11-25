@@ -4,7 +4,6 @@ export interface GuestFiles {
 
 const USER = 'skywalker212';
 const HOST = 'akash.is';
-const HOME = `/home/${USER}`;
 const SOURCE = '/mnt/portfolio-source';
 
 export async function startLinuxSession(
@@ -28,11 +27,10 @@ export async function startLinuxSession(
             throw new Error(setup.stderr.trim() || 'Unable to initialize the Linux guest.');
         }
         await source.unmount();
-        const pty = await kernel.spawn('/bin/sh', ['-i'], {
+        // The guest's login applet prints /etc/motd and switches to the portfolio user.
+        const pty = await kernel.spawn('/bin/busybox', ['login', '-f', USER], {
             ...size,
-            user: USER,
-            cwd: HOME,
-            env: { ENV: '/opt/portfolio/profile.sh' },
+            user: 0,
             signal,
         });
         return { pty, stop: () => kernel.stop() };
