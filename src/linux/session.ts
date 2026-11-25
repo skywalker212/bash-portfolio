@@ -1,6 +1,11 @@
-import type { SessionEvent, SessionRequest, TerminalSize } from './sessionMessages';
+import type { DuckDbDownload, SessionEvent, SessionRequest, TerminalSize, ZshPrompt } from './sessionMessages';
 
-export async function startLinuxSession(size: TerminalSize, signal: AbortSignal) {
+export async function startLinuxSession(
+    size: TerminalSize,
+    signal: AbortSignal,
+    prompt: ZshPrompt,
+    onDuckDbDownload: (state: DuckDbDownload) => void,
+) {
     signal.throwIfAborted();
     const worker = new Worker(new URL('./guest.worker.ts', import.meta.url), { type: 'module' });
     const ready = Promise.withResolvers<Extract<SessionEvent, { type: 'ready' }>>();
@@ -30,8 +35,10 @@ export async function startLinuxSession(size: TerminalSize, signal: AbortSignal)
     }
 
     worker.onmessage = (event: MessageEvent<SessionEvent>) => {
-        if (event.data.type === 'ready') ready.resolve(event.data);
-        else finish(event.data);
+        const message = event.data;
+        if (message.type === 'ready') ready.resolve(message);
+        if (message.type === 'closed') finish(message);
+        if (message.type === 'duckdb-download' && !signal.aborted) onDuckDbDownload(message.state);
     };
     worker.onerror = event => {
         event.preventDefault();
@@ -42,7 +49,7 @@ export async function startLinuxSession(size: TerminalSize, signal: AbortSignal)
     };
 
     signal.addEventListener('abort', stop, { once: true });
-    send({ type: 'start', kernel: new URL('/portfolio.wasm', window.location.origin).href, size });
+    send({ type: 'start', kernel: new URL('/portfolio.wasm', window.location.origin).href, size, prompt });
 
     try {
         const { input, output, temporary } = await Promise.race([
@@ -64,7 +71,12 @@ export async function startLinuxSession(size: TerminalSize, signal: AbortSignal)
                 return { code };
             }),
         };
-        return { pty, stop, temporary };
+        return {
+            pty, stop, temporary,
+            setPrompt(prompt: ZshPrompt) {
+                if (!result) send({ type: 'zsh-prompt', prompt });
+            },
+        };
     } catch (error) {
         await stop();
         throw error;

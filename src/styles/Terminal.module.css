@@ -1,12 +1,158 @@
 .terminal {
     position: relative;
+    inset-block-start: var(--terminal-viewport-top, 0px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.5rem;
     width: 100%;
     height: 100vh;
-    height: 100dvh;
+    height: var(--terminal-viewport-height, 100dvh);
     padding: 1rem;
     background-color: var(--terminal-bg);
     color: var(--terminal-text);
+    color-scheme: dark;
     font: clamp(10px, 2.6vw, 14px) / 1.5 Inconsolata, monospace;
+}
+
+.terminal[data-cursor='bar'] { --terminal-cursor: bar; }
+.terminal[data-cursor='block'] { --terminal-cursor: block; }
+.terminal[data-cursor='underline'] { --terminal-cursor: underline; }
+
+.terminal[data-theme='midnight'] {
+    --terminal-bg: #141821;
+    --terminal-text: #e2e8f4;
+    --terminal-prompt: #7ee3b5;
+    --terminal-selection: rgba(126, 227, 181, 0.25);
+    --terminal-black: #222936;
+    --terminal-red: #ff8a97;
+    --terminal-yellow: #edcb84;
+    --terminal-blue: #8eb5ff;
+    --terminal-magenta: #d3a4ff;
+    --terminal-cyan: #8bdde6;
+    --terminal-white: #e2e8f4;
+    --terminal-bright-black: #8896ae;
+    --terminal-bright-green: #a6f1ca;
+}
+
+.terminal[data-theme='light'] {
+    color-scheme: light;
+    --terminal-bg: #faf7ee;
+    --terminal-text: #26251f;
+    --terminal-prompt: #246343;
+    --terminal-selection: rgba(36, 99, 67, 0.19);
+    --terminal-black: #26251f;
+    --terminal-red: #9c263c;
+    --terminal-yellow: #765400;
+    --terminal-blue: #25519b;
+    --terminal-magenta: #76418d;
+    --terminal-cyan: #11616b;
+    --terminal-white: #514f48;
+    --terminal-bright-black: #66635a;
+    --terminal-bright-green: #20634e;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    font-size: 14px;
+}
+
+.status {
+    position: absolute;
+    inset-block-start: 0.5rem;
+    inset-inline-end: 0.5rem;
+    z-index: 11;
+    max-inline-size: min(26rem, calc(100% - 1rem));
+    padding: 0.35rem 0.65rem;
+    overflow-wrap: anywhere;
+    border: 1px solid color-mix(in srgb, var(--terminal-text) 35%, transparent);
+    border-radius: 0.375rem;
+    background: var(--terminal-bg);
+    color: var(--terminal-text);
+    box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 25%);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.status:empty { opacity: 0; }
+
+.toolbar button,
+.settings button {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid currentColor;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.terminal :is(button, select, input):focus-visible {
+    outline: 2px solid var(--terminal-prompt);
+    outline-offset: 2px;
+}
+
+.showKeyboard,
+.touchKeys { display: none; }
+
+@media (pointer: coarse) {
+    .controls {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .toolbar { flex-wrap: wrap; }
+
+    .toolbar button,
+    .restart,
+    .settings button,
+    .settings select,
+    .settings input {
+        min-width: 44px;
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+
+    .showKeyboard {
+        display: block;
+        margin-inline-end: auto;
+    }
+
+    .controls button:disabled {
+        opacity: 0.55;
+        cursor: default;
+    }
+
+    .touchKeys {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        justify-self: center;
+        width: min(36rem, calc(100% + 0.5rem));
+        overflow: hidden;
+        border: 1px solid currentColor;
+        border-radius: 0.375rem;
+        font-size: 16px;
+    }
+
+    .touchKeys button {
+        min-height: 44px;
+        padding: 0.25rem 0;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+
+    .touchKeys button + button { border-inline-start: 1px solid currentColor; }
+    .touchKeys button:focus-visible { outline-offset: -3px; }
+
+    .touchKeys button[aria-pressed='true'] {
+        background: var(--terminal-prompt);
+        color: var(--terminal-bg);
+        font-weight: 700;
+    }
+}
+
+.viewport {
+    position: relative;
+    overflow: hidden;
 }
 
 .surface {
@@ -16,24 +162,26 @@
 
 .preview {
     position: absolute;
-    inset: 1rem;
+    inset: 0;
     overflow: hidden;
     background-color: var(--terminal-bg);
 }
 
-.motd {
-    margin: 0 0 0.5rem;
-    font: inherit;
-    white-space: pre-wrap;
-}
-
 .error {
-    color: #ff6b6b;
+    color: var(--terminal-red, #ff6b6b);
 }
 
 .fallback {
     overflow-y: auto;
     padding-bottom: 3rem;
+}
+
+.staticFallback {
+    min-height: 100vh;
+    padding: 1rem;
+    background-color: var(--terminal-bg);
+    color: var(--terminal-text);
+    font-size: 16px;
 }
 
 .fallback h1,
@@ -53,8 +201,8 @@
 
 .restart {
     position: absolute;
-    bottom: 1rem;
-    right: 1rem;
+    bottom: 0;
+    right: 0;
     padding: 0.35em 0.5em;
     background-color: var(--terminal-bg);
     color: var(--terminal-prompt);
@@ -62,7 +210,55 @@
     cursor: pointer;
 }
 
+.settings {
+    width: min(22rem, calc(100% - 2rem));
+    max-height: calc(100% - 2rem);
+    overflow-y: auto;
+    margin: auto;
+    padding: 1.25rem;
+    background: var(--terminal-bg);
+    color: var(--terminal-text);
+    border: 1px solid currentColor;
+    border-radius: 0.5rem;
+    font-size: 16px;
+}
+
+.settings::backdrop { background: rgb(0 0 0 / 55%); }
+.settings h2 { margin-bottom: 1rem; font-weight: 700; }
+
+@media (min-width: 768px) {
+    .settings { margin: 1rem 1rem auto auto; }
+}
+
+.settings label {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.settings :is(select, input) {
+    min-width: 0;
+    padding: 0.25rem;
+    color: inherit;
+    background: inherit;
+    border: 1px solid currentColor;
+    border-radius: 0.25rem;
+}
+
+.settings .promptFormat {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+}
+
+.settingHint {
+    margin-bottom: 0.75rem;
+    font-size: 14px;
+}
+
+.settings form { text-align: right; }
+
 @media (max-width: 640px) {
     .terminal { padding: 0.5rem; }
-    .preview { inset: 0.5rem; }
 }

@@ -1,14 +1,34 @@
 /// <reference lib="webworker" />
 
-import { bundledBoot, checkSupport, createKernel, loadKernelModule, readKwsparse } from 'unkernel/web';
-import type { KernelHandle, Pty } from 'unkernel/web';
+import { bundledBoot, checkSupport, createKernel, loadKernelModule, MemoryFs, readKwsparse } from 'unkernel/web';
+import type { KernelHandle, Pty, VsockConnection, VsockListener } from 'unkernel/web';
+import { duckdbFiles } from './duckdb';
 import { openHomeDisk } from './homeDisk';
-import type { SessionEvent, SessionRequest } from './sessionMessages';
+import type { SessionEvent, SessionRequest, ZshPrompt } from './sessionMessages';
 
 const scope = self as unknown as DedicatedWorkerGlobalScope;
 const boot = new AbortController();
 const stopping = Promise.withResolvers<null>();
+const promptPort = 46217;
+const promptWriters = new Set<WritableStreamDefaultWriter<Uint8Array | string>>();
 let shell: Pty | undefined;
+let zshPrompt: ZshPrompt;
+
+function promptFile() {
+    const theme = /^[a-z0-9_-]+$/.test(zshPrompt.theme) ? zshPrompt.theme : 'portfolio';
+    const format = zshPrompt.format.replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').slice(0, 160);
+    return `${theme}\n${format}\n`;
+}
+
+function watchPrompt(connection: VsockConnection) {
+    const writer = connection.writable.getWriter();
+    promptWriters.add(writer);
+    void writer.write('\n').catch(() => {});
+    void connection.closed.then(() => {
+        promptWriters.delete(writer);
+        writer.releaseLock();
+    });
+}
 
 function post(message: SessionEvent, transfer: Transferable[] = []) {
     scope.postMessage(message, transfer);
@@ -17,6 +37,7 @@ function post(message: SessionEvent, transfer: Transferable[] = []) {
 async function run({ kernel: url, size }: Extract<SessionRequest, { type: 'start' }>) {
     const { signal } = boot;
     let kernel: KernelHandle | undefined;
+    let promptEvents: VsockListener | undefined;
     let disk: Awaited<ReturnType<typeof openHomeDisk>> | undefined;
     let code: number | null = null;
     let error: string | undefined;
@@ -33,7 +54,22 @@ async function run({ kernel: url, size }: Extract<SessionRequest, { type: 'start
             error = `The browser could not save your home directory. ${message(cause)}`;
             stopping.resolve(null);
         });
-        kernel = await createKernel({ kernel: module, disks: [disk.device], memoryMiB: 128, cpus: 1, signal });
+        const tools = duckdbFiles(url, signal, state => post({ type: 'duckdb-download', state }));
+        kernel = await createKernel({
+            kernel: module,
+            disks: [disk.device],
+            memoryMiB: 192,
+            cpus: 1,
+            signal,
+            mounts: {
+                '/opt/portfolio/tools': { fs: tools, readOnly: true, requestTimeout: 120_000 },
+                '/opt/portfolio/settings': {
+                    fs: new MemoryFs({ prompt: promptFile, 'prompt-events': `${promptPort}\n` }),
+                    readOnly: true,
+                },
+            },
+        });
+        promptEvents = kernel.vsock?.listen(promptPort, watchPrompt);
 
         const pty = await kernel.spawn('/opt/portfolio/login', [], { ...size, user: 0, signal });
         shell = pty;
@@ -45,6 +81,7 @@ async function run({ kernel: url, size }: Extract<SessionRequest, { type: 'start
     } catch (cause) {
         if (!signal.aborted) error = message(cause);
     } finally {
+        promptEvents?.close();
         try {
             if (kernel) {
                 try {
@@ -70,7 +107,13 @@ scope.onmessage = (event: MessageEvent<SessionRequest>) => {
     const request = event.data;
     switch (request.type) {
         case 'start':
+            zshPrompt = request.prompt;
             void run(request);
+            break;
+        case 'zsh-prompt':
+            if (zshPrompt.theme === request.prompt.theme && zshPrompt.format === request.prompt.format) break;
+            zshPrompt = request.prompt;
+            promptWriters.forEach(writer => { void writer.write('\n').catch(() => {}); });
             break;
         case 'resize':
             shell?.resize(request.size.cols, request.size.rows);

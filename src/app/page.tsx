@@ -1,13 +1,15 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import Terminal from '@/components/Terminal';
+import styles from '@/styles/Terminal.module.css';
 
 export default async function Home() {
   const guest = join(process.cwd(), 'data/linux');
-  const [motd, contacts, experience, internships] = await Promise.all(
-    ['motd', 'share/contacts.tsv', 'share/experience.tsv', 'share/internships.tsv']
+  const [contacts, experience, internships, prompts] = await Promise.all([
+    ...['share/contacts.tsv', 'share/experience.tsv', 'share/internships.tsv']
       .map(file => readFile(join(guest, file), 'utf8')),
-  );
+    readFile(join(process.cwd(), 'public/guest-tools/zsh-prompts.json'), 'utf8'),
+  ]);
   const rows = (text: string) => text.trim().split('\n').map(line => line.split('\t'));
   const fallback = (
     <article>
@@ -26,8 +28,15 @@ export default async function Home() {
   );
 
   return (
-    <main className="min-h-screen bg-black">
-      <Terminal motd={motd} fallback={fallback} />
+    <main className="bg-black">
+      <noscript>
+        <style>{`.${styles.terminal} { display: none; }`}</style>
+        <div className={`${styles.fallback} ${styles.staticFallback}`}>
+          <p>The Linux terminal needs JavaScript.</p>
+          {fallback}
+        </div>
+      </noscript>
+      <Terminal promptThemes={JSON.parse(prompts)} fallback={fallback} />
     </main>
   );
 }

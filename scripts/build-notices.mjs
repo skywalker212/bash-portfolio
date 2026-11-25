@@ -22,7 +22,7 @@ async function readPackageNotices(name, files) {
     return { version, text: [`${name} ${version}`, ...notices].join('\n\n') };
 }
 
-export async function writeThirdPartyNotices(output) {
+export async function writeThirdPartyNotices(output, duckdb) {
     const [unkernel, dependencies, catsay] = await Promise.all([
         readPackageNotices('unkernel', ['THIRD-PARTY.md', 'LICENSE', 'LICENSE-MIT']),
         Promise.all(Object.entries(packages).map(([name, files]) => readPackageNotices(name, files))),
@@ -36,6 +36,7 @@ export async function writeThirdPartyNotices(output) {
         unkernel.text,
         ...dependencies.map(notice => notice.text),
         catsay,
+        duckdb,
     ];
     await writeFile(output, sections.join('\n\n') + '\n');
 }
