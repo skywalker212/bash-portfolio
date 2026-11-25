@@ -226,6 +226,10 @@
 .settings::backdrop { background: rgb(0 0 0 / 55%); }
 .settings h2 { margin-bottom: 1rem; font-weight: 700; }
 
+@media (min-width: 768px) {
+    .settings { margin: 1rem 1rem auto auto; }
+}
+
 .settings label {
     display: grid;
     grid-template-columns: 1fr 1fr;

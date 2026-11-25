@@ -464,7 +464,7 @@ export default function Terminal({ promptThemes, fallback }: { promptThemes: rea
                         </p>
                     </>
                 )}
-                <p className={styles.settingHint} id="zsh-prompt-help">Changes appear at the next Zsh prompt.</p>
+                <p className={styles.settingHint} id="zsh-prompt-help">Updates the current Zsh prompt as you choose.</p>
                 <form method="dialog"><button type="submit">Done</button></form>
             </dialog>
         </section>

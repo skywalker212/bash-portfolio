@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import { bundledBoot, checkSupport, createKernel, loadKernelModule, MemoryFs, readKwsparse } from 'unkernel/web';
-import type { KernelHandle, Pty } from 'unkernel/web';
+import type { KernelHandle, Pty, VsockConnection, VsockListener } from 'unkernel/web';
 import { duckdbFiles } from './duckdb';
 import { openHomeDisk } from './homeDisk';
 import type { SessionEvent, SessionRequest, ZshPrompt } from './sessionMessages';
@@ -9,6 +9,8 @@ import type { SessionEvent, SessionRequest, ZshPrompt } from './sessionMessages'
 const scope = self as unknown as DedicatedWorkerGlobalScope;
 const boot = new AbortController();
 const stopping = Promise.withResolvers<null>();
+const promptPort = 46217;
+const promptWriters = new Set<WritableStreamDefaultWriter<Uint8Array | string>>();
 let shell: Pty | undefined;
 let zshPrompt: ZshPrompt;
 
@@ -18,6 +20,16 @@ function promptFile() {
     return `${theme}\n${format}\n`;
 }
 
+function watchPrompt(connection: VsockConnection) {
+    const writer = connection.writable.getWriter();
+    promptWriters.add(writer);
+    void writer.write('\n').catch(() => {});
+    void connection.closed.then(() => {
+        promptWriters.delete(writer);
+        writer.releaseLock();
+    });
+}
+
 function post(message: SessionEvent, transfer: Transferable[] = []) {
     scope.postMessage(message, transfer);
 }
@@ -25,6 +37,7 @@ function post(message: SessionEvent, transfer: Transferable[] = []) {
 async function run({ kernel: url, size }: Extract<SessionRequest, { type: 'start' }>) {
     const { signal } = boot;
     let kernel: KernelHandle | undefined;
+    let promptEvents: VsockListener | undefined;
     let disk: Awaited<ReturnType<typeof openHomeDisk>> | undefined;
     let code: number | null = null;
     let error: string | undefined;
@@ -50,9 +63,13 @@ async function run({ kernel: url, size }: Extract<SessionRequest, { type: 'start
             signal,
             mounts: {
                 '/opt/portfolio/tools': { fs: tools, readOnly: true, requestTimeout: 120_000 },
-                '/opt/portfolio/settings': { fs: new MemoryFs({ prompt: promptFile }), readOnly: true },
+                '/opt/portfolio/settings': {
+                    fs: new MemoryFs({ prompt: promptFile, 'prompt-events': `${promptPort}\n` }),
+                    readOnly: true,
+                },
             },
         });
+        promptEvents = kernel.vsock?.listen(promptPort, watchPrompt);
 
         const pty = await kernel.spawn('/opt/portfolio/login', [], { ...size, user: 0, signal });
         shell = pty;
@@ -64,6 +81,7 @@ async function run({ kernel: url, size }: Extract<SessionRequest, { type: 'start
     } catch (cause) {
         if (!signal.aborted) error = message(cause);
     } finally {
+        promptEvents?.close();
         try {
             if (kernel) {
                 try {
@@ -93,7 +111,9 @@ scope.onmessage = (event: MessageEvent<SessionRequest>) => {
             void run(request);
             break;
         case 'zsh-prompt':
+            if (zshPrompt.theme === request.prompt.theme && zshPrompt.format === request.prompt.format) break;
             zshPrompt = request.prompt;
+            promptWriters.forEach(writer => { void writer.write('\n').catch(() => {}); });
             break;
         case 'resize':
             shell?.resize(request.size.cols, request.size.rows);

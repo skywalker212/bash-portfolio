@@ -21,7 +21,7 @@ The homepage connects xterm.js to the guest's PTY. The build bundles the shell s
 - Run `vim notes.txt` to edit a file. Press `i` for Insert mode, `Esc` for Normal mode, `v` for Visual mode, or type `:wq` in Normal mode to save and quit. Put your Vim settings in `~/.vimrc`.
 - Zsh starts with standard line editing. Run `bindkey -v` for vi-style editing, or add it to `~/.zshrc` along with any aliases and prompt settings. In vi-style editing, press `Esc` for Normal mode and `i` to resume typing. Run `sh` to open BusyBox ash.
 - Open **Terminal settings** to choose a theme, font size, or default cursor shape. Vim and Zsh use a block cursor in Normal mode.
-- Choose a bundled **Zsh prompt** theme or enter a custom prompt with [Zsh prompt escapes](https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html). Changes take effect at the next prompt. Choose **Portfolio / .zshrc** to return to your usual prompt.
+- Choose a bundled **Zsh prompt** theme or enter a custom prompt with [Zsh prompt escapes](https://zsh.sourceforge.io/Doc/Release/Prompt-Expansion.html). An idle prompt updates as you choose. During a command, the change appears when the shell prompt returns. Choose **Portfolio / .zshrc** to return to your usual prompt.
 - On touch devices, tap **Open keyboard** to start typing. The key row sends **Esc**, **Tab**, and arrow keys. Tap **Ctrl**, then a character, to send a shortcut such as Ctrl+C.
 
 Guest programs can ring the terminal bell or set the browser tab title with standard terminal control sequences.
