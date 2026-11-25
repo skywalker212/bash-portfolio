@@ -179,6 +179,7 @@ async function writeAsset(path, bytes) {
     }
 }
 await writeAsset(join(root, `public/guest-tools/duckdb-${duckdb.version}.gz`), tools.duckdbAsset);
+await writeAsset(join(root, 'public/guest-tools/zsh-prompts.json'), JSON.stringify(tools.promptThemes) + '\n');
 await writeThirdPartyNotices(join(dirname(output), 'third-party.txt'), tools.duckdbNotice);
 await writeAsset(output, image);
 console.log(`Built public/portfolio.wasm with a ${overlay.length}-byte portfolio initramfs overlay`);

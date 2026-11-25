@@ -86,7 +86,7 @@
     cursor: pointer;
 }
 
-.terminal :is(button, select):focus-visible {
+.terminal :is(button, select, input):focus-visible {
     outline: 2px solid var(--terminal-prompt);
     outline-offset: 2px;
 }
@@ -105,7 +105,8 @@
     .toolbar button,
     .restart,
     .settings button,
-    .settings select {
+    .settings select,
+    .settings input {
         min-width: 44px;
         min-height: 44px;
         touch-action: manipulation;
@@ -166,12 +167,6 @@
     background-color: var(--terminal-bg);
 }
 
-.motd {
-    margin: 0 0 0.5rem;
-    font: inherit;
-    white-space: pre-wrap;
-}
-
 .error {
     color: var(--terminal-red, #ff6b6b);
 }
@@ -217,6 +212,8 @@
 
 .settings {
     width: min(22rem, calc(100% - 2rem));
+    max-height: calc(100% - 2rem);
+    overflow-y: auto;
     margin: auto;
     padding: 1.25rem;
     background: var(--terminal-bg);
@@ -237,13 +234,23 @@
     margin-bottom: 0.75rem;
 }
 
-.settings select {
+.settings :is(select, input) {
     min-width: 0;
     padding: 0.25rem;
     color: inherit;
     background: inherit;
     border: 1px solid currentColor;
     border-radius: 0.25rem;
+}
+
+.settings .promptFormat {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+}
+
+.settingHint {
+    margin-bottom: 0.75rem;
+    font-size: 14px;
 }
 
 .settings form { text-align: right; }

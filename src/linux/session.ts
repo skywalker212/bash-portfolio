@@ -1,8 +1,9 @@
-import type { DuckDbDownload, SessionEvent, SessionRequest, TerminalSize } from './sessionMessages';
+import type { DuckDbDownload, SessionEvent, SessionRequest, TerminalSize, ZshPrompt } from './sessionMessages';
 
 export async function startLinuxSession(
     size: TerminalSize,
     signal: AbortSignal,
+    prompt: ZshPrompt,
     onDuckDbDownload: (state: DuckDbDownload) => void,
 ) {
     signal.throwIfAborted();
@@ -48,7 +49,7 @@ export async function startLinuxSession(
     };
 
     signal.addEventListener('abort', stop, { once: true });
-    send({ type: 'start', kernel: new URL('/portfolio.wasm', window.location.origin).href, size });
+    send({ type: 'start', kernel: new URL('/portfolio.wasm', window.location.origin).href, size, prompt });
 
     try {
         const { input, output, temporary } = await Promise.race([
@@ -70,7 +71,12 @@ export async function startLinuxSession(
                 return { code };
             }),
         };
-        return { pty, stop, temporary };
+        return {
+            pty, stop, temporary,
+            setPrompt(prompt: ZshPrompt) {
+                if (!result) send({ type: 'zsh-prompt', prompt });
+            },
+        };
     } catch (error) {
         await stop();
         throw error;

@@ -5,10 +5,11 @@ import styles from '@/styles/Terminal.module.css';
 
 export default async function Home() {
   const guest = join(process.cwd(), 'data/linux');
-  const [motd, contacts, experience, internships] = await Promise.all(
-    ['motd', 'share/contacts.tsv', 'share/experience.tsv', 'share/internships.tsv']
+  const [contacts, experience, internships, prompts] = await Promise.all([
+    ...['share/contacts.tsv', 'share/experience.tsv', 'share/internships.tsv']
       .map(file => readFile(join(guest, file), 'utf8')),
-  );
+    readFile(join(process.cwd(), 'public/guest-tools/zsh-prompts.json'), 'utf8'),
+  ]);
   const rows = (text: string) => text.trim().split('\n').map(line => line.split('\t'));
   const fallback = (
     <article>
@@ -35,7 +36,7 @@ export default async function Home() {
           {fallback}
         </div>
       </noscript>
-      <Terminal motd={motd} fallback={fallback} />
+      <Terminal promptThemes={JSON.parse(prompts)} fallback={fallback} />
     </main>
   );
 }

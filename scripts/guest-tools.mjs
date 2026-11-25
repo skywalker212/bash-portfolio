@@ -101,9 +101,15 @@ export async function prepareGuestTools(root) {
         await mkdir(licenseDir, { recursive: true });
         const license = await readFile(archives.at(-1), 'utf8');
         await writeFile(join(licenseDir, 'LICENSE'), license);
+        const promptFiles = await readdir(join(tree, 'usr/share/zsh/functions/Prompts'));
+        const promptThemes = promptFiles.flatMap(name => {
+            const match = /^prompt_(.+)_setup$/.exec(name);
+            // The settings' Portfolio option uses Zsh's restore action.
+            return match && match[1] !== 'restore' ? [match[1]] : [];
+        }).sort();
         const entries = await archiveEntries(tree);
         entries.push({ name: 'usr/bin/duckdb', mode: 0o120777, data: Buffer.from('/opt/portfolio/tools/duckdb') });
-        return { entries, duckdbAsset: await compress(binary), duckdbNotice: `DuckDB ${duckdb.version}\n\n${license.trimEnd()}` };
+        return { entries, promptThemes, duckdbAsset: await compress(binary), duckdbNotice: `DuckDB ${duckdb.version}\n\n${license.trimEnd()}` };
     } finally {
         await rm(staging, { recursive: true, force: true });
     }

@@ -1,15 +1,22 @@
 /// <reference lib="webworker" />
 
-import { bundledBoot, checkSupport, createKernel, loadKernelModule, readKwsparse } from 'unkernel/web';
+import { bundledBoot, checkSupport, createKernel, loadKernelModule, MemoryFs, readKwsparse } from 'unkernel/web';
 import type { KernelHandle, Pty } from 'unkernel/web';
 import { duckdbFiles } from './duckdb';
 import { openHomeDisk } from './homeDisk';
-import type { SessionEvent, SessionRequest } from './sessionMessages';
+import type { SessionEvent, SessionRequest, ZshPrompt } from './sessionMessages';
 
 const scope = self as unknown as DedicatedWorkerGlobalScope;
 const boot = new AbortController();
 const stopping = Promise.withResolvers<null>();
 let shell: Pty | undefined;
+let zshPrompt: ZshPrompt;
+
+function promptFile() {
+    const theme = /^[a-z0-9_-]+$/.test(zshPrompt.theme) ? zshPrompt.theme : 'portfolio';
+    const format = zshPrompt.format.replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').slice(0, 160);
+    return `${theme}\n${format}\n`;
+}
 
 function post(message: SessionEvent, transfer: Transferable[] = []) {
     scope.postMessage(message, transfer);
@@ -43,6 +50,7 @@ async function run({ kernel: url, size }: Extract<SessionRequest, { type: 'start
             signal,
             mounts: {
                 '/opt/portfolio/tools': { fs: tools, readOnly: true, requestTimeout: 120_000 },
+                '/opt/portfolio/settings': { fs: new MemoryFs({ prompt: promptFile }), readOnly: true },
             },
         });
 
@@ -81,7 +89,11 @@ scope.onmessage = (event: MessageEvent<SessionRequest>) => {
     const request = event.data;
     switch (request.type) {
         case 'start':
+            zshPrompt = request.prompt;
             void run(request);
+            break;
+        case 'zsh-prompt':
+            zshPrompt = request.prompt;
             break;
         case 'resize':
             shell?.resize(request.size.cols, request.size.rows);

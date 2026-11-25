@@ -5,8 +5,14 @@ export interface TerminalSize {
 
 export type DuckDbDownload = 'loading' | 'ready' | 'failed';
 
+export interface ZshPrompt {
+    theme: string;
+    format: string;
+}
+
 export type SessionRequest =
-    | { type: 'start'; kernel: string; size: TerminalSize }
+    | { type: 'start'; kernel: string; size: TerminalSize; prompt: ZshPrompt }
+    | { type: 'zsh-prompt'; prompt: ZshPrompt }
     | { type: 'resize'; size: TerminalSize }
     | { type: 'stop' };
 

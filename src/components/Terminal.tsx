@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import type { FitAddon as XtermFit } from '@xterm/addon-fit';
 import type { Terminal as Xterm } from '@xterm/xterm';
 import { startLinuxSession } from '@/linux/session';
-import type { DuckDbDownload } from '@/linux/sessionMessages';
+import type { DuckDbDownload, ZshPrompt } from '@/linux/sessionMessages';
 import styles from '@/styles/Terminal.module.css';
 
 type Status =
@@ -15,8 +15,11 @@ type Status =
 const themes = { classic: 'Classic', midnight: 'Midnight', light: 'Light' };
 const fontSizes = ['auto', '12', '14', '16', '18', '20', '24'];
 const cursors = { bar: 'Bar', block: 'Block', underline: 'Underline' };
-type Preferences = { theme: keyof typeof themes; fontSize: string; cursor: keyof typeof cursors };
-const defaults: Preferences = { theme: 'classic', fontSize: 'auto', cursor: 'bar' };
+type Preferences = { theme: keyof typeof themes; fontSize: string; cursor: keyof typeof cursors; zshPrompt: ZshPrompt };
+const defaults: Preferences = {
+    theme: 'classic', fontSize: 'auto', cursor: 'bar',
+    zshPrompt: { theme: 'portfolio', format: '%n@%M:%~$ ' },
+};
 const preferencesKey = 'portfolio-terminal-preferences';
 const downloadMessages = {
     loading: 'Downloading DuckDB…',
@@ -40,13 +43,18 @@ function controlInput(data: string) {
     return data;
 }
 
-function readPreferences(): Preferences {
+function readPreferences(promptThemes: readonly string[]): Preferences {
     try {
         const saved = JSON.parse(localStorage.getItem(preferencesKey) ?? '{}');
+        const prompt = saved.zshPrompt;
         return {
             theme: Object.hasOwn(themes, saved.theme) ? saved.theme : defaults.theme,
             fontSize: fontSizes.includes(saved.fontSize) ? saved.fontSize : defaults.fontSize,
             cursor: Object.hasOwn(cursors, saved.cursor) ? saved.cursor : defaults.cursor,
+            zshPrompt: {
+                theme: prompt?.theme === 'custom' || promptThemes.includes(prompt?.theme) ? prompt.theme : defaults.zshPrompt.theme,
+                format: typeof prompt?.format === 'string' ? prompt.format.slice(0, 160) : defaults.zshPrompt.format,
+            },
         };
     } catch {
         return defaults;
@@ -116,11 +124,13 @@ function acceptNativeText(terminal: Xterm, signal: AbortSignal) {
     signal.addEventListener('abort', () => clearTimeout(endComposition), { once: true });
 }
 
-export default function Terminal({ motd, fallback }: { motd: string; fallback: ReactNode }) {
+export default function Terminal({ promptThemes, fallback }: { promptThemes: readonly string[]; fallback: ReactNode }) {
     const area = useRef<HTMLElement>(null);
     const surface = useRef<HTMLDivElement>(null);
     const settings = useRef<HTMLDialogElement>(null);
     const active = useRef<{ terminal: Xterm; fit: XtermFit } | null>(null);
+    const currentPrompt = useRef(defaults.zshPrompt);
+    const setGuestPrompt = useRef<((prompt: ZshPrompt) => void) | undefined>(undefined);
     const controlKey = useRef(false);
     const [preferences, setPreferences] = useState(defaults);
     const [status, setStatus] = useState<Status>({ phase: 'booting' });
@@ -129,7 +139,11 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
     const [duckDbDownload, setDuckDbDownload] = useState<DuckDbDownload>('ready');
     const [controlPressed, setControlPressed] = useState(false);
 
-    useEffect(() => setPreferences(readPreferences()), []);
+    useEffect(() => {
+        const saved = readPreferences(promptThemes);
+        currentPrompt.current = saved.zshPrompt;
+        setPreferences(saved);
+    }, [promptThemes]);
 
     useEffect(() => {
         const terminal = area.current;
@@ -167,7 +181,7 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
         terminal.options.fontSize = parseFloat(style.fontSize);
         terminal.options.cursorStyle = preferences.cursor;
         fit.fit();
-    }, [preferences]);
+    }, [preferences.theme, preferences.fontSize, preferences.cursor]);
 
     useEffect(() => {
         const container = surface.current;
@@ -232,10 +246,14 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
             observer.observe(container);
             resize();
 
-            const session = await startLinuxSession({ cols: xterm.cols, rows: xterm.rows }, signal, setDuckDbDownload);
+            const session = await startLinuxSession(
+                { cols: xterm.cols, rows: xterm.rows }, signal, currentPrompt.current, setDuckDbDownload,
+            );
             const { pty } = session;
             try {
                 signal.throwIfAborted();
+                setGuestPrompt.current = session.setPrompt;
+                session.setPrompt(currentPrompt.current);
                 pty.resize(xterm.cols, xterm.rows);
                 const input = xterm.onData(data => {
                     if (controlKey.current && (data.length === 1 || !data.startsWith('\x1b'))) {
@@ -281,6 +299,7 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
                     if (!signal.aborted) xterm.options.disableStdin = true;
                 }
             } finally {
+                if (setGuestPrompt.current === session.setPrompt) setGuestPrompt.current = undefined;
                 await session.stop();
             }
         }
@@ -291,11 +310,16 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
             observer?.disconnect();
             if (resizeFrame !== undefined) cancelAnimationFrame(resizeFrame);
             active.current = null;
+            setGuestPrompt.current = undefined;
             terminal?.dispose();
         };
     }, [generation]);
 
     function changePreferences(next: Preferences) {
+        if (currentPrompt.current !== next.zshPrompt) {
+            currentPrompt.current = next.zshPrompt;
+            setGuestPrompt.current?.(next.zshPrompt);
+        }
         setPreferences(next);
         try {
             localStorage.setItem(preferencesKey, JSON.stringify(next));
@@ -373,9 +397,6 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
             <div className={styles.viewport}>
                 <div className={styles.surface} ref={surface} aria-busy={status.phase === 'booting'}
                     style={{ fontSize: preferences.fontSize === 'auto' ? undefined : `${preferences.fontSize}px` }} />
-                {status.phase === 'booting' && (
-                    <div className={styles.preview}><pre className={styles.motd}>{motd}</pre></div>
-                )}
                 {status.phase === 'failed' && (
                     <div className={`${styles.preview} ${styles.fallback}`}>
                         <p className={styles.error} role="alert">{status.message}</p>
@@ -415,6 +436,35 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
                         {Object.entries(cursors).map(([key, title]) => <option key={key} value={key}>{title}</option>)}
                     </select>
                 </label>
+                <label>
+                    <span id="zsh-prompt-label">Zsh prompt</span>
+                    <select value={preferences.zshPrompt.theme} aria-labelledby="zsh-prompt-label"
+                        aria-describedby="zsh-prompt-help" onChange={event => changePreferences({
+                        ...preferences, zshPrompt: { ...preferences.zshPrompt, theme: event.currentTarget.value },
+                    })}>
+                        <option value="portfolio">Portfolio / .zshrc</option>
+                        <option value="custom">Custom</option>
+                        <optgroup label="Bundled Zsh themes">
+                            {promptThemes.map(theme => <option key={theme} value={theme}>{theme}</option>)}
+                        </optgroup>
+                    </select>
+                </label>
+                {preferences.zshPrompt.theme === 'custom' && (
+                    <>
+                        <label className={styles.promptFormat}>
+                            Custom prompt
+                            <input type="text" value={preferences.zshPrompt.format} maxLength={160}
+                                aria-describedby="zsh-prompt-format-help" autoCapitalize="none" spellCheck={false}
+                                onChange={event => changePreferences({
+                                    ...preferences, zshPrompt: { ...preferences.zshPrompt, format: event.currentTarget.value },
+                                })} />
+                        </label>
+                        <p className={styles.settingHint} id="zsh-prompt-format-help">
+                            Use <code>%n</code> for your username, <code>%M</code> for the host, and <code>%~</code> for the current directory.
+                        </p>
+                    </>
+                )}
+                <p className={styles.settingHint} id="zsh-prompt-help">Changes appear at the next Zsh prompt.</p>
                 <form method="dialog"><button type="submit">Done</button></form>
             </dialog>
         </section>
