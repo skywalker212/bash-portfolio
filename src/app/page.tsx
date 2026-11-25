@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import Terminal from '@/components/Terminal';
+import styles from '@/styles/Terminal.module.css';
 
 export default async function Home() {
   const guest = join(process.cwd(), 'data/linux');
@@ -27,6 +28,13 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-black">
+      <noscript>
+        <style>{`.${styles.terminal} { display: none; }`}</style>
+        <div className={`${styles.fallback} ${styles.staticFallback}`}>
+          <p>The Linux terminal needs JavaScript.</p>
+          {fallback}
+        </div>
+      </noscript>
       <Terminal motd={motd} fallback={fallback} />
     </main>
   );

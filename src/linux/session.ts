@@ -1,6 +1,10 @@
-import type { SessionEvent, SessionRequest, TerminalSize } from './sessionMessages';
+import type { DuckDbDownload, SessionEvent, SessionRequest, TerminalSize } from './sessionMessages';
 
-export async function startLinuxSession(size: TerminalSize, signal: AbortSignal) {
+export async function startLinuxSession(
+    size: TerminalSize,
+    signal: AbortSignal,
+    onDuckDbDownload: (state: DuckDbDownload) => void,
+) {
     signal.throwIfAborted();
     const worker = new Worker(new URL('./guest.worker.ts', import.meta.url), { type: 'module' });
     const ready = Promise.withResolvers<Extract<SessionEvent, { type: 'ready' }>>();
@@ -30,8 +34,10 @@ export async function startLinuxSession(size: TerminalSize, signal: AbortSignal)
     }
 
     worker.onmessage = (event: MessageEvent<SessionEvent>) => {
-        if (event.data.type === 'ready') ready.resolve(event.data);
-        else finish(event.data);
+        const message = event.data;
+        if (message.type === 'ready') ready.resolve(message);
+        if (message.type === 'closed') finish(message);
+        if (message.type === 'duckdb-download' && !signal.aborted) onDuckDbDownload(message.state);
     };
     worker.onerror = event => {
         event.preventDefault();

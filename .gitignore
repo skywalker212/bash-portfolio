@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.cache/guest-tools/
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -18,6 +19,7 @@
 /public/portfolio.wasm
 /public/portfolio.wasm.*
 /public/third-party.txt
+/public/guest-tools/
 
 # misc
 .DS_Store

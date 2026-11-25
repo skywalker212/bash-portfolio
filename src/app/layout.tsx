@@ -12,20 +12,19 @@ export const metadata = {
 
 export const viewport: Viewport = {
   width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  userScalable: false
+  initialScale: 1
 }
 
 export default function RootLayout({
   children,
 }: { children: ReactNode }) {
+  const onVercel = process.env.VERCEL === '1';
   return (
     <html lang="en">
       <body>
         {children}
-        <Analytics />
-        <SpeedInsights />
+        {onVercel && <Analytics />}
+        {onVercel && <SpeedInsights />}
       </body>
     </html>
   )

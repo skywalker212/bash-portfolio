@@ -1,0 +1,7 @@
+if &term =~# '^xterm'
+    let &t_EI = "\e[2 q"
+    let &t_SI = "\e[0 q"
+    let &t_SR = "\e[4 q"
+    let &t_ti ..= &t_EI
+    let &t_te ..= &t_SI
+endif

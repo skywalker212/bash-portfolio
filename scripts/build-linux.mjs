@@ -2,6 +2,8 @@ import { mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promise
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
+import duckdb from '../data/linux/duckdb.json' with { type: 'json' };
+import { prepareGuestTools } from './guest-tools.mjs';
 import { readGuestPrograms } from './guest-programs.mjs';
 import { writeThirdPartyNotices } from './build-notices.mjs';
 
@@ -116,10 +118,12 @@ async function portfolioArchive(base) {
 
     const entries = [
         file('etc/inittab', inittab.replace(sysinit, sysinit + `::sysinit:/opt/portfolio/mount-home ${home} ${uid}\n`)),
-        accountFile('etc/passwd', `${user}:x:${uid}:${uid}:Portfolio:${home}:/bin/sh`),
+        accountFile('etc/passwd', `${user}:x:${uid}:${uid}:Portfolio:${home}:/bin/zsh`),
         accountFile('etc/group', `${user}:x:${uid}:`),
         file('etc/hostname', hostname + '\n'),
         file('etc/profile', await readFile(join(guest, 'profile.sh'))),
+        file('etc/vim/vimrc.local', await readFile(join(guest, 'vimrc'))),
+        file('etc/zsh/zshrc.d/portfolio.zsh', await readFile(join(guest, 'zshrc.zsh'))),
         file('etc/motd', await readFile(join(guest, 'motd'))),
         directory('home'),
         directory(home.slice(1), uid),
@@ -144,7 +148,7 @@ async function portfolioArchive(base) {
             entries.push(file(`${target}/${name}`, await readFile(join(guest, subdirectory, name))));
         }
     }
-    return newc(entries);
+    return entries;
 }
 
 const wasm = await readFile(new URL(import.meta.resolve('unkernel/unkernel.wasm')));
@@ -153,20 +157,28 @@ const initrd = parts.find(part => part.name === initrdSection)?.body;
 if (!initrd || initrd.length % 4 !== 0 || !parts.some(part => part.name === dataDiskSection)) {
     throw new Error('Missing or unaligned bundled boot data in the pinned unkernel WASM');
 }
-const overlay = gzipSync(await portfolioArchive(readInitramfs(initrd)), { level: 9 });
+const tools = await prepareGuestTools(root);
+const overlay = gzipSync(newc([
+    ...tools.entries,
+    ...await portfolioArchive(readInitramfs(initrd)),
+]), { level: 9 });
 const disk = await readFile(join(guest, 'home.kwsparse.gz'));
 const image = Buffer.concat([wasm.subarray(0, 8), ...parts.map(part => {
     if (part.name === initrdSection) return customSection(initrdSection, Buffer.concat([initrd, overlay]));
     if (part.name === dataDiskSection) return customSection(dataDiskSection, disk);
     return part.bytes;
 })]);
-const temporary = `${output}.${process.pid}`;
-await mkdir(dirname(output), { recursive: true });
-await writeThirdPartyNotices(join(dirname(output), 'third-party.txt'));
-try {
-    await writeFile(temporary, image);
-    await rename(temporary, output);
-} finally {
-    await rm(temporary, { force: true });
+async function writeAsset(path, bytes) {
+    const temporary = `${path}.${process.pid}`;
+    await mkdir(dirname(path), { recursive: true });
+    try {
+        await writeFile(temporary, bytes);
+        await rename(temporary, path);
+    } finally {
+        await rm(temporary, { force: true });
+    }
 }
+await writeAsset(join(root, `public/guest-tools/duckdb-${duckdb.version}.gz`), tools.duckdbAsset);
+await writeThirdPartyNotices(join(dirname(output), 'third-party.txt'), tools.duckdbNotice);
+await writeAsset(output, image);
 console.log(`Built public/portfolio.wasm with a ${overlay.length}-byte portfolio initramfs overlay`);

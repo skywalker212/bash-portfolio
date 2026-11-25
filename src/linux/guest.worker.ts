@@ -2,6 +2,7 @@
 
 import { bundledBoot, checkSupport, createKernel, loadKernelModule, readKwsparse } from 'unkernel/web';
 import type { KernelHandle, Pty } from 'unkernel/web';
+import { duckdbFiles } from './duckdb';
 import { openHomeDisk } from './homeDisk';
 import type { SessionEvent, SessionRequest } from './sessionMessages';
 
@@ -33,7 +34,17 @@ async function run({ kernel: url, size }: Extract<SessionRequest, { type: 'start
             error = `The browser could not save your home directory. ${message(cause)}`;
             stopping.resolve(null);
         });
-        kernel = await createKernel({ kernel: module, disks: [disk.device], memoryMiB: 128, cpus: 1, signal });
+        const tools = duckdbFiles(url, signal, state => post({ type: 'duckdb-download', state }));
+        kernel = await createKernel({
+            kernel: module,
+            disks: [disk.device],
+            memoryMiB: 192,
+            cpus: 1,
+            signal,
+            mounts: {
+                '/opt/portfolio/tools': { fs: tools, readOnly: true, requestTimeout: 120_000 },
+            },
+        });
 
         const pty = await kernel.spawn('/opt/portfolio/login', [], { ...size, user: 0, signal });
         shell = pty;
