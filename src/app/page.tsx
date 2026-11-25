@@ -27,7 +27,7 @@ export default async function Home() {
   );
 
   return (
-    <main className="min-h-screen bg-black">
+    <main className="bg-black">
       <noscript>
         <style>{`.${styles.terminal} { display: none; }`}</style>
         <div className={`${styles.fallback} ${styles.staticFallback}`}>

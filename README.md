@@ -20,7 +20,8 @@ The homepage connects xterm.js to the guest's PTY. The build bundles the shell s
 - Run `duckdb` for an interactive SQL prompt or `duckdb notes.duckdb` to keep a database in your home directory. The browser downloads the CLI the first time you run it. Type `.quit` to exit.
 - Run `vim notes.txt` to edit a file. Press `i` for Insert mode, `Esc` for Normal mode, `v` for Visual mode, or type `:wq` in Normal mode to save and quit. Put your Vim settings in `~/.vimrc`.
 - Zsh starts with standard line editing. Run `bindkey -v` for vi-style editing, or add it to `~/.zshrc` along with any aliases and prompt settings. In vi-style editing, press `Esc` for Normal mode and `i` to resume typing. Run `sh` to open BusyBox ash.
-- Open **Terminal settings** to choose a theme, font size, or default cursor shape. Vim and Zsh use a block cursor in Normal mode. Touch devices have an **Esc** button above the terminal.
+- Open **Terminal settings** to choose a theme, font size, or default cursor shape. Vim and Zsh use a block cursor in Normal mode.
+- On touch devices, tap **Open keyboard** to start typing. The key row sends **Esc**, **Tab**, and arrow keys. Tap **Ctrl**, then a character, to send a shortcut such as Ctrl+C.
 
 Guest programs can ring the terminal bell or set the browser tab title with standard terminal control sequences.
 

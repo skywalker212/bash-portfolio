@@ -23,6 +23,22 @@ const downloadMessages = {
     ready: '',
     failed: 'DuckDB download failed. Run duckdb to retry.',
 };
+const arrows = [
+    { label: '↑', name: 'Up arrow', code: 'A' },
+    { label: '↓', name: 'Down arrow', code: 'B' },
+    { label: '←', name: 'Left arrow', code: 'D' },
+    { label: '→', name: 'Right arrow', code: 'C' },
+] as const;
+
+function controlInput(data: string) {
+    if (data.length !== 1) return data;
+    const code = data.charCodeAt(0);
+    if (code >= 97 && code <= 122) return String.fromCharCode(code - 96);
+    if (code >= 64 && code <= 95) return String.fromCharCode(code - 64);
+    if (data === ' ') return '\x00';
+    if (data === '?') return '\x7f';
+    return data;
+}
 
 function readPreferences(): Preferences {
     try {
@@ -101,16 +117,46 @@ function acceptNativeText(terminal: Xterm, signal: AbortSignal) {
 }
 
 export default function Terminal({ motd, fallback }: { motd: string; fallback: ReactNode }) {
+    const area = useRef<HTMLElement>(null);
     const surface = useRef<HTMLDivElement>(null);
     const settings = useRef<HTMLDialogElement>(null);
     const active = useRef<{ terminal: Xterm; fit: XtermFit } | null>(null);
+    const controlKey = useRef(false);
     const [preferences, setPreferences] = useState(defaults);
     const [status, setStatus] = useState<Status>({ phase: 'booting' });
     const [generation, setGeneration] = useState(0);
     const [bellRinging, setBellRinging] = useState(false);
     const [duckDbDownload, setDuckDbDownload] = useState<DuckDbDownload>('ready');
+    const [controlPressed, setControlPressed] = useState(false);
 
     useEffect(() => setPreferences(readPreferences()), []);
+
+    useEffect(() => {
+        const terminal = area.current;
+        const viewport = window.visualViewport;
+        if (!terminal || !viewport) return;
+        const touch = matchMedia('(pointer: coarse)');
+        const fitViewport = () => {
+            if (touch.matches && Math.abs(viewport.scale - 1) < 0.01 && viewport.height > 0 && viewport.height < innerHeight - 1) {
+                terminal.style.setProperty('--terminal-viewport-height', `${Math.floor(viewport.height)}px`);
+                terminal.style.setProperty('--terminal-viewport-top', `${viewport.offsetTop}px`);
+            } else {
+                terminal.style.removeProperty('--terminal-viewport-height');
+                terminal.style.removeProperty('--terminal-viewport-top');
+            }
+        };
+        fitViewport();
+        viewport.addEventListener('resize', fitViewport);
+        viewport.addEventListener('scroll', fitViewport);
+        window.addEventListener('resize', fitViewport);
+        touch.addEventListener('change', fitViewport);
+        return () => {
+            viewport.removeEventListener('resize', fitViewport);
+            viewport.removeEventListener('scroll', fitViewport);
+            window.removeEventListener('resize', fitViewport);
+            touch.removeEventListener('change', fitViewport);
+        };
+    }, []);
 
     useEffect(() => {
         const container = surface.current;
@@ -192,6 +238,10 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
                 signal.throwIfAborted();
                 pty.resize(xterm.cols, xterm.rows);
                 const input = xterm.onData(data => {
+                    if (controlKey.current && (data.length === 1 || !data.startsWith('\x1b'))) {
+                        updateControlKey(false);
+                        data = controlInput(data);
+                    }
                     void pty.write(data).catch(error => {
                         if (pty.exitCode === null) fail(error);
                     });
@@ -255,29 +305,73 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
     }
 
     function restart() {
+        updateControlKey(false);
         setBellRinging(false);
         setDuckDbDownload('ready');
         setStatus({ phase: 'booting' });
         setGeneration(value => value + 1);
     }
 
+    function updateControlKey(pressed: boolean) {
+        controlKey.current = pressed;
+        setControlPressed(pressed);
+    }
+
+    function sendTouchKey(data: string) {
+        active.current?.terminal.input(data, true);
+    }
+
+    function sendArrow(code: typeof arrows[number]['code']) {
+        const terminal = active.current?.terminal;
+        if (!terminal) return;
+        if (controlKey.current) {
+            updateControlKey(false);
+            terminal.input(`\x1b[1;5${code}`, true);
+            return;
+        }
+        const prefix = terminal.modes.applicationCursorKeysMode ? '\x1bO' : '\x1b[';
+        terminal.input(prefix + code, true);
+    }
+
+    const running = status.phase === 'running';
     let terminalStatus = '';
     if (status.phase === 'booting') terminalStatus = 'Starting Linux…';
-    if (status.phase === 'running') terminalStatus = downloadMessages[duckDbDownload] || (bellRinging ? 'Terminal bell' : '');
+    if (running) terminalStatus = downloadMessages[duckDbDownload] || (bellRinging ? 'Terminal bell' : '');
 
     return (
-        <section className={styles.terminal} data-theme={preferences.theme}
-            data-cursor={preferences.cursor} aria-label="Linux terminal" aria-busy={status.phase === 'booting'}>
-            <div className={styles.toolbar}>
-                <span className={styles.status} role="status">{terminalStatus}</span>
-                {status.phase === 'running' && (
-                    <button className={styles.escape} type="button" onPointerDown={event => event.preventDefault()}
-                        onClick={() => active.current?.terminal.input('\x1b', true)} aria-label="Send Escape">Esc</button>
+        <section ref={area} className={styles.terminal} data-theme={preferences.theme}
+            data-cursor={preferences.cursor} aria-label="Linux terminal">
+            <div className={styles.controls}>
+                <div className={styles.toolbar}>
+                    {(running || status.phase === 'booting') && (
+                        <button className={styles.showKeyboard} type="button" disabled={!running}
+                            onClick={() => active.current?.terminal.focus()}>Open keyboard</button>
+                    )}
+                    <button type="button" onClick={event => {
+                        event.currentTarget.focus({ preventScroll: true });
+                        settings.current?.showModal();
+                    }}>Terminal settings</button>
+                </div>
+                {(running || status.phase === 'booting') && (
+                    <div className={styles.touchKeys} role="group" aria-label="Terminal keys"
+                        onPointerDown={event => event.preventDefault()}>
+                        <button type="button" disabled={!running} aria-label="Esc (Escape)"
+                            onClick={() => sendTouchKey('\x1b')}>Esc</button>
+                        <button type="button" disabled={!running} aria-label="Send Tab"
+                            onClick={() => sendTouchKey('\t')}>Tab</button>
+                        <button type="button" disabled={!running} aria-pressed={controlPressed} onClick={() => {
+                            updateControlKey(!controlKey.current);
+                            active.current?.terminal.focus();
+                        }}>Ctrl</button>
+                        {arrows.map(({ label, name, code }) => (
+                            <button key={code} type="button" disabled={!running} aria-label={name}
+                                onClick={() => sendArrow(code)}>{label}</button>
+                        ))}
+                    </div>
                 )}
-                <button type="button" onClick={() => settings.current?.showModal()}>Terminal settings</button>
             </div>
             <div className={styles.viewport}>
-                <div className={styles.surface} ref={surface}
+                <div className={styles.surface} ref={surface} aria-busy={status.phase === 'booting'}
                     style={{ fontSize: preferences.fontSize === 'auto' ? undefined : `${preferences.fontSize}px` }} />
                 {status.phase === 'booting' && (
                     <div className={styles.preview}><pre className={styles.motd}>{motd}</pre></div>
@@ -293,11 +387,9 @@ export default function Terminal({ motd, fallback }: { motd: string; fallback: R
                         Restart session
                     </button>
                 )}
+                <span className={styles.status} role="status" aria-atomic="true">{terminalStatus}</span>
             </div>
-            <dialog className={styles.settings} ref={settings} aria-labelledby="terminal-settings-title"
-                onClose={() => {
-                    if (status.phase === 'running') active.current?.terminal.focus();
-                }}>
+            <dialog className={styles.settings} ref={settings} aria-labelledby="terminal-settings-title">
                 <h2 id="terminal-settings-title">Terminal settings</h2>
                 <label>
                     Theme
