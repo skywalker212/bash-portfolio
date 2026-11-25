@@ -1,6 +1,8 @@
 import { mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gzipSync } from 'node:zlib';
+import { readGuestPrograms } from './guest-programs.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const guest = join(root, 'data/linux');
@@ -126,11 +128,19 @@ async function portfolioArchive(base) {
         file('opt/portfolio/login', `#!/bin/sh\nmountpoint -q ${home} || { echo "Unable to mount the persistent home directory." >&2; exit 1; }\nexec /bin/busybox login -f ${user}\n`, true),
     ];
 
-    for (const subdirectory of ['bin', 'lib', 'share']) {
+    for (const subdirectory of ['bin', 'libexec']) {
+        const target = `opt/portfolio/${subdirectory}`;
+        entries.push(directory(target));
+        for (const { name, data } of await readGuestPrograms(join(guest, subdirectory))) {
+            entries.push(file(`${target}/${name}`, data, true));
+        }
+    }
+
+    for (const subdirectory of ['lib', 'share']) {
         const target = `opt/portfolio/${subdirectory}`;
         entries.push(directory(target));
         for (const name of (await readdir(join(guest, subdirectory))).sort()) {
-            entries.push(file(`${target}/${name}`, await readFile(join(guest, subdirectory, name)), subdirectory === 'bin'));
+            entries.push(file(`${target}/${name}`, await readFile(join(guest, subdirectory, name))));
         }
     }
     return newc(entries);
@@ -142,7 +152,7 @@ const initrd = parts.find(part => part.name === initrdSection)?.body;
 if (!initrd || initrd.length % 4 !== 0 || !parts.some(part => part.name === dataDiskSection)) {
     throw new Error('Missing or unaligned bundled boot data in the pinned unkernel WASM');
 }
-const overlay = await portfolioArchive(readInitramfs(initrd));
+const overlay = gzipSync(await portfolioArchive(readInitramfs(initrd)), { level: 9 });
 const disk = await readFile(join(guest, 'home.kwsparse.gz'));
 const image = Buffer.concat([wasm.subarray(0, 8), ...parts.map(part => {
     if (part.name === initrdSection) return customSection(initrdSection, Buffer.concat([initrd, overlay]));
