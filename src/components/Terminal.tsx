@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import type { Terminal as Xterm } from '@xterm/xterm';
 import { startLinuxSession } from '@/linux/session';
 import styles from '@/styles/Terminal.module.css';
@@ -30,7 +31,7 @@ function renderBytes(terminal: Xterm, bytes: Uint8Array, signal: AbortSignal) {
     });
 }
 
-export default function Terminal({ motd }: { motd: string }) {
+export default function Terminal({ motd, fallback }: { motd: string; fallback: ReactNode }) {
     const surface = useRef<HTMLDivElement>(null);
     const [status, setStatus] = useState<Status>({ phase: 'booting' });
     const [generation, setGeneration] = useState(0);
@@ -108,6 +109,7 @@ export default function Terminal({ motd }: { motd: string }) {
                 });
                 const size = xterm.onResize(({ cols, rows }) => pty.resize(cols, rows));
                 try {
+                    if (session.temporary) xterm.writeln('Temporary home. Files are lost when this session closes.');
                     xterm.options.disableStdin = false;
                     setStatus({ phase: 'running' });
                     if (matchMedia('(pointer: fine)').matches) xterm.focus();
@@ -143,10 +145,13 @@ export default function Terminal({ motd }: { motd: string }) {
     return (
         <section className={styles.terminal} aria-label="Linux terminal" aria-busy={status.phase === 'booting'}>
             <div className={styles.surface} ref={surface} />
-            {(status.phase === 'booting' || status.phase === 'failed') && (
-                <div className={styles.preview}>
-                    <pre className={styles.motd}>{motd}</pre>
-                    {status.phase === 'failed' && <p className={styles.error} role="alert">{status.message}</p>}
+            {status.phase === 'booting' && (
+                <div className={styles.preview}><pre className={styles.motd}>{motd}</pre></div>
+            )}
+            {status.phase === 'failed' && (
+                <div className={`${styles.preview} ${styles.fallback}`}>
+                    <p className={styles.error} role="alert">{status.message}</p>
+                    {fallback}
                 </div>
             )}
             {(status.phase === 'exited' || status.phase === 'failed') && (

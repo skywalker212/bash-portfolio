@@ -10,6 +10,7 @@ const hostname = 'akash.is';
 const uid = 1000;
 const home = `/home/${user}`;
 const initrdSection = 'unkernel.initrd';
+const dataDiskSection = 'unkernel.datadisk';
 
 function readU32(bytes, offset) {
     let value = 0;
@@ -106,7 +107,12 @@ async function portfolioArchive(base) {
         return file(name, original.trimEnd() + '\n' + entry + '\n');
     }
 
+    const inittab = base.get('etc/inittab')?.toString('utf8');
+    const sysinit = '::sysinit:/kw/lib/sysinit\n';
+    if (!inittab?.includes(sysinit)) throw new Error('Missing the expected unkernel sysinit action');
+
     const entries = [
+        file('etc/inittab', inittab.replace(sysinit, sysinit + `::sysinit:/opt/portfolio/mount-home ${home} ${uid}\n`)),
         accountFile('etc/passwd', `${user}:x:${uid}:${uid}:Portfolio:${home}:/bin/sh`),
         accountFile('etc/group', `${user}:x:${uid}:`),
         file('etc/hostname', hostname + '\n'),
@@ -116,7 +122,8 @@ async function portfolioArchive(base) {
         directory(home.slice(1), uid),
         directory('opt'),
         directory('opt/portfolio'),
-        file('opt/portfolio/login', `#!/bin/sh\nexec /bin/busybox login -f ${user}\n`, true),
+        file('opt/portfolio/mount-home', await readFile(join(guest, 'mount-home.sh')), true),
+        file('opt/portfolio/login', `#!/bin/sh\nmountpoint -q ${home} || { echo "Unable to mount the persistent home directory." >&2; exit 1; }\nexec /bin/busybox login -f ${user}\n`, true),
     ];
 
     for (const subdirectory of ['bin', 'lib', 'share']) {
@@ -132,12 +139,14 @@ async function portfolioArchive(base) {
 const wasm = await readFile(new URL(import.meta.resolve('unkernel/unkernel.wasm')));
 const parts = sections(wasm);
 const initrd = parts.find(part => part.name === initrdSection)?.body;
-if (!initrd || initrd.length % 4 !== 0) {
+if (!initrd || initrd.length % 4 !== 0 || !parts.some(part => part.name === dataDiskSection)) {
     throw new Error('Missing or unaligned bundled boot data in the pinned unkernel WASM');
 }
 const overlay = await portfolioArchive(readInitramfs(initrd));
+const disk = await readFile(join(guest, 'home.kwsparse.gz'));
 const image = Buffer.concat([wasm.subarray(0, 8), ...parts.map(part => {
     if (part.name === initrdSection) return customSection(initrdSection, Buffer.concat([initrd, overlay]));
+    if (part.name === dataDiskSection) return customSection(dataDiskSection, disk);
     return part.bytes;
 })]);
 const temporary = `${output}.${process.pid}`;

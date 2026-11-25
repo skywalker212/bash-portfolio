@@ -31,6 +31,26 @@
     color: #ff6b6b;
 }
 
+.fallback {
+    overflow-y: auto;
+    padding-bottom: 3rem;
+}
+
+.fallback h1,
+.fallback h2 {
+    margin: 1em 0 0.35em;
+    font-weight: bold;
+}
+
+.fallback li {
+    margin-bottom: 0.5em;
+}
+
+.fallback a {
+    color: var(--terminal-prompt);
+    text-decoration: underline;
+}
+
 .restart {
     position: absolute;
     bottom: 1rem;
